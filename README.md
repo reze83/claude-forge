@@ -58,8 +58,7 @@ claude-forge/
 ├── agents/                         → ~/.claude/agents/
 ├── skills/                         → ~/.claude/skills/
 ├── commands/                       → ~/.claude/commands/
-├── multi-model/                    Codex CLI Support
-├── project-template/               Template fuer neue Projekte
+├── multi-model/                    → ~/.claude/multi-model/ (Codex CLI)
 ├── tests/                          Test-Suite
 └── docs/                           Architektur-Dokumentation
 ```
