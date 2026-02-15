@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- install.sh: ruff installation fails when pip3 binary is missing and sudo requires password
+- install.sh: prettier installed via npm but not found in PATH (npm global bin not in PATH)
+
+### Added
+- install.sh: 3-stage ruff fallback (pip3 → python3 -m pip → venv-based install)
+- install.sh: prettier PATH verification after npm install with symlink fallback to ~/.local/bin
+- install.sh: post-install PATH check warns if ~/.local/bin or npm global bin are missing from PATH
+
 ## [0.2.1] - 2026-02-15
 
 ### Added

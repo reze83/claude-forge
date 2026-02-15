@@ -48,16 +48,27 @@ install.sh                      uninstall.sh
     │   ├── Pflicht: git,jq,node,   │   └── Nur wenn Ziel → Repo
     │   │   python3                  ├── Backup-Hinweis anzeigen
     │   └── Optional: shfmt,ruff,   └── --dry-run Modus
-    │       prettier
+    │       prettier (mit Fallbacks)
     ├── Plugin-Modus Check          update.sh
     ├── Backup bestehender Dateien      │
     ├── Symlinks erstellen              ├── git fetch + Changelog anzeigen
     │   └── INSTALLED_SYMLINKS[]        ├── Lokale Aenderungen stashen
     ├── validate.sh (abgefangen)        ├── git pull --ff-only
-    ├── Codex-Hinweis (optional)        ├── install.sh (neue Symlinks + Deps)
-    └── ERR Trap → Rollback             ├── Stash wiederherstellen
-                                        └── VERSION Vergleich anzeigen
+    ├── PATH-Check + Empfehlung         ├── install.sh (neue Symlinks + Deps)
+    ├── Codex-Hinweis (optional)        ├── Stash wiederherstellen
+    └── ERR Trap → Rollback             └── VERSION Vergleich anzeigen
 ```
+
+### Dependency-Fallbacks (optionale Formatter)
+
+| Tool | Fallback-Kette |
+|---|---|
+| ruff | apt/brew → pip3 install --user → python3 -m pip → venv (~/.local/venvs/claude-forge-tools/) + Symlink ~/.local/bin/ |
+| prettier | apt/brew → npm install -g → Verify PATH → Symlink ~/.local/bin/ |
+| shfmt | apt/brew |
+
+Nach der Installation prueft ein PATH-Check, ob `~/.local/bin` und das npm-global-bin
+Verzeichnis im PATH liegen. Falls nicht, wird eine konkrete `export PATH=...` Empfehlung ausgegeben.
 
 ### Rollback-Mechanismus
 
@@ -122,7 +133,7 @@ Timeouts muessen in beiden Dateien identisch sein — `validate.sh` prueft das.
 | Dateiendung | Formatter | Installiert via |
 |---|---|---|
 | .js, .jsx, .ts, .tsx, .json, .css, .html, .md, .yaml | prettier | npm |
-| .py | ruff | pip3 / apt |
+| .py | ruff | pip3 / apt / venv-fallback |
 | .rs | rustfmt | rustup |
 | .go | gofmt | go install |
 | .sh | shfmt | apt / brew |

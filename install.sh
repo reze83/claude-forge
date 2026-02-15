@@ -138,10 +138,42 @@ auto_install_optional() {
     sudo apt-get install -y -qq "$pkg" 2>/dev/null && return 0
   elif command -v brew >/dev/null 2>&1; then
     brew install "$pkg" 2>/dev/null && return 0
-  elif command -v pip3 >/dev/null 2>&1 && [[ "$pkg" == "ruff" ]]; then
-    pip3 install --user "$pkg" 2>/dev/null && return 0
-  elif command -v npm >/dev/null 2>&1 && [[ "$pkg" == "prettier" ]]; then
-    npm install -g "$pkg" 2>/dev/null && return 0
+  fi
+  # Language-specific fallbacks
+  if [[ "$pkg" == "ruff" ]]; then
+    if command -v pip3 >/dev/null 2>&1; then
+      pip3 install --user "$pkg" 2>/dev/null && return 0
+    fi
+    if command -v python3 >/dev/null 2>&1; then
+      python3 -m pip install --user "$pkg" 2>/dev/null && return 0
+      # Fallback: venv-based install (Debian/Ubuntu block system pip)
+      local venv_dir="$HOME/.local/venvs/claude-forge-tools"
+      if python3 -m venv "$venv_dir" 2>/dev/null \
+          && "$venv_dir/bin/pip" install "$pkg" 2>/dev/null; then
+        mkdir -p "$HOME/.local/bin"
+        ln -sf "$venv_dir/bin/$cmd" "$HOME/.local/bin/$cmd"
+        log_ok "$pkg installiert via venv ($venv_dir)"
+        return 0
+      fi
+    fi
+  elif [[ "$pkg" == "prettier" ]]; then
+    if command -v npm >/dev/null 2>&1; then
+      npm install -g "$pkg" 2>/dev/null || true
+      # Verify binary is in PATH after npm install
+      if command -v "$cmd" >/dev/null 2>&1; then
+        return 0
+      fi
+      # npm global bin may not be in PATH — create symlink as fallback
+      local npm_bin
+      npm_bin="$(npm prefix -g 2>/dev/null)/bin/$cmd"
+      if [[ -x "$npm_bin" ]]; then
+        mkdir -p "$HOME/.local/bin"
+        ln -sf "$npm_bin" "$HOME/.local/bin/$cmd"
+        log_ok "$pkg installiert (Symlink: ~/.local/bin/$cmd)"
+        echo -e "  ${YELLOW}[INFO]${NC} npm global bin ist nicht im PATH. Stelle sicher, dass ~/.local/bin im PATH liegt."
+        return 0
+      fi
+    fi
   fi
   echo -e "  ${YELLOW}[WARN]${NC} $pkg konnte nicht installiert werden (optional)"
   return 1
@@ -266,6 +298,25 @@ if ! $DRY_RUN; then
   bash "$REPO_DIR/validate.sh" || {
     echo -e "${YELLOW}[WARN]${NC} Validierung hat Fehler gemeldet (Symlinks sind trotzdem installiert)."
   }
+fi
+
+# --- PATH-Check ---
+PATH_HINTS=()
+if [[ -d "$HOME/.local/bin" ]] && [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+  PATH_HINTS+=("$HOME/.local/bin")
+fi
+NPM_GLOBAL_BIN="$(npm prefix -g 2>/dev/null)/bin"
+if [[ -d "$NPM_GLOBAL_BIN" ]] && [[ ":$PATH:" != *":$NPM_GLOBAL_BIN:"* ]]; then
+  PATH_HINTS+=("$NPM_GLOBAL_BIN")
+fi
+if [[ ${#PATH_HINTS[@]} -gt 0 ]]; then
+  echo ""
+  echo -e "${YELLOW}[INFO]${NC} Folgende Verzeichnisse sind nicht im PATH:"
+  for p in "${PATH_HINTS[@]}"; do
+    echo -e "       - $p"
+  done
+  echo -e "       Empfehlung: In ~/.bashrc oder ~/.zshrc einfuegen:"
+  echo -e "       ${GREEN}export PATH=\"${PATH_HINTS[*]// /:}:\$PATH\"${NC}"
 fi
 
 # --- Hinweis: Codex CLI ---

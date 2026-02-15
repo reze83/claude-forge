@@ -85,12 +85,15 @@ bash update.sh --check  # Nur pruefen ob Updates verfuegbar
 
 ## Voraussetzungen
 
-`install.sh` installiert fehlende Dependencies automatisch (apt/brew).
+`install.sh` installiert fehlende Dependencies automatisch (apt/brew/pip/npm mit Fallbacks).
 
 | | Pakete |
 |---|--------|
 | **Pflicht** | git, jq, node >= 20, python3 >= 3.10 |
 | **Optional** | shfmt, ruff, prettier (Auto-Formatter), Codex CLI |
+
+> [!NOTE]
+> Falls `pip3` nicht verfuegbar ist (z.B. Debian/Ubuntu ohne python3-pip), installiert `install.sh` ruff automatisch in einem venv unter `~/.local/venvs/claude-forge-tools/`. Bei fehlenden PATH-Eintraegen wird am Ende ein konkreter `export PATH=...` Vorschlag ausgegeben.
 
 ---
 
@@ -121,7 +124,11 @@ bash install.sh --with-codex
 <details>
 <summary><strong>Installation</strong></summary>
 
-**Dependencies fehlen** — `install.sh` installiert Pflicht-Dependencies (git, jq, node, python3) und optionale Formatter (shfmt, ruff, prettier) automatisch via apt-get oder brew.
+**Dependencies fehlen** — `install.sh` installiert Pflicht-Dependencies (git, jq, node, python3) und optionale Formatter (shfmt, ruff, prettier) automatisch via apt-get, brew, pip oder npm mit mehreren Fallbacks.
+
+**ruff laesst sich nicht installieren** — Auf Debian/Ubuntu ohne python3-pip nutzt der Installer automatisch ein venv (`~/.local/venvs/claude-forge-tools/`) und verlinkt die Binaries nach `~/.local/bin/`.
+
+**prettier/codex nicht gefunden nach Installation** — Falls `npm install -g` in ein Verzeichnis installiert das nicht im PATH liegt (z.B. `~/.npm-global/bin/`), erstellt der Installer einen Symlink nach `~/.local/bin/`. Am Ende wird eine PATH-Empfehlung angezeigt.
 
 **Symlink-Fehler** — Bestehende Dateien in `~/.claude/` werden automatisch nach `~/.claude/.backup/<timestamp>/` gesichert. Bei Fehlern wird ein Rollback durchgefuehrt.
 
