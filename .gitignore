@@ -1,0 +1,21 @@
+# Lokale Overrides (nie committen)
+CLAUDE.local.md
+*.local.json
+*.local.md
+
+# Backups
+.backup/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp
+*.tmp
+*.log
+
+# Credentials
+.env*
+*.pem
+*.key
+.credentials*

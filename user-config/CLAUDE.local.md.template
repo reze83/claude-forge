@@ -1,0 +1,3 @@
+# Lokale Ergaenzungen (nicht in Git einchecken)
+# Persoenliche Praeferenzen, lokale Pfade etc. hier eintragen.
+# NIEMALS API-Keys hier speichern — export in ~/.bashrc verwenden.

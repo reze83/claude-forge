@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "respectGitignore": true,
+  "env": {
+    "BASH_DEFAULT_TIMEOUT_MS": "120000",
+    "BASH_MAX_TIMEOUT_MS": "600000",
+    "CLAUDE_CODE_SHELL": "/bin/bash",
+    "CLAUDE_CODE_TMPDIR": "/tmp/claude-code",
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "85",
+    "ENABLE_TOOL_SEARCH": "auto:5"
+  },
+  "includeCoAuthoredBy": true,
+  "permissions": {
+    "allow": [
+      "Glob", "Grep", "Task",
+      "Bash(git status)", "Bash(git diff *)", "Bash(git log *)",
+      "Bash(git branch *)", "Bash(git checkout *)", "Bash(git add *)",
+      "Bash(git commit *)", "Bash(git stash *)", "Bash(git fetch *)",
+      "Bash(git pull *)",
+      "Bash(ls *)", "Bash(cat *)", "Bash(head *)", "Bash(tail *)",
+      "Bash(find *)", "Bash(wc *)", "Bash(sort *)", "Bash(uniq *)",
+      "Bash(diff *)", "Bash(mkdir *)", "Bash(cp *)", "Bash(mv *)",
+      "Bash(touch *)", "Bash(chmod *)", "Bash(echo *)", "Bash(pwd)",
+      "Bash(which *)", "Bash(node *)", "Bash(npm run *)",
+      "Bash(npm test *)", "Bash(npm install *)", "Bash(npx *)",
+      "Bash(python *)", "Bash(pip *)", "Bash(cargo *)",
+      "Bash(make *)", "Bash(jq *)", "Bash(sed *)", "Bash(awk *)",
+      "Bash(tee *)", "Bash(claude *)",
+      "WebSearch", "Read", "Write", "Edit", "WebFetch",
+      "mcp__github", "mcp__context7",
+      "mcp__claude_ai_DeepWiki", "mcp__claude_ai_playwright",
+      "mcp__claude_ai_fetch", "mcp__claude_ai_exa",
+      "mcp__claude_ai_serena", "mcp__claude_ai_memory",
+      "mcp__claude_ai_python-execute", "mcp__claude_ai_microsoft",
+      "mcp__claude_ai_sequentialthinking"
+    ],
+    "deny": [
+      "Bash(curl *)", "Bash(wget *)"
+    ],
+    "ask": [
+      "Bash(git push *)", "Bash(git merge *)",
+      "Bash(git rebase *)", "Bash(git reset *)",
+      "Bash(rm *)", "Bash(sudo *)",
+      "Bash(docker *)", "Bash(docker-compose *)"
+    ],
+    "defaultMode": "bypassPermissions"
+  },
+  "language": "german",
+  "sandbox": {
+    "enabled": true,
+    "network": {
+      "allowedDomains": [
+        "api.anthropic.com", "github.com", "api.github.com",
+        "registry.npmjs.org", "pypi.org"
+      ]
+    },
+    "excludedCommands": []
+  },
+  "autoUpdatesChannel": "stable",
+  "bypassPermissions": true,
+  "showTurnDuration": true,
+  "PreToolUse": [
+    {
+      "matcher": "Bash",
+      "hooks": [{
+        "type": "command",
+        "command": "bash $HOME/.claude/hooks/bash-firewall.sh",
+        "timeout": 10
+      }]
+    },
+    {
+      "matcher": "Read|Write|Edit",
+      "hooks": [{
+        "type": "command",
+        "command": "bash $HOME/.claude/hooks/protect-files.sh",
+        "timeout": 10
+      }]
+    },
+    {
+      "matcher": "Write(.*\\.(env|key|pem|p12|pfx|keystore)$|.*secrets.*|.*credentials.*|.*config\\.(json|yaml|yml|toml)$)",
+      "hooks": [{
+        "type": "agent",
+        "prompt": "Pruefe die zu schreibende Datei: 1) Enthaelt sie Secrets/Tokens? 2) Ueberschreibt sie wichtige Config? 3) Ist das Format korrekt? Nutze Read und Grep um den Kontext zu verstehen. Antworte mit ALLOW oder BLOCK + Grund."
+      }]
+    }
+  ],
+  "PostToolUse": [
+    {
+      "matcher": "Edit|Write",
+      "hooks": [{
+        "type": "command",
+        "command": "bash $HOME/.claude/hooks/auto-format.sh",
+        "timeout": 30
+      }]
+    }
+  ],
+  "Stop": [
+    {
+      "matcher": "",
+      "hooks": [{
+        "type": "command",
+        "command": "bash $HOME/.claude/hooks/session-logger.sh",
+        "timeout": 15
+      }]
+    }
+  ],
+  "UserPromptSubmit": [
+    {
+      "matcher": "",
+      "hooks": [{
+        "type": "prompt",
+        "prompt": "Wenn der User nach einem Code-Review fragt, erinnere daran: 1) Tests pruefen, 2) Security checken, 3) Performance beachten. Antworte mit PROCEED wenn kein Review erkannt wird."
+      }]
+    }
+  ],
+  "skipDangerousModePermissionPrompt": true
+}
