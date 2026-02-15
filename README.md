@@ -45,11 +45,11 @@ claude-forge/
 ├── install.sh                      Symlink-Installer
 ├── uninstall.sh                    Saubere Deinstallation
 ├── validate.sh                     Konfig-Validierung
-├── user-config/                    → ~/.claude/ (Symlinks)
-│   ├── settings.json               Hauptkonfiguration
-│   ├── CLAUDE.md                   Globale Instruktionen
-│   ├── MEMORY.md                   Persistenter Speicher
-│   └── rules/                      Constraint-Regeln
+├── user-config/                    Vorlagen fuer ~/.claude/
+│   ├── settings.json.example       Hauptkonfiguration (kopiert bei Install)
+│   ├── CLAUDE.md.example           Globale Instruktionen (kopiert bei Install)
+│   └── MEMORY.md                   Persistenter Speicher (symlinked)
+├── rules/                          → ~/.claude/rules/ (symlinked)
 ├── hooks/                          → ~/.claude/hooks/
 │   ├── bash-firewall.sh            Gefaehrliche Befehle blocken
 │   ├── protect-files.sh            Sensible Dateien schuetzen

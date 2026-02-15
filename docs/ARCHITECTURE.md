@@ -10,16 +10,24 @@ Loesung: Das Repo ist beides — ein Plugin UND ein Symlink-basiertes Config-Rep
 
 ## Dateipfade
 
-| Repo-Datei | Symlink-Ziel | Zweck |
-|---|---|---|
-| user-config/settings.json | ~/.claude/settings.json | Hauptkonfiguration |
-| user-config/CLAUDE.md | ~/.claude/CLAUDE.md | Globale Instruktionen |
-| user-config/MEMORY.md | ~/.claude/MEMORY.md | Persistenter Speicher |
-| user-config/rules/ | ~/.claude/rules/ | Constraint-Regeln |
-| hooks/ | ~/.claude/hooks/ | Hook-Scripts |
-| commands/ | ~/.claude/commands/ | Slash-Commands |
-| agents/*.md | ~/.claude/agents/*.md | Subagenten (einzeln) |
-| skills/*/ | ~/.claude/skills/*/ | Skills (einzeln) |
+| Repo-Datei | Ziel | Methode | Zweck |
+|---|---|---|---|
+| user-config/settings.json.example | ~/.claude/settings.json | Kopie (einmalig) | Hauptkonfiguration |
+| user-config/CLAUDE.md.example | ~/.claude/CLAUDE.md | Kopie (einmalig) | Globale Instruktionen |
+| user-config/MEMORY.md | ~/.claude/MEMORY.md | Symlink | Persistenter Speicher |
+| rules/ | ~/.claude/rules/ | Symlink | Constraint-Regeln |
+| hooks/ | ~/.claude/hooks/ | Symlink | Hook-Scripts |
+| commands/ | ~/.claude/commands/ | Symlink | Slash-Commands |
+| agents/*.md | ~/.claude/agents/*.md | Symlink (einzeln) | Subagenten |
+| skills/*/ | ~/.claude/skills/*/ | Symlink (einzeln) | Skills |
+
+### Kopie vs. Symlink
+
+- **Kopie**: `settings.json` und `CLAUDE.md` werden aus `.example`-Vorlagen kopiert.
+  Existierende Dateien werden NICHT ueberschrieben. So kann jeder User seine
+  eigenen Praeferenzen pflegen (Sprache, MCP-Server, Permissions etc.).
+- **Symlink**: Alle anderen Komponenten werden verlinkt. Aenderungen im Repo
+  wirken sich sofort aus.
 
 ## WICHTIG: Installationsmodus
 

@@ -87,22 +87,26 @@ log_ok "Alle Pre-Checks bestanden."
 # --- Phase 1: User-Config ---
 echo ""
 echo "-- Phase 1: User-Config --"
-create_symlink "$REPO_DIR/user-config/settings.json" "$CLAUDE_DIR/settings.json"
-create_symlink "$REPO_DIR/user-config/CLAUDE.md"     "$CLAUDE_DIR/CLAUDE.md"
-create_symlink "$REPO_DIR/user-config/MEMORY.md"      "$CLAUDE_DIR/MEMORY.md"
-create_symlink "$REPO_DIR/user-config/rules"           "$CLAUDE_DIR/rules"
 
-# CLAUDE.local.md: NUR Template kopieren wenn Datei nicht existiert
-if [[ ! -f "$CLAUDE_DIR/CLAUDE.local.md" ]]; then
-  if $DRY_RUN; then
-    log_dry "Wuerde CLAUDE.local.md aus Template erstellen"
+# settings.json und CLAUDE.md: Kopieren aus .example (nur wenn Ziel nicht existiert)
+for example_file in settings.json CLAUDE.md; do
+  if [[ ! -f "$CLAUDE_DIR/$example_file" ]]; then
+    if $DRY_RUN; then
+      log_dry "Wuerde $example_file aus .example erstellen"
+    else
+      cp "$REPO_DIR/user-config/${example_file}.example" "$CLAUDE_DIR/$example_file"
+      log_ok "$example_file aus .example erstellt"
+    fi
   else
-    cp "$REPO_DIR/user-config/CLAUDE.local.md.template" "$CLAUDE_DIR/CLAUDE.local.md"
-    log_ok "CLAUDE.local.md aus Template erstellt"
+    log_skip "$example_file existiert bereits (nicht ueberschrieben)"
   fi
-else
-  log_skip "CLAUDE.local.md existiert bereits (nicht ueberschrieben)"
-fi
+done
+
+# MEMORY.md: Symlink (wird von Claude Code automatisch gepflegt)
+create_symlink "$REPO_DIR/user-config/MEMORY.md" "$CLAUDE_DIR/MEMORY.md"
+
+# Rules: Symlink aus Repo-Root
+create_symlink "$REPO_DIR/rules" "$CLAUDE_DIR/rules"
 
 # --- Phase 2: Hooks ---
 echo ""

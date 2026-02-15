@@ -39,10 +39,10 @@ warn() {
 echo "=== claude-forge validation ==="
 echo ""
 
-# --- Symlinks ---
-echo "-- Symlinks --"
-check "settings.json ist Symlink"    "[[ -L '$CLAUDE_DIR/settings.json' ]]"
-check "CLAUDE.md ist Symlink"        "[[ -L '$CLAUDE_DIR/CLAUDE.md' ]]"
+# --- Dateien & Symlinks ---
+echo "-- Dateien & Symlinks --"
+check "settings.json vorhanden"      "[[ -f '$CLAUDE_DIR/settings.json' ]]"
+check "CLAUDE.md vorhanden"          "[[ -f '$CLAUDE_DIR/CLAUDE.md' ]]"
 check "MEMORY.md ist Symlink"        "[[ -L '$CLAUDE_DIR/MEMORY.md' ]]"
 check "rules/ ist Symlink"           "[[ -L '$CLAUDE_DIR/rules' ]]"
 check "hooks/ ist Symlink"           "[[ -L '$CLAUDE_DIR/hooks' ]]"
@@ -51,7 +51,7 @@ check "commands/ ist Symlink"        "[[ -L '$CLAUDE_DIR/commands' ]]"
 # --- JSON-Validitaet ---
 echo ""
 echo "-- JSON-Validitaet --"
-check "settings.json valides JSON"   "jq empty '$REPO_DIR/user-config/settings.json'"
+check "settings.json.example valides JSON"  "jq empty '$REPO_DIR/user-config/settings.json.example'"
 check "hooks.json valides JSON"      "jq empty '$REPO_DIR/hooks/hooks.json'"
 check "plugin.json valides JSON"     "jq empty '$REPO_DIR/.claude-plugin/plugin.json'"
 

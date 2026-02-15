@@ -30,9 +30,7 @@ remove_if_symlink_to_repo() {
 echo "=== claude-forge uninstaller ==="
 echo ""
 
-# User-Config
-remove_if_symlink_to_repo "$CLAUDE_DIR/settings.json"
-remove_if_symlink_to_repo "$CLAUDE_DIR/CLAUDE.md"
+# Symlinked components
 remove_if_symlink_to_repo "$CLAUDE_DIR/MEMORY.md"
 remove_if_symlink_to_repo "$CLAUDE_DIR/rules"
 remove_if_symlink_to_repo "$CLAUDE_DIR/hooks"
@@ -51,7 +49,7 @@ for skill_dir in "$REPO_DIR/skills/"*/; do
 done
 
 # Letztes Backup finden und anbieten
-LATEST_BACKUP="$(ls -dt "$CLAUDE_DIR/.backup/"*/ 2>/dev/null | head -1)"
+LATEST_BACKUP="$(ls -dt "$CLAUDE_DIR/.backup/"*/ 2>/dev/null | head -1 || true)"
 if [[ -n "$LATEST_BACKUP" ]]; then
   echo ""
   echo -e "${YELLOW}Backup gefunden: $LATEST_BACKUP${NC}"
