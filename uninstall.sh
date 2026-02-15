@@ -9,11 +9,23 @@ set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
 CLAUDE_DIR="$HOME/.claude"
+DRY_RUN=false
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
+
+# --- Argumente ---
+for arg in "$@"; do
+  case "$arg" in
+    --dry-run)  DRY_RUN=true ;;
+    --help|-h)
+      echo "Usage: uninstall.sh [--dry-run] [--help]"
+      echo "  --dry-run  Zeigt was entfernt wuerde, aendert nichts"
+      exit 0 ;;
+  esac
+done
 
 remove_if_symlink_to_repo() {
   local target="$1"
@@ -21,13 +33,20 @@ remove_if_symlink_to_repo() {
     local link_target
     link_target="$(readlink -f "$target")"
     if [[ "$link_target" == "$REPO_DIR"* ]]; then
-      rm "$target"
-      echo -e "  ${GREEN}[OK]${NC} Entfernt: $target"
+      if $DRY_RUN; then
+        echo -e "  ${YELLOW}[DRY]${NC} Wuerde entfernen: $target"
+      else
+        rm "$target"
+        echo -e "  ${GREEN}[OK]${NC} Entfernt: $target"
+      fi
     fi
   fi
 }
 
 echo "=== claude-forge uninstaller ==="
+if $DRY_RUN; then
+  echo -e "${YELLOW}(Dry-Run Modus — keine Aenderungen)${NC}"
+fi
 echo ""
 
 # Symlinked components

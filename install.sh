@@ -40,6 +40,28 @@ log_skip() { echo -e "  ${YELLOW}[SKIP]${NC} $1"; }
 log_err()  { echo -e "  ${RED}[ERR]${NC} $1"; ERRORS=$((ERRORS + 1)); }
 log_dry()  { echo -e "  ${YELLOW}[DRY]${NC} $1"; }
 
+INSTALLED_SYMLINKS=()
+
+cleanup_on_error() {
+  echo ""
+  echo -e "${RED}Fehler aufgetreten — Rollback...${NC}"
+  for link in "${INSTALLED_SYMLINKS[@]}"; do
+    if [[ -L "$link" ]]; then
+      rm -f "$link"
+      echo -e "  ${YELLOW}[ROLLBACK]${NC} Entfernt: $link"
+    fi
+    # Restore backup if available
+    local backup_file="$BACKUP_DIR/$(basename "$link")"
+    if [[ -f "$backup_file" || -d "$backup_file" ]]; then
+      cp -a "$backup_file" "$link"
+      echo -e "  ${YELLOW}[ROLLBACK]${NC} Wiederhergestellt: $link"
+    fi
+  done
+  echo -e "${RED}Rollback abgeschlossen. Installation abgebrochen.${NC}"
+  exit 1
+}
+trap cleanup_on_error ERR
+
 backup_if_exists() {
   local target="$1"
   if [[ -e "$target" && ! -L "$target" ]]; then
@@ -65,6 +87,7 @@ create_symlink() {
   backup_if_exists "$target"
   mkdir -p "$(dirname "$target")"
   ln -sfn "$source" "$target"
+  INSTALLED_SYMLINKS+=("$target")
   log_ok "Verlinkt: $target → $source"
 }
 
@@ -83,6 +106,11 @@ if [[ $ERRORS -gt 0 ]]; then
   exit 1
 fi
 log_ok "Alle Pre-Checks bestanden."
+
+if pgrep -f "claude.*--plugin-dir.*claude-forge" >/dev/null 2>&1; then
+  log_err "claude-forge laeuft als Plugin. Beende Claude und starte ohne --plugin-dir."
+  exit 1
+fi
 
 # --- Phase 1: User-Config ---
 echo ""
