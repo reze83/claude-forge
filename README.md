@@ -7,7 +7,8 @@ Modulares Claude Code Config-Repository mit Multi-Model Support.
 ```bash
 git clone https://github.com/reze83/claude-forge.git ~/develop/claude-forge
 cd ~/develop/claude-forge
-bash install.sh
+bash install.sh            # Hooks, Agents, Skills, Commands
+bash install.sh --with-codex  # Optional: + Codex CLI fuer /multi-* Commands
 ```
 
 ## Alternative: Plugin-Modus
