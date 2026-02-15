@@ -3,7 +3,7 @@ set -euo pipefail
 
 # ============================================================
 # Codex-Wrapper-Tests
-# Testet codex-wrapper.sh ohne echten Codex CLI
+# Testet codex-wrapper.sh — Fehlerbehandlung + Live-Aufruf
 # ============================================================
 
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
@@ -13,6 +13,7 @@ FAIL=0
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
 NC='\033[0m'
 
 assert_contains() {
@@ -29,35 +30,56 @@ assert_contains() {
   fi
 }
 
+skip() {
+  echo -e "  ${YELLOW}[SKIP]${NC} $1"
+}
+
 echo "=== Codex-Wrapper-Tests ==="
 echo ""
+
+# --- Fehlerbehandlung ---
+echo "-- Fehlerbehandlung --"
 
 # Test 1: Fehlender --prompt
 OUT=$(bash "$WRAPPER" 2>&1) || true
 assert_contains "Fehlender Prompt → error" '"status":"error"' "$OUT"
 
-# Test 2: Fehlender Codex CLI (PATH manipulieren)
-OUT=$(PATH=/usr/bin bash "$WRAPPER" --prompt "test" 2>&1) || true
-assert_contains "Fehlender Codex → error" 'nicht installiert' "$OUT"
+# Test 2: JSON-Output bei Fehler
+assert_contains "Fehler-Output ist JSON" '"model":"codex"' "$OUT"
 
-# Test 3: Sandbox-Modus Mapping (pruefe ob Variable gesetzt wird)
-OUT=$(PATH=/usr/bin bash "$WRAPPER" --sandbox read --prompt "test" 2>&1) || true
-assert_contains "Sandbox read → error (kein codex)" '"status":"error"' "$OUT"
-
-OUT=$(PATH=/usr/bin bash "$WRAPPER" --sandbox full --prompt "test" 2>&1) || true
-assert_contains "Sandbox full → error (kein codex)" '"status":"error"' "$OUT"
-
-# Test 5: Timeout-Parameter wird akzeptiert
-OUT=$(PATH=/usr/bin bash "$WRAPPER" --timeout 5 --prompt "test" 2>&1) || true
-assert_contains "Timeout-Parameter akzeptiert" '"status":"error"' "$OUT"
-
-# Test 6: jq verfuegbar
+# Test 3: jq verfuegbar
 if command -v jq >/dev/null 2>&1; then
   echo -e "  ${GREEN}[PASS]${NC} jq ist installiert"
   PASS=$((PASS + 1))
 else
   echo -e "  ${RED}[FAIL]${NC} jq fehlt"
   FAIL=$((FAIL + 1))
+fi
+
+# --- Live-Tests (nur wenn Codex installiert) ---
+echo ""
+echo "-- Live-Tests --"
+
+if command -v codex >/dev/null 2>&1 || npm config get prefix >/dev/null 2>&1; then
+  # Test 4: Sandbox read (Codex antwortet)
+  OUT=$(bash "$WRAPPER" --sandbox read --prompt "Reply with exactly one word: PING" --timeout 30 2>&1) || true
+  assert_contains "Sandbox read → success" '"status":"success"' "$OUT"
+
+  # Test 5: Output enthaelt Codex-Antwort
+  assert_contains "Output enthaelt Antwort" 'PING' "$OUT"
+
+  # Test 6: JSON ist valide
+  if echo "$OUT" | jq empty 2>/dev/null; then
+    echo -e "  ${GREEN}[PASS]${NC} Output ist valides JSON"
+    PASS=$((PASS + 1))
+  else
+    echo -e "  ${RED}[FAIL]${NC} Output ist kein valides JSON"
+    FAIL=$((FAIL + 1))
+  fi
+else
+  skip "Codex nicht installiert — Live-Tests uebersprungen"
+  skip "Codex nicht installiert — Live-Tests uebersprungen"
+  skip "Codex nicht installiert — Live-Tests uebersprungen"
 fi
 
 echo ""

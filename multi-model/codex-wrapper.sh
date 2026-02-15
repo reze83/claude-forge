@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ============================================================
-# Codex CLI Wrapper fuer Claude Code
+# Codex CLI Wrapper fuer Claude Code (v0.101+)
 # Aufgerufen von multi-* Commands via Bash.
 #
 # Usage: codex-wrapper.sh --sandbox <mode> --prompt "<prompt>"
@@ -40,36 +40,47 @@ if [[ -z "$PROMPT" ]]; then
   exit 1
 fi
 
+# --- PATH erweitern (npm global bin) ---
+NPM_BIN="$(npm config get prefix 2>/dev/null)/bin" || true
+[[ -d "$NPM_BIN" ]] && export PATH="$NPM_BIN:$PATH"
+
 # --- Codex verfuegbar? ---
 if ! command -v codex >/dev/null 2>&1; then
   echo '{"status":"error","output":"Codex CLI nicht installiert. bash multi-model/codex-setup.sh ausfuehren.","model":"codex"}'
   exit 1
 fi
 
-# --- Sandbox-Modus mappen ---
+# --- Sandbox-Modus mappen (Codex CLI v0.101+) ---
 case "$SANDBOX" in
-  read)  APPROVAL="suggest" ;;
-  write) APPROVAL="auto-edit" ;;
-  full)  APPROVAL="full-auto" ;;
-  *)     APPROVAL="auto-edit" ;;
+  read)  SANDBOX_FLAG="read-only" ;;
+  write) SANDBOX_FLAG="workspace-write" ;;
+  full)  SANDBOX_FLAG="danger-full-access" ;;
+  *)     SANDBOX_FLAG="workspace-write" ;;
 esac
 
-# --- Temp-Datei fuer Prompt ---
-TMPFILE="$(mktemp /tmp/claude-codex-XXXXXX.txt)"
-echo "$PROMPT" > "$TMPFILE"
-trap 'rm -f "$TMPFILE"' EXIT
+# --- Temp-Datei fuer Output ---
+OUTFILE="$(mktemp /tmp/claude-codex-out-XXXXXX.txt)"
+trap 'rm -f "$OUTFILE"' EXIT
 
-# --- Codex ausfuehren ---
+# --- Codex ausfuehren (non-interactive via exec) ---
 cd "$WORKDIR"
-OUTPUT=$(timeout "$TIMEOUT" codex -q --approval-mode "$APPROVAL" - < "$TMPFILE" 2>&1) || {
+timeout "$TIMEOUT" codex exec \
+  --sandbox "$SANDBOX_FLAG" \
+  -o "$OUTFILE" \
+  "$PROMPT" >/dev/null 2>&1 || {
   EXIT_CODE=$?
   if [[ $EXIT_CODE -eq 124 ]]; then
     echo "{\"status\":\"error\",\"output\":\"Codex Timeout nach ${TIMEOUT}s\",\"model\":\"codex\"}"
   else
-    echo "{\"status\":\"error\",\"output\":$(echo "$OUTPUT" | jq -Rs .),\"model\":\"codex\"}"
+    # Fehler-Output aus der Datei oder stderr lesen
+    ERROR_MSG=""
+    [[ -s "$OUTFILE" ]] && ERROR_MSG="$(cat "$OUTFILE")"
+    echo "{\"status\":\"error\",\"output\":$(echo "$ERROR_MSG" | jq -Rs .),\"model\":\"codex\"}"
   fi
   exit 0  # Immer exit 0 damit Claude den Fehler verarbeiten kann
 }
 
 # --- Erfolg ---
+OUTPUT=""
+[[ -s "$OUTFILE" ]] && OUTPUT="$(cat "$OUTFILE")"
 echo "{\"status\":\"success\",\"output\":$(echo "$OUTPUT" | jq -Rs .),\"model\":\"codex\"}"
