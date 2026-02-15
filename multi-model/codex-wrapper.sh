@@ -27,11 +27,20 @@ fi
 # --- Argumente ---
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --sandbox|--prompt|--workdir|--timeout)
+      if [[ $# -lt 2 ]]; then
+        echo "{\"status\":\"error\",\"output\":\"Missing value for $1\",\"model\":\"codex\"}"
+        exit 0
+      fi
+      ;;&
     --sandbox) SANDBOX="$2"; shift 2 ;;
     --prompt)  PROMPT="$2"; shift 2 ;;
     --workdir) WORKDIR="$2"; shift 2 ;;
     --timeout) TIMEOUT="$2"; shift 2 ;;
-    *) shift ;;
+    *)
+      echo "{\"status\":\"error\",\"output\":\"Unknown argument: $1\",\"model\":\"codex\"}"
+      exit 0
+      ;;
   esac
 done
 

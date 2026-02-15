@@ -46,3 +46,6 @@ jobs:
         run: |
           mkdir -p "$HOME/.claude"
           bash tests/test-install.sh
+
+      - name: Run validate tests
+        run: bash tests/test-validate.sh

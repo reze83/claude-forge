@@ -3,6 +3,7 @@ set -euo pipefail
 # PostToolUse Hook — Secret-Scan
 # Prueft Dateien nach Write/Edit auf versehentlich eingefuegte Secrets.
 # Darf NIEMALS blocken (PostToolUse) → warnt nur via stdout.
+# Compatible: Bash 3.2+ (macOS) and Bash 4+ / GNU+BSD coreutils
 
 INPUT=$(cat)
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
@@ -11,33 +12,34 @@ FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
 
 # Skip binary files and large files (>1MB)
 MAX_SIZE=1048576
-FILE_SIZE=$(stat -c%s "$FILE_PATH" 2>/dev/null || echo 0)
+# Cross-platform file size: macOS stat -f%z, Linux stat -c%s
+FILE_SIZE=$(stat -f%z "$FILE_PATH" 2>/dev/null || stat -c%s "$FILE_PATH" 2>/dev/null || echo 0)
 [[ "$FILE_SIZE" -gt "$MAX_SIZE" ]] && exit 0
 
 FINDINGS=()
 
-# Anthropic API Key
-if grep -qP 'sk-ant-[a-zA-Z0-9_-]{20,}' "$FILE_PATH" 2>/dev/null; then
+# Anthropic API Key (ERE statt PCRE fuer Portabilitaet)
+if grep -qE 'sk-ant-[a-zA-Z0-9_-]{20,}' "$FILE_PATH" 2>/dev/null; then
   FINDINGS+=("Anthropic API Key (sk-ant-...)")
 fi
 
 # OpenAI API Key
-if grep -qP 'sk-[a-zA-Z0-9]{48,}' "$FILE_PATH" 2>/dev/null; then
+if grep -qE 'sk-[a-zA-Z0-9]{48,}' "$FILE_PATH" 2>/dev/null; then
   FINDINGS+=("OpenAI API Key (sk-...)")
 fi
 
 # GitHub Token
-if grep -qP 'ghp_[a-zA-Z0-9]{36}' "$FILE_PATH" 2>/dev/null; then
+if grep -qE 'ghp_[a-zA-Z0-9]{36}' "$FILE_PATH" 2>/dev/null; then
   FINDINGS+=("GitHub Token (ghp_...)")
 fi
 
 # AWS Access Key
-if grep -qP 'AKIA[0-9A-Z]{16}' "$FILE_PATH" 2>/dev/null; then
+if grep -qE 'AKIA[0-9A-Z]{16}' "$FILE_PATH" 2>/dev/null; then
   FINDINGS+=("AWS Access Key (AKIA...)")
 fi
 
 # JWT Token
-if grep -qP 'eyJ[a-zA-Z0-9_-]*\.eyJ[a-zA-Z0-9_-]*\.' "$FILE_PATH" 2>/dev/null; then
+if grep -qE 'eyJ[a-zA-Z0-9_-]*\.eyJ[a-zA-Z0-9_-]*\.' "$FILE_PATH" 2>/dev/null; then
   FINDINGS+=("JWT Token (eyJ...)")
 fi
 

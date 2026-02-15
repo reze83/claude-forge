@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Auto-install missing dependencies in install.sh (apt-get/brew)
 - Auto-install optional formatters (shfmt, ruff, prettier)
 - Symlink target validation in validate.sh (readlink check)
-- Tests for secret-scan.sh, session-logger.sh, and update.sh (50 total)
+- Tests for secret-scan.sh, session-logger.sh, and update.sh (68 total)
 
 ### Fixed
 - protect-files.sh: block .npmrc and .netrc (auth token protection)

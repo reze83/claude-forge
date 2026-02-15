@@ -7,7 +7,7 @@ Security Hooks | Auto-Formatting | Secret-Scan | Multi-Model Support
 
 [![Version](https://img.shields.io/badge/version-0.2.1-blue?style=flat-square)](CHANGELOG.md)
 [![CI](https://img.shields.io/github/actions/workflow/status/reze83/claude-forge/test.yml?branch=main&style=flat-square&label=CI)](https://github.com/reze83/claude-forge/actions)
-[![Tests](https://img.shields.io/badge/tests-50%20passed-brightgreen?style=flat-square)](#)
+[![Tests](https://img.shields.io/badge/tests-68%20passed-brightgreen?style=flat-square)](#)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 
 </div>
@@ -195,7 +195,7 @@ claude-forge/
 ├── skills/                         → ~/.claude/skills/
 ├── commands/                       → ~/.claude/commands/
 ├── multi-model/                    → ~/.claude/multi-model/ (Codex CLI)
-├── tests/                          Test-Suite (50 Tests)
+├── tests/                          Test-Suite (68 Tests)
 └── docs/                           Architektur-Dokumentation
 ```
 

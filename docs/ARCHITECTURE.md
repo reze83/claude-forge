@@ -83,7 +83,7 @@ wiederhergestellt. validate.sh Fehler loesen keinen Rollback aus.
 | Hook | Event | Matcher | Zweck |
 |---|---|---|---|
 | bash-firewall.sh | PreToolUse | Bash | Gefaehrliche Befehle blocken |
-| protect-files.sh | PreToolUse | Read\|Write\|Edit | Sensible Dateien schuetzen |
+| protect-files.sh | PreToolUse | Read\|Write\|Edit\|Glob\|Grep | Sensible Dateien schuetzen |
 | auto-format.sh | PostToolUse | Edit\|Write | Auto-Formatting (Polyglot) |
 | secret-scan.sh | PostToolUse | Edit\|Write | Secret-Erkennung in geschriebenen Dateien |
 | session-logger.sh | Stop | * | Session-Ende Log + Desktop-Notification |
@@ -110,12 +110,12 @@ Timeouts muessen in beiden Dateien identisch sein — `validate.sh` prueft das.
 
 ### protect-files.sh: Schutz-Stufen
 
-| Dateimuster | Read | Write | Edit |
-|---|---|---|---|
-| .env, .ssh/, .aws/, .gnupg/, .git/ | Blockiert | Blockiert | Blockiert |
-| .npmrc, .netrc | Blockiert | Blockiert | Blockiert |
-| *.pem, *.key, *.p12, *.pfx | Blockiert | Blockiert | Blockiert |
-| package-lock.json | Erlaubt | Blockiert | Blockiert |
+| Dateimuster | Read | Write | Edit | Glob/Grep |
+|---|---|---|---|---|
+| .env, .ssh/, .aws/, .gnupg/, .git/ | Blockiert | Blockiert | Blockiert | Blockiert |
+| .npmrc, .netrc | Blockiert | Blockiert | Blockiert | Blockiert |
+| *.pem, *.key, *.p12, *.pfx | Blockiert | Blockiert | Blockiert | Blockiert |
+| package-lock.json | Erlaubt | Blockiert | Blockiert | Erlaubt |
 
 ### secret-scan.sh: Erkannte Patterns
 
@@ -165,7 +165,7 @@ damit Claude den Output parsen kann:
 
 ## Validierung
 
-validate.sh prueft in 7 Sektionen:
+validate.sh prueft in 9 Sektionen:
 
 1. **Dateien & Symlinks** — Existenz + readlink Ziel-Pruefung
 2. **JSON-Validitaet** — settings.json.example, hooks.json, plugin.json
@@ -193,4 +193,4 @@ validate.sh prueft in 7 Sektionen:
 | test-install.sh | - | Install/Uninstall Lifecycle |
 | test-codex.sh | - | Codex Wrapper (nur wenn Codex installiert) |
 
-CI (`test.yml`) fuehrt alle Tests auf ubuntu-22.04 aus (ausser test-codex.sh).
+CI (`test.yml`) fuehrt alle Tests auf ubuntu-22.04 aus (ausser test-codex.sh und test-validate.sh).
