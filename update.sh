@@ -38,6 +38,11 @@ fi
 CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 CURRENT_COMMIT="$(git rev-parse --short HEAD)"
 
+if [[ "$CURRENT_BRANCH" == "HEAD" ]]; then
+  echo -e "${RED}[ERR]${NC} Detached HEAD. Bitte einen Branch auschecken: git checkout <branch>"
+  exit 1
+fi
+
 LOCAL_VERSION="$(cat "$REPO_DIR/VERSION" 2>/dev/null || echo "unbekannt")"
 
 echo "=== claude-forge update ==="
@@ -74,8 +79,10 @@ fi
 
 # --- Lokale Aenderungen pruefen ---
 if [[ -n "$(git status --porcelain)" ]]; then
-  echo -e "${YELLOW}[WARN]${NC} Lokale Aenderungen gefunden — stashe sie vor dem Update."
-  git stash --include-untracked
+  echo -e "${YELLOW}[WARN]${NC} Lokale Aenderungen gefunden:"
+  git status --short
+  echo -e "${YELLOW}[INFO]${NC} Aenderungen werden temporaer gestashed und nach dem Update wiederhergestellt."
+  git stash --include-untracked --quiet
   STASHED=true
   echo -e "  ${GREEN}[OK]${NC} Aenderungen gestashed."
 else

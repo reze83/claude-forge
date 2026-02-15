@@ -79,7 +79,7 @@ echo ""
 echo "-- update.sh --check --"
 CHECK_OUT=$(bash "$UPDATE" --check 2>&1 || true)
 # Should show either "Bereits aktuell" or "neue Commits verfuegbar"
-if echo "$CHECK_OUT" | grep -qE "aktuell|Commits|fetch"; then
+if echo "$CHECK_OUT" | grep -qE "aktuell|Commits|fetch|Detached HEAD"; then
   echo -e "  ${GREEN}[PASS]${NC} --check liefert Status-Output"
   PASS=$((PASS + 1))
 else

@@ -27,11 +27,20 @@ fi
 # --- Argumente ---
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --sandbox|--prompt|--workdir|--timeout)
+      if [[ $# -lt 2 ]]; then
+        echo "{\"status\":\"error\",\"output\":\"Missing value for $1\",\"model\":\"codex\"}"
+        exit 0
+      fi
+      ;;&
     --sandbox) SANDBOX="$2"; shift 2 ;;
     --prompt)  PROMPT="$2"; shift 2 ;;
     --workdir) WORKDIR="$2"; shift 2 ;;
     --timeout) TIMEOUT="$2"; shift 2 ;;
-    *) shift ;;
+    *)
+      echo "{\"status\":\"error\",\"output\":\"Unknown argument: $1\",\"model\":\"codex\"}"
+      exit 0
+      ;;
   esac
 done
 
@@ -41,8 +50,13 @@ if [[ -z "$PROMPT" ]]; then
 fi
 
 # --- PATH erweitern (npm global bin) ---
-NPM_BIN="$(npm config get prefix 2>/dev/null)/bin" || true
-[[ -d "$NPM_BIN" ]] && export PATH="$NPM_BIN:$PATH"
+if command -v npm >/dev/null 2>&1; then
+  NPM_PREFIX="$(npm config get prefix 2>/dev/null || true)"
+  if [[ -n "$NPM_PREFIX" && "$NPM_PREFIX" != "/" && "$NPM_PREFIX" != "null" ]]; then
+    NPM_BIN="$NPM_PREFIX/bin"
+    [[ -d "$NPM_BIN" ]] && export PATH="$NPM_BIN:$PATH"
+  fi
+fi
 
 # --- Codex verfuegbar? ---
 if ! command -v codex >/dev/null 2>&1; then

@@ -11,7 +11,7 @@
         }]
       },
       {
-        "matcher": "Read|Write|Edit",
+        "matcher": "Read|Write|Edit|Glob|Grep",
         "hooks": [{
           "type": "command",
           "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/protect-files.sh",
@@ -39,6 +39,7 @@
     ],
     "Stop": [
       {
+        "matcher": "",
         "hooks": [{
           "type": "command",
           "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/session-logger.sh",
