@@ -85,6 +85,47 @@ Dann in Claude Code:
 
 Siehe [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) fuer Design-Entscheidungen.
 
+## Troubleshooting
+
+### Installation
+
+**Dependencies fehlen**: `validate.sh` prueft automatisch ob `node`, `python3`, `git` und `jq` installiert sind. Fehlende Tools nachinstallieren und erneut `bash install.sh` ausfuehren.
+
+**Symlink-Fehler**: Falls bestehende Dateien (keine Symlinks) in `~/.claude/` existieren, werden sie automatisch nach `~/.claude/.backup/<timestamp>/` gesichert. Bei Fehlern waehrend der Installation wird automatisch ein Rollback durchgefuehrt.
+
+### Hook-Blockierung
+
+**package-lock.json**: Write und Edit sind blockiert, Read ist erlaubt. Falls ein Tool faelschlicherweise blockiert wird, die Datei `hooks/protect-files.sh` pruefen.
+
+**Eigene Scripts blockiert**: Die `bash-firewall.sh` blockiert gefaehrliche Befehle. Erlaubte/blockierte Muster stehen direkt im Script.
+
+### Codex CLI
+
+**codex nicht gefunden**: `bash multi-model/codex-setup.sh` ausfuehren oder manuell `npm install -g @openai/codex`.
+
+**Codex Timeout**: Standard-Timeout ist 180s. Kann per `--timeout` Parameter im `codex-wrapper.sh` angepasst werden.
+
+### Plugin vs Symlink Modus
+
+**Hooks werden doppelt geladen**: Nie Plugin-Modus (`--plugin-dir`) und Symlink-Modus gleichzeitig nutzen. Der Installer erkennt laufende Plugin-Instanzen und warnt.
+
+### Debugging
+
+**Logs**: Session-Logs werden bei Stop-Events geschrieben. Pfad: `~/.claude/sessions/`.
+
+**Hook manuell testen**:
+```bash
+echo '{"tool_input":{"command":"ls -la"}}' | bash hooks/bash-firewall.sh
+echo '{"tool_input":{"file_path":"/home/user/.env"}}' | bash hooks/protect-files.sh
+```
+
+**JSON-Validierung**:
+```bash
+jq empty hooks/hooks.json
+jq empty user-config/settings.json.example
+bash validate.sh
+```
+
 ## Deinstallation
 
 ```bash
