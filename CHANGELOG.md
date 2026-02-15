@@ -7,12 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-02-15
+
+### Added
+- `/forge-status` command: show version, symlink health, hooks, available updates
+- `/forge-update` command: trigger updates from within Claude Code
+- `secret-scan.sh` PostToolUse hook: detect leaked secrets after Write/Edit
+- `update.sh` for one-command updates with version comparison
+- `VERSION` file for version tracking
+- Auto-install missing dependencies in install.sh (apt-get/brew)
+- Auto-install optional formatters (shfmt, ruff, prettier)
+- Symlink target validation in validate.sh (readlink check)
+- Tests for secret-scan.sh, session-logger.sh, and update.sh (50 total)
+
+### Fixed
+- protect-files.sh: block .npmrc and .netrc (auth token protection)
+- codex-wrapper.sh: consistent exit 0 for all error paths
+
+## [0.2.0] - 2026-02-15
+
 ### Fixed
 - Hook timeout inconsistency between hooks.json and settings.json.example (auto-format: 15→30s, session-logger: 10→15s)
 - codex-wrapper.sh uses `$TMPDIR` instead of hardcoded `/tmp`
 - protect-files.sh allows Read on package-lock.json (only blocks Write/Edit)
 - Secret scan patterns expanded (Anthropic, OpenAI, AWS, JWT)
 - Attribution setting uses object format per official docs
+- validate.sh failure no longer triggers install rollback
 
 ### Added
 - Shell script formatting via shfmt in auto-format.sh
@@ -20,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dry-run mode for uninstall.sh (`--dry-run`)
 - Rollback on error during install.sh
 - Plugin-mode conflict detection in install.sh
+- Codex missing hint after install
 - CONTRIBUTING.md with development guidelines
 - CHANGELOG.md
 - README.md troubleshooting section

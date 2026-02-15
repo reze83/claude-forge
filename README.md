@@ -33,29 +33,32 @@ bash update.sh --check  # Nur pruefen ob Updates verfuegbar sind
 
 | Komponente | Beschreibung |
 |---|---|
-| 4 Hooks | Bash-Firewall, File-Protection, Auto-Format, Session-Logger |
+| 5 Hooks | Bash-Firewall, File-Protection, Auto-Format, Secret-Scan, Session-Logger |
 | 3 Agents | Research, Test-Runner, Security-Auditor |
 | 4 Skills | Code-Review, Explain-Code, Deploy, Project-Init |
-| 5 Commands | Multi-Model Workflow (Claude + Codex CLI) |
+| 7 Commands | Multi-Model (5), /forge-status, /forge-update |
 | 4 Rules | Git-Workflow, Security, Token-Optimierung, Code-Standards |
 
 ## Voraussetzungen
 
-- WSL2 / Ubuntu 22.04+
-- Node.js >= 20 (`node --version`)
-- Python 3.12+ (`python3 --version`)
-- Git (`git --version`)
-- jq (`jq --version`)
-- Optional: Codex CLI (`npm install -g @openai/codex`)
+`install.sh` installiert fehlende Dependencies automatisch (apt/brew).
+
+**Pflicht**: git, jq, node >= 20, python3 >= 3.12
+**Optional**: shfmt, ruff, prettier (Auto-Formatter), Codex CLI
 
 ## Verzeichnisstruktur
 
 ```
 claude-forge/
 ├── .claude-plugin/plugin.json      Plugin-Manifest
-├── install.sh                      Symlink-Installer
-├── uninstall.sh                    Saubere Deinstallation
-├── validate.sh                     Konfig-Validierung
+├── .github/workflows/test.yml      CI Pipeline
+├── install.sh                      Symlink-Installer (Auto-Install Dependencies)
+├── uninstall.sh                    Saubere Deinstallation (--dry-run)
+├── update.sh                       One-Command Updater (--check)
+├── validate.sh                     Konfig-Validierung + Secret-Scan
+├── VERSION                         Aktuelle Version
+├── CHANGELOG.md                    Aenderungshistorie
+├── CONTRIBUTING.md                 Entwickler-Richtlinien
 ├── user-config/                    Vorlagen fuer ~/.claude/
 │   ├── settings.json.example       Hauptkonfiguration (kopiert bei Install)
 │   ├── CLAUDE.md.example           Globale Instruktionen (kopiert bei Install)
@@ -64,13 +67,21 @@ claude-forge/
 ├── hooks/                          → ~/.claude/hooks/
 │   ├── bash-firewall.sh            Gefaehrliche Befehle blocken
 │   ├── protect-files.sh            Sensible Dateien schuetzen
-│   ├── auto-format.sh              Auto-Formatting (Polyglot)
+│   ├── auto-format.sh              Auto-Formatting (JS/TS/Python/Rust/Go/Shell)
+│   ├── secret-scan.sh              Secret-Erkennung nach Write/Edit
 │   └── session-logger.sh           Session-Ende Notification
 ├── agents/                         → ~/.claude/agents/
 ├── skills/                         → ~/.claude/skills/
 ├── commands/                       → ~/.claude/commands/
+│   ├── multi-*.md                  Multi-Model Commands (5)
+│   ├── forge-status.md             /forge-status
+│   └── forge-update.md             /forge-update
 ├── multi-model/                    → ~/.claude/multi-model/ (Codex CLI)
-├── tests/                          Test-Suite
+├── tests/                          Test-Suite (50 Tests)
+│   ├── test-hooks.sh               Hook Unit-Tests (44)
+│   ├── test-update.sh              Update-Tests (6)
+│   ├── test-install.sh             Install/Uninstall Tests
+│   └── test-codex.sh               Codex Wrapper Tests
 └── docs/                           Architektur-Dokumentation
 ```
 
@@ -92,6 +103,15 @@ Dann in Claude Code:
 /multi-frontend Erstelle ein Login-Formular
 ```
 
+## Forge-Verwaltung
+
+In Claude Code:
+
+```
+/forge-status    # Version, Symlinks, Hooks, verfuegbare Updates
+/forge-update    # Auf neueste Version aktualisieren
+```
+
 ## Anpassung
 
 Siehe [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) fuer Design-Entscheidungen.
@@ -100,7 +120,7 @@ Siehe [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) fuer Design-Entscheidungen.
 
 ### Installation
 
-**Dependencies fehlen**: `validate.sh` prueft automatisch ob `node`, `python3`, `git` und `jq` installiert sind. Fehlende Tools nachinstallieren und erneut `bash install.sh` ausfuehren.
+**Dependencies fehlen**: `install.sh` installiert fehlende Pflicht-Dependencies (git, jq, node, python3) und optionale Formatter (shfmt, ruff, prettier) automatisch via apt-get oder brew.
 
 **Symlink-Fehler**: Falls bestehende Dateien (keine Symlinks) in `~/.claude/` existieren, werden sie automatisch nach `~/.claude/.backup/<timestamp>/` gesichert. Bei Fehlern waehrend der Installation wird automatisch ein Rollback durchgefuehrt.
 
