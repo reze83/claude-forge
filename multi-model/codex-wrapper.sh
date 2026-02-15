@@ -15,8 +15,11 @@ set -euo pipefail
 
 SANDBOX="write"
 PROMPT=""
-TIMEOUT=180
+TIMEOUT=240
 WORKDIR="$(pwd)"
+
+readonly MIN_TIMEOUT=30
+readonly MAX_TIMEOUT=600
 
 # --- Pre-Checks ---
 if ! command -v jq >/dev/null 2>&1; then
@@ -49,6 +52,12 @@ if [[ -z "$PROMPT" ]]; then
   exit 0
 fi
 
+# --- Timeout validieren ---
+if [[ "$TIMEOUT" -lt "$MIN_TIMEOUT" || "$TIMEOUT" -gt "$MAX_TIMEOUT" ]]; then
+  echo "{\"status\":\"error\",\"output\":\"Timeout must be between ${MIN_TIMEOUT}s and ${MAX_TIMEOUT}s (got: ${TIMEOUT}s)\",\"model\":\"codex\"}"
+  exit 0
+fi
+
 # --- PATH erweitern (npm global bin) ---
 if command -v npm >/dev/null 2>&1; then
   NPM_PREFIX="$(npm config get prefix 2>/dev/null || true)"
@@ -75,30 +84,43 @@ case "$SANDBOX" in
     ;;
 esac
 
-# --- Temp-Datei fuer Output ---
-mkdir -p "${TMPDIR:-/tmp/claude}" 2>/dev/null || true
-OUTFILE="$(mktemp "${TMPDIR:-/tmp/claude}/claude-codex-out-XXXXXX.txt")"
-trap 'rm -f "$OUTFILE"' EXIT
+# --- Git-Repo Check ---
+SKIP_GIT_FLAG=""
+if ! git -C "$WORKDIR" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  SKIP_GIT_FLAG="--skip-git-repo-check"
+fi
+
+# --- Temp-Dateien fuer Output + Stderr ---
+TMPBASE="${TMPDIR:-/tmp/claude}"
+mkdir -p "$TMPBASE" 2>/dev/null || true
+OUTFILE="$(mktemp "${TMPBASE}/claude-codex-out-XXXXXX.txt")"
+ERRFILE="$(mktemp "${TMPBASE}/claude-codex-err-XXXXXX.txt")"
+trap 'rm -f "$OUTFILE" "$ERRFILE"' EXIT
 
 # --- Codex ausfuehren (non-interactive via exec) ---
 cd "$WORKDIR"
+# shellcheck disable=SC2086
 timeout "$TIMEOUT" codex exec \
   --sandbox "$SANDBOX_FLAG" \
+  $SKIP_GIT_FLAG \
   -o "$OUTFILE" \
-  "$PROMPT" >/dev/null 2>&1 || {
+  "$PROMPT" 2>"$ERRFILE" || {
   EXIT_CODE=$?
+  STDERR_MSG=""
+  [[ -s "$ERRFILE" ]] && STDERR_MSG="$(cat "$ERRFILE")"
+  OUTPUT_MSG=""
+  [[ -s "$OUTFILE" ]] && OUTPUT_MSG="$(cat "$OUTFILE")"
+
   if [[ $EXIT_CODE -eq 124 ]]; then
-    echo "{\"status\":\"error\",\"output\":\"Codex Timeout nach ${TIMEOUT}s\",\"model\":\"codex\"}"
+    echo "{\"status\":\"error\",\"output\":\"Codex timeout after ${TIMEOUT}s. Try a smaller task.\",\"model\":\"codex\"}"
   else
-    # Fehler-Output aus der Datei oder stderr lesen
-    ERROR_MSG=""
-    [[ -s "$OUTFILE" ]] && ERROR_MSG="$(cat "$OUTFILE")"
-    echo "{\"status\":\"error\",\"output\":$(echo "$ERROR_MSG" | jq -Rs .),\"model\":\"codex\"}"
+    COMBINED="${OUTPUT_MSG:+$OUTPUT_MSG\n}${STDERR_MSG}"
+    echo "{\"status\":\"error\",\"output\":$(printf '%s' "$COMBINED" | jq -Rs .),\"model\":\"codex\"}"
   fi
-  exit 0  # Immer exit 0 damit Claude den Fehler verarbeiten kann
+  exit 0
 }
 
 # --- Erfolg ---
 OUTPUT=""
 [[ -s "$OUTFILE" ]] && OUTPUT="$(cat "$OUTFILE")"
-echo "{\"status\":\"success\",\"output\":$(echo "$OUTPUT" | jq -Rs .),\"model\":\"codex\"}"
+echo "{\"status\":\"success\",\"output\":$(printf '%s' "$OUTPUT" | jq -Rs .),\"model\":\"codex\"}"

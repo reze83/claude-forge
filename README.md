@@ -5,9 +5,9 @@
 **Modulares Claude Code Config-Repository**
 Security Hooks | Auto-Formatting | Secret-Scan | Multi-Model Support
 
-[![Version](https://img.shields.io/badge/version-0.2.1-blue?style=flat-square)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.2.2-blue?style=flat-square)](CHANGELOG.md)
 [![CI](https://img.shields.io/github/actions/workflow/status/reze83/claude-forge/test.yml?branch=main&style=flat-square&label=CI)](https://github.com/reze83/claude-forge/actions)
-[![Tests](https://img.shields.io/badge/tests-68%20passed-brightgreen?style=flat-square)](#)
+[![Tests](https://img.shields.io/badge/tests-71%20passed-brightgreen?style=flat-square)](#)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 
 </div>
@@ -148,7 +148,11 @@ bash install.sh --with-codex
 
 **codex nicht gefunden** — `bash multi-model/codex-setup.sh` ausfuehren oder manuell `npm install -g @openai/codex`.
 
-**Codex Timeout** — Standard-Timeout ist 180s. Anpassbar per `--timeout` in `codex-wrapper.sh`.
+**Codex Timeout** — Standard-Timeout ist 240s (Range: 30-600s). Anpassbar per `--timeout` in `codex-wrapper.sh`. Bei Timeouts: Aufgabe in kleinere Teilschritte zerlegen.
+
+**"Not inside a trusted directory"** — Der Wrapper erkennt automatisch ob das Arbeitsverzeichnis ein Git-Repo ist und setzt `--skip-git-repo-check` falls nicht. Falls der Fehler trotzdem auftritt: Wrapper-Version pruefen (`/forge-status`).
+
+**Leere Fehlermeldung** — Stderr wird jetzt separat erfasst und im JSON-Output zurueckgegeben. Bei alteren Wrapper-Versionen wurde stderr verschluckt — Update via `/forge-update`.
 
 </details>
 
