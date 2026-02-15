@@ -155,13 +155,28 @@ Self-Management direkt aus Claude Code:
 - `/forge-status` — Version, Symlinks, Hooks, Updates
 - `/forge-update` — Triggert update.sh
 
-### codex-wrapper.sh: Error Handling
+### codex-wrapper.sh: Error Handling & Robustness
 
 Alle Fehler-Pfade geben strukturiertes JSON zurueck mit `exit 0`,
 damit Claude den Output parsen kann:
 ```json
 {"status":"error","output":"Codex CLI nicht installiert...","model":"codex"}
 ```
+
+#### Non-Git Directory Support
+The wrapper auto-detects if `--workdir` is inside a git repository.
+If not, `--skip-git-repo-check` is passed to `codex exec` automatically.
+This allows Codex to work on standalone script directories without `git init`.
+
+#### Stderr Capture
+Stderr is captured to a separate temp file instead of being silenced.
+On error, both stdout output and stderr are combined in the JSON response,
+making debugging significantly easier.
+
+#### Input Validation
+- Sandbox mode is validated against allowed values (`read|write|full`)
+- Timeout is validated to be within 30-600 seconds (default: 240s)
+- Missing `--prompt` and unknown arguments return structured error JSON
 
 ## Validierung
 
@@ -191,7 +206,8 @@ validate.sh prueft in 9 Sektionen:
 | test-hooks.sh | 44 | bash-firewall, protect-files, auto-format, secret-scan, session-logger |
 | test-update.sh | 6 | --help, VERSION, Nicht-Git-Repo, --check |
 | test-install.sh | 11 | Install/Uninstall Lifecycle |
-| test-codex.sh | 6 | Codex Wrapper |
+| test-codex.sh | 9 | Codex Wrapper (error handling, timeout validation, live) |
 | test-validate.sh | 1 | Validierungs-Durchlauf |
 
 CI (`test.yml`) fuehrt alle Tests auf ubuntu-22.04 aus (ausser test-codex.sh und test-validate.sh).
+Total: 71 tests (68 existing + 3 new codex wrapper validation tests).

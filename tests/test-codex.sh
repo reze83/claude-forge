@@ -56,6 +56,15 @@ else
   FAIL=$((FAIL + 1))
 fi
 
+# Test: Timeout-Validierung (zu klein)
+OUT=$(bash "$WRAPPER" --sandbox read --timeout 5 --prompt "test" 2>&1) || true
+assert_contains "Timeout zu klein → error" '"status":"error"' "$OUT"
+assert_contains "Timeout-Fehler nennt Bereich" 'between' "$OUT"
+
+# Test: Timeout-Validierung (zu gross)
+OUT=$(bash "$WRAPPER" --sandbox read --timeout 9999 --prompt "test" 2>&1) || true
+assert_contains "Timeout zu gross → error" '"status":"error"' "$OUT"
+
 # --- Live-Tests (nur wenn Codex installiert) ---
 echo ""
 echo "-- Live-Tests --"

@@ -7,14 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-02-16
+
 ### Fixed
+- codex-wrapper.sh: auto-detect non-git directories and pass `--skip-git-repo-check`
+- codex-wrapper.sh: capture stderr separately instead of silencing with `>/dev/null 2>&1`
+- codex-wrapper.sh: use `printf` instead of `echo` for safer output encoding
 - install.sh: ruff installation fails when pip3 binary is missing and sudo requires password
 - install.sh: prettier installed via npm but not found in PATH (npm global bin not in PATH)
 
 ### Added
+- codex-wrapper.sh: timeout validation (30-600s range, rejects out-of-bounds values)
+- codex-wrapper.sh: actionable timeout error message ("Try a smaller task")
 - install.sh: 3-stage ruff fallback (pip3 → python3 -m pip → venv-based install)
 - install.sh: prettier PATH verification after npm install with symlink fallback to ~/.local/bin
 - install.sh: post-install PATH check warns if ~/.local/bin or npm global bin are missing from PATH
+- test-codex.sh: 3 new tests for timeout validation (71 total)
+- multi-model/README.md: flags reference, auto-behavior docs, best practices section
+
+### Changed
+- codex-wrapper.sh: default timeout increased from 180s to 240s
 
 ## [0.2.1] - 2026-02-15
 
