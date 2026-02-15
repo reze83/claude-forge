@@ -5,9 +5,10 @@
     "BASH_DEFAULT_TIMEOUT_MS": "120000",
     "BASH_MAX_TIMEOUT_MS": "600000",
     "CLAUDE_CODE_TMPDIR": "/tmp/claude-code",
-    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "85"
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "85",
+    "ENABLE_TOOL_SEARCH": "auto:5"
   },
-  "includeCoAuthoredBy": true,
+  "attribution": true,
   "permissions": {
     "allow": [
       "Glob", "Grep", "Task",
