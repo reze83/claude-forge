@@ -1,6 +1,6 @@
 {
   "name": "claude-forge",
-  "version": "1.0.0",
+  "version": "0.2.1",
   "description": "Modular Claude Code configuration with security hooks, fullstack development tools, and multi-model support (Codex CLI)",
   "author": {
     "name": "reze83",
