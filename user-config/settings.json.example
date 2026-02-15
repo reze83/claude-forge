@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "respectGitignore": true,
+  "env": {
+    "BASH_DEFAULT_TIMEOUT_MS": "120000",
+    "BASH_MAX_TIMEOUT_MS": "600000",
+    "CLAUDE_CODE_TMPDIR": "/tmp/claude-code",
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "85",
+    "ENABLE_TOOL_SEARCH": "auto:5"
+  },
+  "attribution": {
+    "commits": true,
+    "pullRequests": true
+  },
+  "permissions": {
+    "allow": [
+      "Glob", "Grep", "Task",
+      "Bash(git status)", "Bash(git diff *)", "Bash(git log *)",
+      "Bash(git branch *)", "Bash(git checkout *)", "Bash(git add *)",
+      "Bash(git commit *)", "Bash(git stash *)", "Bash(git fetch *)",
+      "Bash(git pull *)",
+      "Bash(ls *)", "Bash(cat *)", "Bash(head *)", "Bash(tail *)",
+      "Bash(find *)", "Bash(wc *)", "Bash(sort *)", "Bash(uniq *)",
+      "Bash(diff *)", "Bash(mkdir *)", "Bash(cp *)", "Bash(mv *)",
+      "Bash(touch *)", "Bash(chmod *)", "Bash(echo *)", "Bash(pwd)",
+      "Bash(which *)", "Bash(node *)", "Bash(npm run *)",
+      "Bash(npm test *)", "Bash(npm install *)", "Bash(npx *)",
+      "Bash(python *)", "Bash(pip *)", "Bash(cargo *)",
+      "Bash(make *)", "Bash(jq *)", "Bash(sed *)", "Bash(awk *)",
+      "Bash(tee *)",
+      "WebSearch", "Read", "Write", "Edit"
+    ],
+    "deny": [
+      "Bash(curl *)", "Bash(wget *)"
+    ],
+    "ask": [
+      "Bash(git push *)", "Bash(git merge *)",
+      "Bash(git rebase *)", "Bash(git reset *)",
+      "Bash(rm *)", "Bash(sudo *)",
+      "Bash(docker *)", "Bash(docker-compose *)",
+      "WebFetch"
+    ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "network": {
+      "allowedDomains": [
+        "api.anthropic.com", "github.com", "api.github.com",
+        "registry.npmjs.org", "pypi.org"
+      ]
+    }
+  },
+  "showTurnDuration": true,
+  "PreToolUse": [
+    {
+      "matcher": "Bash",
+      "hooks": [{
+        "type": "command",
+        "command": "bash $HOME/.claude/hooks/bash-firewall.sh",
+        "timeout": 10
+      }]
+    },
+    {
+      "matcher": "Read|Write|Edit|Glob|Grep",
+      "hooks": [{
+        "type": "command",
+        "command": "bash $HOME/.claude/hooks/protect-files.sh",
+        "timeout": 10
+      }]
+    }
+  ],
+  "PostToolUse": [
+    {
+      "matcher": "Edit|Write",
+      "hooks": [{
+        "type": "command",
+        "command": "bash $HOME/.claude/hooks/auto-format.sh",
+        "timeout": 30
+      }]
+    },
+    {
+      "matcher": "Edit|Write",
+      "hooks": [{
+        "type": "command",
+        "command": "bash $HOME/.claude/hooks/secret-scan.sh",
+        "timeout": 10
+      }]
+    }
+  ],
+  "Stop": [
+    {
+      "matcher": "",
+      "hooks": [{
+        "type": "command",
+        "command": "bash $HOME/.claude/hooks/session-logger.sh",
+        "timeout": 15
+      }]
+    }
+  ]
+}

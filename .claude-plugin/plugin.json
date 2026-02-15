@@ -1,0 +1,9 @@
+{
+  "name": "claude-forge",
+  "version": "0.2.1",
+  "description": "Modular Claude Code configuration with security hooks, fullstack development tools, and multi-model support (Codex CLI)",
+  "author": {
+    "name": "reze83",
+    "email": "reze83@users.noreply.github.com"
+  }
+}
