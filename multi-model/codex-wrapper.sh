@@ -21,7 +21,7 @@ WORKDIR="$(pwd)"
 # --- Pre-Checks ---
 if ! command -v jq >/dev/null 2>&1; then
   echo '{"status":"error","output":"jq nicht installiert. apt install jq","model":"codex"}'
-  exit 1
+  exit 0
 fi
 
 # --- Argumente ---
@@ -37,7 +37,7 @@ done
 
 if [[ -z "$PROMPT" ]]; then
   echo '{"status":"error","output":"--prompt ist erforderlich","model":"codex"}'
-  exit 1
+  exit 0
 fi
 
 # --- PATH erweitern (npm global bin) ---
@@ -47,7 +47,7 @@ NPM_BIN="$(npm config get prefix 2>/dev/null)/bin" || true
 # --- Codex verfuegbar? ---
 if ! command -v codex >/dev/null 2>&1; then
   echo '{"status":"error","output":"Codex CLI nicht installiert. bash multi-model/codex-setup.sh ausfuehren.","model":"codex"}'
-  exit 1
+  exit 0
 fi
 
 # --- Sandbox-Modus mappen (Codex CLI v0.101+) ---
