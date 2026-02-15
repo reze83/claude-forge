@@ -185,7 +185,16 @@ fi
 echo ""
 if ! $DRY_RUN; then
   echo "-- Validierung --"
-  bash "$REPO_DIR/validate.sh"
+  bash "$REPO_DIR/validate.sh" || {
+    echo -e "${YELLOW}[WARN]${NC} Validierung hat Fehler gemeldet (Symlinks sind trotzdem installiert)."
+  }
+fi
+
+# --- Hinweis: Codex CLI ---
+if ! command -v codex >/dev/null 2>&1; then
+  echo ""
+  echo -e "${YELLOW}[INFO]${NC} Codex CLI ist nicht installiert. /multi-* Commands benoetigen Codex."
+  echo -e "       Optional installieren: ${GREEN}bash install.sh --with-codex${NC}"
 fi
 
 echo ""
