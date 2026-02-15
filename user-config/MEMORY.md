@@ -6,7 +6,7 @@
 
 ## Praeferenzen
 - Commit-Style: Conventional Commits (feat/fix/chore/docs)
-- Branch-Strategie: feature/<name>, fix/<name> → develop → main
+- Branch-Strategie: feature/<name>, fix/<name> → main (GitHub Flow)
 - Projektverzeichnis: ~/develop (alle Projekte werden hier angelegt)
 
 ## Gelernte Muster

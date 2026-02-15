@@ -1,7 +1,7 @@
 # claude-forge
 
 [![Version](https://img.shields.io/badge/version-0.2.1-blue?style=flat-square)](CHANGELOG.md)
-[![CI](https://img.shields.io/github/actions/workflow/status/reze83/claude-forge/test.yml?branch=develop&style=flat-square&label=CI)](https://github.com/reze83/claude-forge/actions)
+[![CI](https://img.shields.io/github/actions/workflow/status/reze83/claude-forge/test.yml?branch=main&style=flat-square&label=CI)](https://github.com/reze83/claude-forge/actions)
 [![Tests](https://img.shields.io/badge/tests-50%20passed-brightgreen?style=flat-square)](#)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 [![Bash](https://img.shields.io/badge/bash-%23121011.svg?style=flat-square&logo=gnu-bash&logoColor=white)](#)

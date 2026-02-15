@@ -6,8 +6,8 @@
 2. Make changes and add tests
 3. Run the test suite (see below)
 4. Commit with [Conventional Commits](https://www.conventionalcommits.org/): `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`
-5. Push to your branch and open a PR against `develop`
-6. Never push directly to `main` or `master`
+5. Push to your branch and open a PR against `main`
+6. Never push directly to `main`
 
 ## Coding Standards
 

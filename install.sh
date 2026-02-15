@@ -3,7 +3,7 @@ set -euo pipefail
 
 # ============================================================
 # claude-forge installer
-# Erstellt Symlinks von ~/develop/claude-forge/ → ~/.claude/
+# Erstellt Symlinks von claude-forge/ → ~/.claude/
 # Idempotent: Kann beliebig oft ausgefuehrt werden.
 # ============================================================
 

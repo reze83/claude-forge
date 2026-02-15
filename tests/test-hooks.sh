@@ -58,7 +58,7 @@ assert_exit "Blockt pip --break"        2 "$FW" '{"tool_input":{"command":"pip i
 
 # Erlaubte Befehle (Exit 0)
 assert_exit "Erlaubt ls -la"            0 "$FW" '{"tool_input":{"command":"ls -la"}}'
-assert_exit "Erlaubt git push develop"  0 "$FW" '{"tool_input":{"command":"git push origin develop"}}'
+assert_exit "Erlaubt git push feature"  0 "$FW" '{"tool_input":{"command":"git push origin feature/my-feature"}}'
 assert_exit "Erlaubt git commit"        0 "$FW" '{"tool_input":{"command":"git commit -m \"feat: test\""}}'
 assert_exit "Erlaubt npm test"          0 "$FW" '{"tool_input":{"command":"npm test"}}'
 assert_exit "Erlaubt chmod 755"         0 "$FW" '{"tool_input":{"command":"chmod 755 script.sh"}}'

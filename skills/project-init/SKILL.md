@@ -29,7 +29,6 @@ allowed-tools:
 3. **Git initialisieren**:
    ```bash
    git init
-   git checkout -b develop
    ```
 
 4. **Sprach-spezifisches Template anwenden**:
