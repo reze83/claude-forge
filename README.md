@@ -5,8 +5,11 @@ Modulares Claude Code Config-Repository mit Multi-Model Support.
 ## Quickstart (Symlink-Modus — empfohlen)
 
 ```bash
-git clone https://github.com/reze83/claude-forge.git ~/develop/claude-forge
-cd ~/develop/claude-forge
+# Clone (Pfad ist frei waehlbar)
+git clone https://github.com/reze83/claude-forge.git ~/.claude/claude-forge
+# oder: git clone ... "${XDG_DATA_HOME:-$HOME/.local/share}/claude-forge"
+
+cd ~/.claude/claude-forge
 bash install.sh            # Hooks, Agents, Skills, Commands
 bash install.sh --with-codex  # Optional: + Codex CLI fuer /multi-* Commands
 ```
@@ -14,7 +17,7 @@ bash install.sh --with-codex  # Optional: + Codex CLI fuer /multi-* Commands
 ## Alternative: Plugin-Modus
 
 ```bash
-claude --plugin-dir ~/develop/claude-forge
+claude --plugin-dir <pfad-zum-repo>
 ```
 
 > **NICHT beides gleichzeitig nutzen** — Hooks wuerden doppelt geladen!
