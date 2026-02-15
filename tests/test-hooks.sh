@@ -103,6 +103,79 @@ assert_exit "Exit 0 fuer leeren Pfad"     0 "$AF" '{"tool_input":{}}'
 
 echo ""
 
+# --- secret-scan.sh ---
+echo "-- secret-scan.sh --"
+SS="$HOOKS_DIR/secret-scan.sh"
+
+# Darf nie blockieren (immer Exit 0)
+assert_exit "Exit 0 fuer fehlende Datei"  0 "$SS" '{"tool_input":{"file_path":"/nonexistent/file.ts"}}'
+assert_exit "Exit 0 fuer leeren Pfad"     0 "$SS" '{"tool_input":{}}'
+
+# Secret detection (braucht echte temp-Dateien)
+TMPDIR_TEST="${TMPDIR:-/tmp/claude}/test-hooks-$$"
+mkdir -p "$TMPDIR_TEST"
+
+# Clean file — no warning
+echo "const x = 42;" > "$TMPDIR_TEST/clean.js"
+CLEAN_OUT=$(echo "{\"tool_input\":{\"file_path\":\"$TMPDIR_TEST/clean.js\"}}" | bash "$SS" 2>/dev/null)
+if [[ -z "$CLEAN_OUT" ]]; then
+  echo -e "  ${GREEN}[PASS]${NC} Kein Alarm bei sauberer Datei"
+  PASS=$((PASS + 1))
+else
+  echo -e "  ${RED}[FAIL]${NC} Falscher Alarm bei sauberer Datei: $CLEAN_OUT"
+  FAIL=$((FAIL + 1))
+fi
+
+# File with fake AWS key — should warn
+echo "AWS_KEY=AKIAIOSFODNN7EXAMPLE" > "$TMPDIR_TEST/secrets.txt"
+SECRET_OUT=$(echo "{\"tool_input\":{\"file_path\":\"$TMPDIR_TEST/secrets.txt\"}}" | bash "$SS" 2>/dev/null)
+if [[ "$SECRET_OUT" == *"AWS Access Key"* ]]; then
+  echo -e "  ${GREEN}[PASS]${NC} Erkennt AWS Key"
+  PASS=$((PASS + 1))
+else
+  echo -e "  ${RED}[FAIL]${NC} AWS Key nicht erkannt: $SECRET_OUT"
+  FAIL=$((FAIL + 1))
+fi
+
+# File with fake private key — should warn
+echo "-----BEGIN PRIVATE KEY-----" > "$TMPDIR_TEST/key.pem"
+PRIVKEY_OUT=$(echo "{\"tool_input\":{\"file_path\":\"$TMPDIR_TEST/key.pem\"}}" | bash "$SS" 2>/dev/null)
+if [[ "$PRIVKEY_OUT" == *"Private Key"* ]]; then
+  echo -e "  ${GREEN}[PASS]${NC} Erkennt Private Key"
+  PASS=$((PASS + 1))
+else
+  echo -e "  ${RED}[FAIL]${NC} Private Key nicht erkannt: $PRIVKEY_OUT"
+  FAIL=$((FAIL + 1))
+fi
+
+rm -rf "$TMPDIR_TEST"
+
+echo ""
+
+# --- session-logger.sh ---
+echo "-- session-logger.sh --"
+SL="$HOOKS_DIR/session-logger.sh"
+
+# Muss immer exit 0 liefern
+assert_exit "Exit 0 (darf nie blockieren)" 0 "$SL" '{}'
+
+# Log-Datei wird geschrieben
+TEST_LOG="$HOME/.claude/session-log.txt"
+BEFORE_COUNT=0
+[[ -f "$TEST_LOG" ]] && BEFORE_COUNT=$(wc -l < "$TEST_LOG")
+echo '{}' | bash "$SL" >/dev/null 2>/dev/null || true
+AFTER_COUNT=0
+[[ -f "$TEST_LOG" ]] && AFTER_COUNT=$(wc -l < "$TEST_LOG")
+if [[ "$AFTER_COUNT" -gt "$BEFORE_COUNT" ]]; then
+  echo -e "  ${GREEN}[PASS]${NC} Schreibt in session-log.txt"
+  PASS=$((PASS + 1))
+else
+  echo -e "  ${RED}[FAIL]${NC} session-log.txt nicht geschrieben"
+  FAIL=$((FAIL + 1))
+fi
+
+echo ""
+
 # --- Ergebnis ---
 echo "================================="
 echo -e "Tests: $((PASS + FAIL)) | ${GREEN}$PASS bestanden${NC} | ${RED}$FAIL fehlgeschlagen${NC}"

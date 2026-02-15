@@ -32,12 +32,15 @@ jobs:
 
       - name: Validate shell syntax
         run: |
-          for f in hooks/*.sh multi-model/*.sh install.sh uninstall.sh validate.sh; do
+          for f in hooks/*.sh multi-model/*.sh install.sh uninstall.sh validate.sh update.sh; do
             [ -f "$f" ] && bash -n "$f" && echo "OK: $f"
           done
 
       - name: Run hook tests
         run: bash tests/test-hooks.sh
+
+      - name: Run update tests
+        run: bash tests/test-update.sh
 
       - name: Run install tests
         run: |
