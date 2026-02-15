@@ -304,6 +304,7 @@ fi
 echo ""
 if ! $DRY_RUN; then
   echo "-- Validierung --"
+  trap - ERR
   bash "$REPO_DIR/validate.sh" || {
     echo -e "${YELLOW}[WARN]${NC} Validierung hat Fehler gemeldet (Symlinks sind trotzdem installiert)."
   }

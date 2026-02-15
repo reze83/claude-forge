@@ -69,7 +69,10 @@ case "$SANDBOX" in
   read)  SANDBOX_FLAG="read-only" ;;
   write) SANDBOX_FLAG="workspace-write" ;;
   full)  SANDBOX_FLAG="danger-full-access" ;;
-  *)     SANDBOX_FLAG="workspace-write" ;;
+  *)
+    echo "{\"status\":\"error\",\"output\":\"Invalid sandbox mode: $SANDBOX (use read|write|full)\",\"model\":\"codex\"}"
+    exit 0
+    ;;
 esac
 
 # --- Temp-Datei fuer Output ---

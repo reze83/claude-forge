@@ -44,6 +44,9 @@ if [[ "$CURRENT_BRANCH" == "HEAD" ]]; then
 fi
 
 LOCAL_VERSION="$(cat "$REPO_DIR/VERSION" 2>/dev/null || echo "unbekannt")"
+if [[ "$LOCAL_VERSION" == "unbekannt" ]]; then
+  echo -e "${YELLOW}[WARN]${NC} VERSION-Datei fehlt"
+fi
 
 echo "=== claude-forge update ==="
 echo -e "Version: ${CYAN}v${LOCAL_VERSION}${NC} | Branch: ${CYAN}${CURRENT_BRANCH}${NC} (${CURRENT_COMMIT})"

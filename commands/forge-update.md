@@ -12,7 +12,7 @@ Aktualisiere claude-forge auf die neueste Version.
 
 Finde den tatsaechlichen Pfad von claude-forge indem du dem hooks-Symlink folgst:
 ```bash
-FORGE_DIR="$(readlink -f "$HOME/.claude/hooks" 2>/dev/null | sed 's|/hooks$||')" && bash "$FORGE_DIR/update.sh"
+FORGE_DIR="$( (readlink -f "$HOME/.claude/hooks" 2>/dev/null || readlink "$HOME/.claude/hooks") | sed 's|/hooks$||')" && bash "$FORGE_DIR/update.sh"
 ```
 
 ## Schritt 2: Ergebnis
