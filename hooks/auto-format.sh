@@ -36,6 +36,12 @@ case "$FILE_PATH" in
       gofmt -w "$FILE_PATH" 2>/dev/null || true
     fi
     ;;
+  # Shell Scripts (shfmt)
+  *.sh)
+    if command -v shfmt >/dev/null 2>&1; then
+      shfmt -w -i 2 -ci "$FILE_PATH" 2>/dev/null || true
+    fi
+    ;;
 esac
 
 exit 0

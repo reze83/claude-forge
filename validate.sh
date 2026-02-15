@@ -106,12 +106,34 @@ check "git vorhanden"    "git --version >/dev/null 2>&1"
 check "jq vorhanden"     "jq --version >/dev/null 2>&1"
 warn  "codex CLI"        "command -v codex >/dev/null 2>&1"
 warn  "ruff vorhanden"   "command -v ruff >/dev/null 2>&1"
+warn  "shfmt vorhanden"  "command -v shfmt >/dev/null 2>&1"
 
 # --- Secrets-Check ---
 echo ""
 echo "-- Secrets-Scan --"
-check "Kein API-Key in Repo"  "! grep -rIl 'sk-[a-zA-Z0-9]\{20,\}' '$REPO_DIR/' --include='*.json' --include='*.md' --include='*.sh' 2>/dev/null"
-check "Kein Token in Repo"    "! grep -rIl 'ghp_[a-zA-Z0-9]\{20,\}' '$REPO_DIR/' --include='*.json' --include='*.md' --include='*.sh' 2>/dev/null"
+check "Kein Anthropic Key"    "! grep -rIl 'sk-ant-[a-zA-Z0-9_-]\{20,\}' '$REPO_DIR/' --include='*.json' --include='*.md' --include='*.sh' 2>/dev/null"
+check "Kein OpenAI Key"       "! grep -rIl 'sk-[a-zA-Z0-9]\{48,\}' '$REPO_DIR/' --include='*.json' --include='*.md' --include='*.sh' 2>/dev/null"
+check "Kein GitHub Token"     "! grep -rIl 'ghp_[a-zA-Z0-9]\{36\}' '$REPO_DIR/' --include='*.json' --include='*.md' --include='*.sh' 2>/dev/null"
+check "Kein AWS Access Key"   "! grep -rIl 'AKIA[0-9A-Z]\{16\}' '$REPO_DIR/' --include='*.json' --include='*.md' --include='*.sh' 2>/dev/null"
+check "Kein JWT Token"        "! grep -rIl 'eyJ[a-zA-Z0-9_-]*\.eyJ[a-zA-Z0-9_-]*\.' '$REPO_DIR/' --include='*.json' --include='*.md' 2>/dev/null"
+
+# --- Hook-Konsistenz ---
+echo ""
+echo "-- Hook-Konsistenz --"
+for event in PreToolUse PostToolUse Stop; do
+  H_COUNT=$(jq -r ".hooks.${event} | length" "$REPO_DIR/hooks/hooks.json" 2>/dev/null || echo 0)
+  for i in $(seq 0 $((H_COUNT - 1))); do
+    H_TO=$(jq -r ".hooks.${event}[$i].hooks[0].timeout" "$REPO_DIR/hooks/hooks.json" 2>/dev/null)
+    S_TO=$(jq -r ".${event}[$i].hooks[0].timeout" "$REPO_DIR/user-config/settings.json.example" 2>/dev/null)
+    H_MATCHER=$(jq -r ".hooks.${event}[$i].matcher // \"*\"" "$REPO_DIR/hooks/hooks.json" 2>/dev/null)
+    if [[ "$H_TO" != "$S_TO" ]]; then
+      echo -e "  ${RED}[FAIL]${NC} ${event}[$i] ($H_MATCHER) Timeout: hooks.json=${H_TO} vs settings=${S_TO}"
+      ERRORS=$((ERRORS + 1))
+    else
+      echo -e "  ${GREEN}[PASS]${NC} ${event}[$i] ($H_MATCHER) Timeout konsistent (${H_TO}s)"
+    fi
+  done
+done
 
 # --- Ergebnis ---
 echo ""

@@ -59,7 +59,8 @@ case "$SANDBOX" in
 esac
 
 # --- Temp-Datei fuer Output ---
-OUTFILE="$(mktemp /tmp/claude-codex-out-XXXXXX.txt)"
+mkdir -p "${TMPDIR:-/tmp/claude}" 2>/dev/null || true
+OUTFILE="$(mktemp "${TMPDIR:-/tmp/claude}/claude-codex-out-XXXXXX.txt")"
 trap 'rm -f "$OUTFILE"' EXIT
 
 # --- Codex ausfuehren (non-interactive via exec) ---

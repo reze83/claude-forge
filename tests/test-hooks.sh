@@ -79,6 +79,11 @@ assert_exit "Blockt *.pem"              2 "$PF" '{"tool_input":{"file_path":"/ho
 assert_exit "Blockt *.key"              2 "$PF" '{"tool_input":{"file_path":"/home/c/private.key"}}'
 assert_exit "Blockt .git/"              2 "$PF" '{"tool_input":{"file_path":"/home/c/repo/.git/config"}}'
 
+# package-lock.json (Write/Edit blockiert, Read erlaubt)
+assert_exit "Blockt package-lock.json Write" 2 "$PF" '{"tool_name":"Write","tool_input":{"file_path":"/home/c/project/package-lock.json"}}'
+assert_exit "Blockt package-lock.json Edit"  2 "$PF" '{"tool_name":"Edit","tool_input":{"file_path":"/home/c/project/package-lock.json"}}'
+assert_exit "Erlaubt package-lock.json Read" 0 "$PF" '{"tool_name":"Read","tool_input":{"file_path":"/home/c/project/package-lock.json"}}'
+
 # Erlaubte Dateien (Exit 0)
 assert_exit "Erlaubt src/index.ts"      0 "$PF" '{"tool_input":{"file_path":"/home/c/src/index.ts"}}'
 assert_exit "Erlaubt README.md"         0 "$PF" '{"tool_input":{"file_path":"/home/c/README.md"}}'

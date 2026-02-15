@@ -8,7 +8,10 @@
     "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "85",
     "ENABLE_TOOL_SEARCH": "auto:5"
   },
-  "attribution": true,
+  "attribution": {
+    "commits": true,
+    "pullRequests": true
+  },
   "permissions": {
     "allow": [
       "Glob", "Grep", "Task",
