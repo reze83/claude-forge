@@ -122,11 +122,36 @@ install_node() {
   return 1
 }
 
+auto_install_optional() {
+  local cmd="$1"
+  local pkg="${2:-$1}"
+  if command -v "$cmd" >/dev/null 2>&1; then
+    log_ok "$cmd bereits vorhanden"
+    return 0
+  fi
+  if $DRY_RUN; then
+    log_dry "Wuerde installieren: $pkg"
+    return 0
+  fi
+  echo -e "  ${YELLOW}[AUTO]${NC} Installiere $pkg..."
+  if command -v apt-get >/dev/null 2>&1; then
+    sudo apt-get install -y -qq "$pkg" 2>/dev/null && return 0
+  elif command -v brew >/dev/null 2>&1; then
+    brew install "$pkg" 2>/dev/null && return 0
+  elif command -v pip3 >/dev/null 2>&1 && [[ "$pkg" == "ruff" ]]; then
+    pip3 install --user "$pkg" 2>/dev/null && return 0
+  elif command -v npm >/dev/null 2>&1 && [[ "$pkg" == "prettier" ]]; then
+    npm install -g "$pkg" 2>/dev/null && return 0
+  fi
+  echo -e "  ${YELLOW}[WARN]${NC} $pkg konnte nicht installiert werden (optional)"
+  return 1
+}
+
 # --- Pre-Checks ---
 echo "=== claude-forge installer ==="
 echo ""
 
-echo "-- Pre-Checks --"
+echo "-- Pre-Checks (Pflicht) --"
 if ! command -v git >/dev/null 2>&1; then
   auto_install git || log_err "git nicht gefunden und konnte nicht installiert werden."
 fi
@@ -136,18 +161,29 @@ fi
 if ! command -v node >/dev/null 2>&1; then
   install_node || log_err "node nicht gefunden und konnte nicht installiert werden."
 fi
+if ! command -v python3 >/dev/null 2>&1; then
+  auto_install python3 || log_err "python3 nicht gefunden und konnte nicht installiert werden."
+fi
 [[ -d "$CLAUDE_DIR" ]] || { mkdir -p "$CLAUDE_DIR" && log_ok "$CLAUDE_DIR erstellt"; }
 
 # Final verification
 command -v git >/dev/null 2>&1 || { log_err "git nicht verfuegbar."; }
 command -v jq >/dev/null 2>&1 || { log_err "jq nicht verfuegbar."; }
 command -v node >/dev/null 2>&1 || { log_err "node nicht verfuegbar."; }
+command -v python3 >/dev/null 2>&1 || { log_err "python3 nicht verfuegbar."; }
 
 if [[ $ERRORS -gt 0 ]]; then
   echo -e "\n${RED}Pre-Checks fehlgeschlagen. $ERRORS Fehler.${NC}"
   exit 1
 fi
-log_ok "Alle Pre-Checks bestanden."
+log_ok "Alle Pflicht-Dependencies vorhanden."
+
+# --- Optionale Formatter (fuer auto-format.sh) ---
+echo ""
+echo "-- Optionale Formatter --"
+auto_install_optional shfmt
+auto_install_optional ruff
+auto_install_optional prettier
 
 if pgrep -f "claude.*--plugin-dir.*claude-forge" >/dev/null 2>&1; then
   log_err "claude-forge laeuft als Plugin. Beende Claude und starte ohne --plugin-dir."
