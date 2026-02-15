@@ -22,6 +22,13 @@ claude --plugin-dir <pfad-zum-repo>
 
 > **NICHT beides gleichzeitig nutzen** — Hooks wuerden doppelt geladen!
 
+## Update
+
+```bash
+bash update.sh          # Holt neueste Version und aktualisiert Installation
+bash update.sh --check  # Nur pruefen ob Updates verfuegbar sind
+```
+
 ## Was ist enthalten?
 
 | Komponente | Beschreibung |
