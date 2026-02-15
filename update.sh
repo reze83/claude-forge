@@ -38,6 +38,11 @@ fi
 CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 CURRENT_COMMIT="$(git rev-parse --short HEAD)"
 
+if [[ "$CURRENT_BRANCH" == "HEAD" ]]; then
+  echo -e "${RED}[ERR]${NC} Detached HEAD. Bitte einen Branch auschecken: git checkout <branch>"
+  exit 1
+fi
+
 LOCAL_VERSION="$(cat "$REPO_DIR/VERSION" 2>/dev/null || echo "unbekannt")"
 
 echo "=== claude-forge update ==="
