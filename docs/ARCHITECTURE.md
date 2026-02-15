@@ -20,6 +20,7 @@ Loesung: Das Repo ist beides — ein Plugin UND ein Symlink-basiertes Config-Rep
 | commands/ | ~/.claude/commands/ | Symlink | Slash-Commands |
 | agents/*.md | ~/.claude/agents/*.md | Symlink (einzeln) | Subagenten |
 | skills/*/ | ~/.claude/skills/*/ | Symlink (einzeln) | Skills |
+| multi-model/ | ~/.claude/multi-model/ | Symlink | Codex CLI Wrapper |
 
 ### Kopie vs. Symlink
 

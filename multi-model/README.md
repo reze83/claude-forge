@@ -22,9 +22,9 @@ Claude Code (Orchestrator)
 | /multi-backend | read | Backend/Algo-Task |
 | /multi-frontend | write | Frontend (Claude-led) |
 
-## Sandbox-Modi
+## Sandbox-Modi (Codex CLI v0.101+)
 | Modus | Codex-Flag | Beschreibung |
 |-------|-----------|-------------|
-| read | --approval-mode suggest | Nur lesen |
-| write | --approval-mode auto-edit | Schreiben im Projektordner |
-| full | --approval-mode full-auto | Voller Zugriff |
+| read | --sandbox read-only | Nur lesen |
+| write | --sandbox workspace-write | Schreiben im Projektordner |
+| full | --sandbox danger-full-access | Voller Zugriff |
