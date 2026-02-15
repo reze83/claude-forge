@@ -43,10 +43,26 @@ echo ""
 echo "-- Dateien & Symlinks --"
 check "settings.json vorhanden"      "[[ -f '$CLAUDE_DIR/settings.json' ]]"
 check "CLAUDE.md vorhanden"          "[[ -f '$CLAUDE_DIR/CLAUDE.md' ]]"
-check "MEMORY.md ist Symlink"        "[[ -L '$CLAUDE_DIR/MEMORY.md' ]]"
-check "rules/ ist Symlink"           "[[ -L '$CLAUDE_DIR/rules' ]]"
-check "hooks/ ist Symlink"           "[[ -L '$CLAUDE_DIR/hooks' ]]"
-check "commands/ ist Symlink"        "[[ -L '$CLAUDE_DIR/commands' ]]"
+
+check_symlink() {
+  local name="$1"
+  local target="$CLAUDE_DIR/$name"
+  if [[ ! -L "$target" ]]; then
+    echo -e "  ${RED}[FAIL]${NC} $name ist kein Symlink"
+    ERRORS=$((ERRORS + 1))
+  elif [[ ! -e "$target" ]]; then
+    echo -e "  ${RED}[FAIL]${NC} $name → $(readlink "$target") (Ziel existiert nicht)"
+    ERRORS=$((ERRORS + 1))
+  else
+    echo -e "  ${GREEN}[PASS]${NC} $name → $(readlink "$target")"
+  fi
+}
+
+check_symlink "MEMORY.md"
+check_symlink "rules"
+check_symlink "hooks"
+check_symlink "commands"
+check_symlink "multi-model"
 
 # --- JSON-Validitaet ---
 echo ""

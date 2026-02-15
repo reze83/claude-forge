@@ -16,7 +16,7 @@ block() {
   exit 2
 }
 
-PATTERNS=(".env" ".env." "secrets/" ".ssh/" ".aws/" ".gnupg/" ".git/")
+PATTERNS=(".env" ".env." "secrets/" ".ssh/" ".aws/" ".gnupg/" ".git/" ".npmrc" ".netrc")
 EXTENSIONS=(".pem" ".key" ".p12" ".pfx" ".keystore")
 
 # package-lock.json: Only block Write/Edit, allow Read

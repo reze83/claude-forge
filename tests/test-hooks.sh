@@ -78,6 +78,8 @@ assert_exit "Blockt .aws/"              2 "$PF" '{"tool_input":{"file_path":"/ho
 assert_exit "Blockt *.pem"              2 "$PF" '{"tool_input":{"file_path":"/home/c/cert.pem"}}'
 assert_exit "Blockt *.key"              2 "$PF" '{"tool_input":{"file_path":"/home/c/private.key"}}'
 assert_exit "Blockt .git/"              2 "$PF" '{"tool_input":{"file_path":"/home/c/repo/.git/config"}}'
+assert_exit "Blockt .npmrc"             2 "$PF" '{"tool_input":{"file_path":"/home/c/.npmrc"}}'
+assert_exit "Blockt .netrc"             2 "$PF" '{"tool_input":{"file_path":"/home/c/.netrc"}}'
 
 # package-lock.json (Write/Edit blockiert, Read erlaubt)
 assert_exit "Blockt package-lock.json Write" 2 "$PF" '{"tool_name":"Write","tool_input":{"file_path":"/home/c/project/package-lock.json"}}'
