@@ -35,6 +35,7 @@ remove_if_symlink_to_repo "$CLAUDE_DIR/MEMORY.md"
 remove_if_symlink_to_repo "$CLAUDE_DIR/rules"
 remove_if_symlink_to_repo "$CLAUDE_DIR/hooks"
 remove_if_symlink_to_repo "$CLAUDE_DIR/commands"
+remove_if_symlink_to_repo "$CLAUDE_DIR/multi-model"
 
 # Agents (einzeln)
 for agent in "$REPO_DIR/agents/"*.md; do

@@ -14,9 +14,10 @@ Backend-Aufgabe an Codex delegieren: $ARGUMENTS
 ## Schritt 1: Kontext
 Lies die Projekt-Konfiguration (package.json, Cargo.toml, pyproject.toml) und uebergib sie als Kontext.
 
-## Schritt 2: Codex aufrufen
+## Schritt 2: Codex aufrufen (PFLICHT)
+Diesen Schritt IMMER ausfuehren — die Aufgabe geht an Codex, nicht an Claude:
 ```bash
-bash ~/develop/claude-forge/multi-model/codex-wrapper.sh \
+bash $HOME/.claude/multi-model/codex-wrapper.sh \
   --sandbox read \
   --prompt "Projekt-Kontext: <kontext>. Aufgabe: $ARGUMENTS"
 ```

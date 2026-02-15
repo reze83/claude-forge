@@ -137,10 +137,15 @@ echo ""
 echo "-- Phase 5: Commands --"
 create_symlink "$REPO_DIR/commands" "$CLAUDE_DIR/commands"
 
-# --- Phase 6: Multi-Model (optional) ---
+# --- Phase 6: Multi-Model (Wrapper verlinken) ---
+echo ""
+echo "-- Phase 6: Multi-Model --"
+create_symlink "$REPO_DIR/multi-model" "$CLAUDE_DIR/multi-model"
+
+# --- Phase 7: Codex CLI (optional) ---
 if $WITH_CODEX; then
   echo ""
-  echo "-- Phase 6: Codex CLI --"
+  echo "-- Phase 7: Codex CLI --"
   if $DRY_RUN; then
     log_dry "Wuerde codex-setup.sh ausfuehren"
   else

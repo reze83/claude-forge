@@ -1,5 +1,5 @@
 ---
-description: "Frontend-Task von Claude bearbeitet, optional mit Codex-Review"
+description: "Frontend-Task von Claude bearbeitet, mit Codex-Review"
 argument-hint: <frontend-aufgabe>
 model: opus
 allowed-tools:
@@ -17,10 +17,10 @@ Frontend-Aufgabe: $ARGUMENTS
 ## Schritt 1: Claude implementiert
 Implementiere die Frontend-Aufgabe direkt. Du bist hier der Lead.
 
-## Schritt 2: Codex-Review (optional)
-Frage den User ob ein Codex-Review gewuenscht ist. Falls ja:
+## Schritt 2: Codex-Review (PFLICHT)
+Lasse Codex den Code reviewen. Diesen Schritt IMMER ausfuehren:
 ```bash
-bash ~/develop/claude-forge/multi-model/codex-wrapper.sh \
+bash $HOME/.claude/multi-model/codex-wrapper.sh \
   --sandbox read \
   --prompt "Reviewe diesen Frontend-Code auf Performance und Best Practices: <code>"
 ```

@@ -18,10 +18,10 @@ Lies relevante Dateien fuer den Projektkontext.
 ## Schritt 2: Claude-Plan
 Erstelle deinen eigenen Implementierungsplan direkt hier.
 
-## Schritt 3: Codex-Plan
-Hole Codex' Perspektive:
+## Schritt 3: Codex-Plan (PFLICHT)
+Hole Codex' Perspektive. Diesen Schritt IMMER ausfuehren:
 ```bash
-bash ~/develop/claude-forge/multi-model/codex-wrapper.sh \
+bash $HOME/.claude/multi-model/codex-wrapper.sh \
   --sandbox read \
   --prompt "Erstelle einen Implementierungsplan fuer: $ARGUMENTS. Beschreibe Architektur, Dateien, Abhaengigkeiten."
 ```

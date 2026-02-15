@@ -10,19 +10,20 @@ allowed-tools:
 
 Delegiere eine Aufgabe an Codex CLI.
 
-## Argumente parsen
+## Schritt 1: Argumente parsen
 Aus $ARGUMENTS:
 - Erstes Wort = Sandbox-Modus (read, write, full). Default: write.
 - Rest = Die Aufgabe fuer Codex.
 
-## Ausfuehren
+## Schritt 2: Codex ausfuehren (PFLICHT)
+Diesen Schritt IMMER ausfuehren — das ist der Kern dieses Commands:
 ```bash
-bash ~/develop/claude-forge/multi-model/codex-wrapper.sh \
+bash $HOME/.claude/multi-model/codex-wrapper.sh \
   --sandbox <modus> \
   --prompt "<aufgabe>"
 ```
 
-## Ergebnis
+## Schritt 3: Ergebnis
 Zeige Codex' Output dem User und biete an:
 1. Output direkt uebernehmen
 2. Output von Claude refactoren lassen
