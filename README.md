@@ -1,6 +1,13 @@
 # claude-forge
 
-Modulares Claude Code Config-Repository mit Multi-Model Support.
+[![Version](https://img.shields.io/badge/version-0.2.1-blue?style=flat-square)](CHANGELOG.md)
+[![CI](https://img.shields.io/github/actions/workflow/status/reze83/claude-forge/test.yml?branch=develop&style=flat-square&label=CI)](https://github.com/reze83/claude-forge/actions)
+[![Tests](https://img.shields.io/badge/tests-50%20passed-brightgreen?style=flat-square)](#)
+[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
+[![Bash](https://img.shields.io/badge/bash-%23121011.svg?style=flat-square&logo=gnu-bash&logoColor=white)](#)
+[![Node.js](https://img.shields.io/badge/node.js-%3E%3D20-6DA55F?style=flat-square&logo=node.js&logoColor=white)](#)
+
+> Modulares Claude Code Config-Repository mit Security Hooks, Auto-Formatting, Secret-Scan und Multi-Model Support (Codex CLI).
 
 ## Quickstart (Symlink-Modus — empfohlen)
 
@@ -29,15 +36,32 @@ bash update.sh          # Holt neueste Version und aktualisiert Installation
 bash update.sh --check  # Nur pruefen ob Updates verfuegbar sind
 ```
 
-## Was ist enthalten?
+## Features
 
-| Komponente | Beschreibung |
-|---|---|
-| 5 Hooks | Bash-Firewall, File-Protection, Auto-Format, Secret-Scan, Session-Logger |
-| 3 Agents | Research, Test-Runner, Security-Auditor |
-| 4 Skills | Code-Review, Explain-Code, Deploy, Project-Init |
-| 7 Commands | Multi-Model (5), /forge-status, /forge-update |
-| 4 Rules | Git-Workflow, Security, Token-Optimierung, Code-Standards |
+### Security
+- **Bash-Firewall** — blockt `rm -rf /`, `git push main`, `chmod 777` u.v.m.
+- **File-Protection** — schuetzt `.env`, `.ssh/`, `.aws/`, `.npmrc`, `*.pem` vor Zugriff
+- **Secret-Scan** — erkennt geleakte API-Keys, AWS-Credentials, JWT-Tokens nach jedem Write/Edit
+
+### Produktivitaet
+- **Auto-Format** — formatiert JS/TS/Python/Rust/Go/Shell automatisch nach jedem Edit
+- **Multi-Model** — delegiert Tasks an Codex CLI (5 Workflow-Commands)
+- **Session-Logger** — Desktop-Notification + Log bei Session-Ende
+
+### Self-Management
+- `/forge-status` — Version, Symlink-Health, Hooks, verfuegbare Updates
+- `/forge-update` — One-Command Update direkt aus Claude Code
+- `bash update.sh` — git pull + neue Dependencies + neue Symlinks
+
+### Weitere Komponenten
+
+| Typ | Anzahl | Inhalt |
+|---|---|---|
+| Hooks | 5 | bash-firewall, protect-files, auto-format, secret-scan, session-logger |
+| Agents | 3 | research, test-runner, security-auditor |
+| Skills | 4 | code-review, explain-code, deploy, project-init |
+| Commands | 7 | multi-model (5), forge-status, forge-update |
+| Rules | 4 | git-workflow, security, token-optimierung, code-standards |
 
 ## Voraussetzungen
 
@@ -160,5 +184,10 @@ bash validate.sh
 ## Deinstallation
 
 ```bash
-bash uninstall.sh
+bash uninstall.sh           # Entfernt alle Symlinks
+bash uninstall.sh --dry-run # Zeigt was entfernt wuerde
 ```
+
+## Contributing
+
+Siehe [CONTRIBUTING.md](CONTRIBUTING.md) fuer Entwickler-Richtlinien und [CHANGELOG.md](CHANGELOG.md) fuer die Aenderungshistorie.
