@@ -5,6 +5,7 @@ tools:
   - Read
   - Grep
   - Glob
+  - WebSearch
 model: sonnet
 color: red
 maxTurns: 15

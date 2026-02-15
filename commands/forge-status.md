@@ -10,8 +10,9 @@ allowed-tools:
 Zeige den aktuellen Status der claude-forge Installation.
 
 ## Schritt 1: Version
+Ermittle den tatsaechlichen Pfad von claude-forge ueber den hooks-Symlink:
 ```bash
-cat "$HOME/.claude/claude-forge/VERSION" 2>/dev/null || echo "unbekannt"
+FORGE_DIR="$(readlink -f "$HOME/.claude/hooks" 2>/dev/null | sed 's|/hooks$||')" && cat "$FORGE_DIR/VERSION" 2>/dev/null || echo "unbekannt"
 ```
 
 ## Schritt 2: Symlink-Health
@@ -39,7 +40,7 @@ jq -r '.hooks | to_entries[] | "\(.key): \(.value | length) hooks"' "$HOME/.clau
 
 ## Schritt 4: Verfuegbare Updates
 ```bash
-bash "$HOME/.claude/claude-forge/update.sh" --check 2>/dev/null || echo "Update-Check fehlgeschlagen"
+FORGE_DIR="$(readlink -f "$HOME/.claude/hooks" 2>/dev/null | sed 's|/hooks$||')" && bash "$FORGE_DIR/update.sh" --check 2>/dev/null || echo "Update-Check fehlgeschlagen"
 ```
 
 ## Schritt 5: Zusammenfassung

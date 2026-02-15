@@ -74,8 +74,10 @@ fi
 
 # --- Lokale Aenderungen pruefen ---
 if [[ -n "$(git status --porcelain)" ]]; then
-  echo -e "${YELLOW}[WARN]${NC} Lokale Aenderungen gefunden — stashe sie vor dem Update."
-  git stash --include-untracked
+  echo -e "${YELLOW}[WARN]${NC} Lokale Aenderungen gefunden:"
+  git status --short
+  echo -e "${YELLOW}[INFO]${NC} Aenderungen werden temporaer gestashed und nach dem Update wiederhergestellt."
+  git stash --include-untracked --quiet
   STASHED=true
   echo -e "  ${GREEN}[OK]${NC} Aenderungen gestashed."
 else

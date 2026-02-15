@@ -113,11 +113,20 @@ install_node() {
     return 0
   fi
   echo -e "  ${YELLOW}[AUTO]${NC} Installiere Node.js 20..."
-  if command -v apt-get >/dev/null 2>&1; then
-    curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - 2>/dev/null \
-      && sudo apt-get install -y -qq nodejs 2>/dev/null && return 0
-  elif command -v brew >/dev/null 2>&1; then
+  if command -v brew >/dev/null 2>&1; then
     brew install node@20 2>/dev/null && return 0
+  elif command -v apt-get >/dev/null 2>&1; then
+    # Download setup script first, then execute (safer than curl|bash)
+    local setup_script
+    setup_script="$(mktemp "${TMPDIR:-/tmp}/nodesource-setup-XXXXXX.sh")"
+    if curl -fsSL https://deb.nodesource.com/setup_20.x -o "$setup_script" 2>/dev/null; then
+      sudo -E bash "$setup_script" 2>/dev/null \
+        && sudo apt-get install -y -qq nodejs 2>/dev/null
+      local result=$?
+      rm -f "$setup_script"
+      [[ $result -eq 0 ]] && return 0
+    fi
+    rm -f "$setup_script" 2>/dev/null || true
   fi
   return 1
 }
@@ -305,9 +314,12 @@ PATH_HINTS=()
 if [[ -d "$HOME/.local/bin" ]] && [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
   PATH_HINTS+=("$HOME/.local/bin")
 fi
-NPM_GLOBAL_BIN="$(npm prefix -g 2>/dev/null)/bin"
-if [[ -d "$NPM_GLOBAL_BIN" ]] && [[ ":$PATH:" != *":$NPM_GLOBAL_BIN:"* ]]; then
-  PATH_HINTS+=("$NPM_GLOBAL_BIN")
+if command -v npm >/dev/null 2>&1; then
+  NPM_GLOBAL_BIN="$(npm prefix -g 2>/dev/null)/bin"
+  if [[ -n "$NPM_GLOBAL_BIN" && "$NPM_GLOBAL_BIN" != "/bin" && -d "$NPM_GLOBAL_BIN" ]] \
+      && [[ ":$PATH:" != *":$NPM_GLOBAL_BIN:"* ]]; then
+    PATH_HINTS+=("$NPM_GLOBAL_BIN")
+  fi
 fi
 if [[ ${#PATH_HINTS[@]} -gt 0 ]]; then
   echo ""
