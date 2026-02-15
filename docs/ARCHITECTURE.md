@@ -190,7 +190,8 @@ validate.sh prueft in 9 Sektionen:
 |---|---|---|
 | test-hooks.sh | 44 | bash-firewall, protect-files, auto-format, secret-scan, session-logger |
 | test-update.sh | 6 | --help, VERSION, Nicht-Git-Repo, --check |
-| test-install.sh | - | Install/Uninstall Lifecycle |
-| test-codex.sh | - | Codex Wrapper (nur wenn Codex installiert) |
+| test-install.sh | 11 | Install/Uninstall Lifecycle |
+| test-codex.sh | 6 | Codex Wrapper |
+| test-validate.sh | 1 | Validierungs-Durchlauf |
 
 CI (`test.yml`) fuehrt alle Tests auf ubuntu-22.04 aus (ausser test-codex.sh und test-validate.sh).

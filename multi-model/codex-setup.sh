@@ -42,7 +42,12 @@ echo -e "${YELLOW}Hinweis: Falls der Browser nicht oeffnet (WSL2), nutze --devic
 echo "  1) Browser-Login:  codex login"
 echo "  2) Device-Auth:    codex login --device-auth  (fuer Remote/WSL2)"
 echo ""
-read -rp "Welche Methode? [1/2]: " LOGIN_METHOD
+if [[ ! -t 0 ]]; then
+  LOGIN_METHOD="${CODEX_LOGIN_METHOD:-1}"
+  echo -e "${YELLOW}[INFO]${NC} Nicht-interaktiv: nutze Login-Methode $LOGIN_METHOD"
+else
+  read -rp "Welche Methode? [1/2]: " LOGIN_METHOD
+fi
 case "$LOGIN_METHOD" in
   2) codex login --device-auth ;;
   *) codex login ;;
