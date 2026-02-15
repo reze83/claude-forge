@@ -42,10 +42,13 @@ jobs:
       - name: Run update tests
         run: bash tests/test-update.sh
 
-      - name: Run install tests
+      - name: Install for validation
         run: |
           mkdir -p "$HOME/.claude"
-          bash tests/test-install.sh
+          bash install.sh
 
       - name: Run validate tests
         run: bash tests/test-validate.sh
+
+      - name: Run install tests
+        run: bash tests/test-install.sh
