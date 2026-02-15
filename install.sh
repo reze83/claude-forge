@@ -91,15 +91,57 @@ create_symlink() {
   log_ok "Verlinkt: $target → $source"
 }
 
+# --- Auto-Install fehlender Dependencies ---
+auto_install() {
+  local pkg="$1"
+  if $DRY_RUN; then
+    log_dry "Wuerde installieren: $pkg"
+    return 0
+  fi
+  echo -e "  ${YELLOW}[AUTO]${NC} Installiere $pkg..."
+  if command -v apt-get >/dev/null 2>&1; then
+    sudo apt-get install -y -qq "$pkg" 2>/dev/null && return 0
+  elif command -v brew >/dev/null 2>&1; then
+    brew install "$pkg" 2>/dev/null && return 0
+  fi
+  return 1
+}
+
+install_node() {
+  if $DRY_RUN; then
+    log_dry "Wuerde Node.js 20 installieren"
+    return 0
+  fi
+  echo -e "  ${YELLOW}[AUTO]${NC} Installiere Node.js 20..."
+  if command -v apt-get >/dev/null 2>&1; then
+    curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - 2>/dev/null \
+      && sudo apt-get install -y -qq nodejs 2>/dev/null && return 0
+  elif command -v brew >/dev/null 2>&1; then
+    brew install node@20 2>/dev/null && return 0
+  fi
+  return 1
+}
+
 # --- Pre-Checks ---
 echo "=== claude-forge installer ==="
 echo ""
 
 echo "-- Pre-Checks --"
-command -v jq >/dev/null 2>&1 || { log_err "jq nicht gefunden. apt install jq"; }
-command -v node >/dev/null 2>&1 || { log_err "node nicht gefunden."; }
-command -v git >/dev/null 2>&1 || { log_err "git nicht gefunden."; }
-[[ -d "$CLAUDE_DIR" ]] || { log_err "$CLAUDE_DIR existiert nicht."; }
+if ! command -v git >/dev/null 2>&1; then
+  auto_install git || log_err "git nicht gefunden und konnte nicht installiert werden."
+fi
+if ! command -v jq >/dev/null 2>&1; then
+  auto_install jq || log_err "jq nicht gefunden und konnte nicht installiert werden."
+fi
+if ! command -v node >/dev/null 2>&1; then
+  install_node || log_err "node nicht gefunden und konnte nicht installiert werden."
+fi
+[[ -d "$CLAUDE_DIR" ]] || { mkdir -p "$CLAUDE_DIR" && log_ok "$CLAUDE_DIR erstellt"; }
+
+# Final verification
+command -v git >/dev/null 2>&1 || { log_err "git nicht verfuegbar."; }
+command -v jq >/dev/null 2>&1 || { log_err "jq nicht verfuegbar."; }
+command -v node >/dev/null 2>&1 || { log_err "node nicht verfuegbar."; }
 
 if [[ $ERRORS -gt 0 ]]; then
   echo -e "\n${RED}Pre-Checks fehlgeschlagen. $ERRORS Fehler.${NC}"
