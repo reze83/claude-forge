@@ -160,6 +160,7 @@ SL="$HOOKS_DIR/session-logger.sh"
 assert_exit "Exit 0 (darf nie blockieren)" 0 "$SL" '{}'
 
 # Log-Datei wird geschrieben
+mkdir -p "$HOME/.claude" 2>/dev/null || true
 TEST_LOG="$HOME/.claude/session-log.txt"
 BEFORE_COUNT=0
 [[ -f "$TEST_LOG" ]] && BEFORE_COUNT=$(wc -l < "$TEST_LOG")
