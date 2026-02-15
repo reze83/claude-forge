@@ -181,9 +181,9 @@ log_ok "Alle Pflicht-Dependencies vorhanden."
 # --- Optionale Formatter (fuer auto-format.sh) ---
 echo ""
 echo "-- Optionale Formatter --"
-auto_install_optional shfmt
-auto_install_optional ruff
-auto_install_optional prettier
+auto_install_optional shfmt || true
+auto_install_optional ruff || true
+auto_install_optional prettier || true
 
 if pgrep -f "claude.*--plugin-dir.*claude-forge" >/dev/null 2>&1; then
   log_err "claude-forge laeuft als Plugin. Beende Claude und starte ohne --plugin-dir."
