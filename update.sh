@@ -38,8 +38,10 @@ fi
 CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 CURRENT_COMMIT="$(git rev-parse --short HEAD)"
 
+LOCAL_VERSION="$(cat "$REPO_DIR/VERSION" 2>/dev/null || echo "unbekannt")"
+
 echo "=== claude-forge update ==="
-echo -e "Branch: ${CYAN}${CURRENT_BRANCH}${NC} (${CURRENT_COMMIT})"
+echo -e "Version: ${CYAN}v${LOCAL_VERSION}${NC} | Branch: ${CYAN}${CURRENT_BRANCH}${NC} (${CURRENT_COMMIT})"
 echo ""
 
 # --- Fetch ---
@@ -93,7 +95,8 @@ git pull --ff-only origin "$CURRENT_BRANCH" || {
 }
 
 NEW_COMMIT="$(git rev-parse --short HEAD)"
-echo -e "  ${GREEN}[OK]${NC} Aktualisiert: ${CURRENT_COMMIT} → ${NEW_COMMIT}"
+NEW_VERSION="$(cat "$REPO_DIR/VERSION" 2>/dev/null || echo "unbekannt")"
+echo -e "  ${GREEN}[OK]${NC} Aktualisiert: v${LOCAL_VERSION} (${CURRENT_COMMIT}) → v${NEW_VERSION} (${NEW_COMMIT})"
 
 # --- Installer neu ausfuehren (neue Symlinks + Dependencies) ---
 echo ""

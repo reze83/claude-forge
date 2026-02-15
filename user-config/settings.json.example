@@ -76,6 +76,14 @@
         "command": "bash $HOME/.claude/hooks/auto-format.sh",
         "timeout": 30
       }]
+    },
+    {
+      "matcher": "Edit|Write",
+      "hooks": [{
+        "type": "command",
+        "command": "bash $HOME/.claude/hooks/secret-scan.sh",
+        "timeout": 10
+      }]
     }
   ],
   "Stop": [
