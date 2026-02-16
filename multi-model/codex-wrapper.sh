@@ -90,11 +90,16 @@ if ! git -C "$WORKDIR" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   SKIP_GIT_FLAG="--skip-git-repo-check"
 fi
 
-# --- Temp-Dateien fuer Output + Stderr ---
+# --- Secure temp directory and files ---
 TMPBASE="${TMPDIR:-/tmp/claude}"
-mkdir -p "$TMPBASE" 2>/dev/null || true
+if ! mkdir -p "$TMPBASE" 2>/dev/null; then
+  # Fallback: create unique temp dir
+  TMPBASE="$(mktemp -d "/tmp/claude-codex-XXXXXX")"
+fi
+chmod 700 "$TMPBASE" 2>/dev/null || true
 OUTFILE="$(mktemp "${TMPBASE}/claude-codex-out-XXXXXX.txt")"
 ERRFILE="$(mktemp "${TMPBASE}/claude-codex-err-XXXXXX.txt")"
+chmod 600 "$OUTFILE" "$ERRFILE" 2>/dev/null || true
 trap 'rm -f "$OUTFILE" "$ERRFILE"' EXIT
 
 # --- timeout verfuegbar? (fehlt auf nativem macOS) ---

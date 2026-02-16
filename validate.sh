@@ -148,7 +148,12 @@ echo "-- Secrets-Scan --"
 
 check_no_secret() {
   local desc="$1" pattern="$2"
-  if grep -rIl --exclude-dir=tests "$pattern" "$REPO_DIR/" --include='*.json' --include='*.md' --include='*.sh' 2>/dev/null; then
+  # Scan all files; exclude lines containing pragma allowlist and test assertion lines
+  if grep -rIn "$pattern" "$REPO_DIR/" --include='*.json' --include='*.md' --include='*.sh' 2>/dev/null \
+      | grep -v 'pragma: allowlist secret' \
+      | grep -v 'assert_exit' \
+      | grep -v 'check_no_secret' \
+      | grep -q .; then
     fail "$desc"
   else
     pass "$desc"

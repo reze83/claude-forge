@@ -13,9 +13,9 @@
 
 <br><br>
 
-[![Version](https://img.shields.io/badge/version-0.2.3-blue?style=flat-square)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.3.0-blue?style=flat-square)](CHANGELOG.md)
 [![CI](https://img.shields.io/github/actions/workflow/status/reze83/claude-forge/test.yml?branch=main&style=flat-square&label=CI)](https://github.com/reze83/claude-forge/actions)
-[![Tests](https://img.shields.io/badge/tests-92%20passed-brightgreen?style=flat-square)](#)
+[![Tests](https://img.shields.io/badge/tests-114%20passed-brightgreen?style=flat-square)](#)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 
 <br>
@@ -71,10 +71,10 @@ claude --plugin-dir <pfad-zum-repo>
 
 | Hook | Funktion |
 |------|----------|
-| **Bash-Firewall** | Blockt `rm -rf /`, `git push main`, `chmod 777`, `eval`, `bash -c`, interaktive Editoren u.v.m. |
-| **File-Protection** | Schuetzt `.env`, `.ssh/`, `.aws/`, `.npmrc`, `*.pem`, `*.key` vor Zugriff. Allowlist fuer `.env.example`/`.env.sample` |
-| **Secret-Scan (Pre)** | Blockt Secrets in Write/Edit-Content BEVOR sie geschrieben werden. `# pragma: allowlist secret` zum Ueberspringen |
-| **Secret-Scan (Post)** | Warnt bei geleakten API-Keys (Anthropic, OpenAI, GitHub, AWS), JWT-Tokens, Private Keys |
+| **Bash-Firewall** | Blockt `rm -rf /`, `git push main`, `chmod 777`, `eval`, `bash -c` — inkl. Bypass-Schutz (absolute Pfade, command/env/exec Prefix, getrennte Flags, Refspec, Force-Push) |
+| **File-Protection** | Schuetzt `.env`, `.ssh/`, `.aws/`, `.npmrc`, `*.pem`, `*.key` (case-insensitive). Allowlist fuer `.env.example`/`.env.sample` |
+| **Secret-Scan (Pre)** | Blockt 11 Secret-Patterns in Write/Edit-Content BEVOR sie geschrieben werden. Pragma-Allowlist gilt pro Zeile |
+| **Secret-Scan (Post)** | Warnt bei 11 Secret-Typen: Anthropic, OpenAI, GitHub (PAT/OAuth/Server/Refresh), AWS, JWT, PEM, Stripe, Slack, Azure |
 | **Hook-Tampering** | Schuetzt `.claude/hooks.json`, `.claude/hooks/`, `.claude/settings.json` vor Manipulation |
 
 ### Produktivitaet
@@ -194,6 +194,11 @@ echo '{"tool_input":{"file_path":"/home/user/.env"}}' | bash hooks/protect-files
 echo '{"tool_name":"Write","tool_input":{"file_path":"/tmp/t","content":"sk-ant-FAKE_KEY_HERE"}}' | bash hooks/secret-scan-pre.sh
 ```
 
+Debug-Logging aktivieren:
+```bash
+export CLAUDE_FORGE_DEBUG=1  # Schreibt nach ~/.claude/hooks-debug.log
+```
+
 Validierung:
 ```bash
 bash validate.sh
@@ -229,7 +234,7 @@ claude-forge/
 ├── skills/                         → ~/.claude/skills/
 ├── commands/                       → ~/.claude/commands/
 ├── multi-model/                    → ~/.claude/multi-model/ (Codex CLI)
-├── tests/                          Test-Suite (92 Tests)
+├── tests/                          Test-Suite (114 Tests)
 └── docs/                           Dokumentation
     ├── ARCHITECTURE.md              Architektur-Uebersicht
     ├── demo.tape                    VHS Tape-Datei (GIF-Recording)

@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 # PreToolUse Hook — Secret-Scan (Pre-Write/Edit)
-# Scannt .tool_input.content (Write) / .tool_input.new_string (Edit)
-# BEVOR die Datei geschrieben wird. Blockt bei High-Confidence Secrets.
+# Scans .tool_input.content (Write) / .tool_input.new_string (Edit)
+# BEFORE the file is written. Blocks on high-confidence secrets.
 # Compatible: Bash 3.2+ (macOS) and Bash 4+
+
+source "$(cd "$(dirname "$0")" && pwd)/lib.sh"
 
 INPUT=$(cat)
 TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // ""')
@@ -17,41 +19,28 @@ esac
 
 [[ -z "$CONTENT" ]] && exit 0
 
-# Allowlist: skip if pragma comment present
-if echo "$CONTENT" | grep -qE '(#|//) pragma: allowlist secret'; then
-  exit 0
+# Content size limit: skip overly large content to prevent DoS
+CONTENT_SIZE=${#CONTENT}
+if [[ "$CONTENT_SIZE" -gt "$MAX_CONTENT_SIZE" ]]; then
+  debug "secret-scan-pre: content too large ($CONTENT_SIZE bytes), truncating to $MAX_CONTENT_SIZE"
+  CONTENT="${CONTENT:0:$MAX_CONTENT_SIZE}"
 fi
 
-# --- Moderne Hook-Output-Funktion ---
-block() {
-  local reason="$1"
-  printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"%s"}}' "$reason"
-  exit 2
-}
+debug "secret-scan-pre: scanning $CONTENT_SIZE bytes for tool=$TOOL_NAME"
 
-# --- Secret-Patterns (ERE, kein PCRE) ---
-if echo "$CONTENT" | grep -qE 'sk-ant-[a-zA-Z0-9_-]{20,}'; then
-  block "SECRET BLOCKED: Anthropic API Key (sk-ant-...) im Content erkannt"
-fi
+# Scan line by line — pragma only applies to the line it appears on
+while IFS= read -r line; do
+  # Skip lines with pragma allowlist
+  if printf '%s' "$line" | grep -qE '(#|//) pragma: allowlist secret'; then
+    continue
+  fi
 
-if echo "$CONTENT" | grep -qE 'sk-[a-zA-Z0-9]{48,}'; then
-  block "SECRET BLOCKED: OpenAI API Key (sk-...) im Content erkannt"
-fi
-
-if echo "$CONTENT" | grep -qE 'ghp_[a-zA-Z0-9]{36}'; then
-  block "SECRET BLOCKED: GitHub Token (ghp_...) im Content erkannt"
-fi
-
-if echo "$CONTENT" | grep -qE 'AKIA[0-9A-Z]{16}'; then
-  block "SECRET BLOCKED: AWS Access Key (AKIA...) im Content erkannt"
-fi
-
-if echo "$CONTENT" | grep -qE 'eyJ[a-zA-Z0-9_-]*\.eyJ[a-zA-Z0-9_-]*\.'; then
-  block "SECRET BLOCKED: JWT Token (eyJ...) im Content erkannt"
-fi
-
-if echo "$CONTENT" | grep -q 'PRIVATE KEY'; then
-  block "SECRET BLOCKED: Private Key Block im Content erkannt"
-fi
+  # Check each secret pattern
+  for i in "${!SECRET_PATTERNS[@]}"; do
+    if printf '%s' "$line" | grep -qE "${SECRET_PATTERNS[$i]}"; then
+      block "SECRET BLOCKED: ${SECRET_LABELS[$i]} detected in content"
+    fi
+  done
+done <<< "$CONTENT"
 
 exit 0

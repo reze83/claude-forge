@@ -82,22 +82,38 @@ wiederhergestellt. validate.sh Fehler loesen keinen Rollback aus.
 
 | Hook | Event | Matcher | Zweck |
 |---|---|---|---|
-| bash-firewall.sh | PreToolUse | Bash | Gefaehrliche Befehle blocken (inkl. `bash -c`/`sh -c`) |
+| bash-firewall.sh | PreToolUse | Bash | Gefaehrliche Befehle blocken — Input-Normalisierung (abs. Pfade, command/exec/env Prefix), 20 Deny-Patterns |
 | protect-files.sh | PreToolUse | Read\|Write\|Edit\|Glob\|Grep | Sensible Dateien schuetzen + Hook-Tampering-Schutz |
 | secret-scan-pre.sh | PreToolUse | Write\|Edit | Secret-Erkennung in Content VOR dem Schreiben (deny) |
 | auto-format.sh | PostToolUse | Edit\|Write | Auto-Formatting (Polyglot) |
 | secret-scan.sh | PostToolUse | Edit\|Write | Secret-Erkennung in geschriebenen Dateien (warn) |
 | session-logger.sh | Stop | * | Session-Ende Log + Desktop-Notification |
 
+### Shared Library: hooks/lib.sh
+
+All hooks source a shared library that provides:
+
+| Function | Purpose |
+|---|---|
+| `block(reason)` | JSON-safe deny output using `jq -Rs` escaping. Prevents JSON injection from user-controlled paths. |
+| `warn(message)` | JSON-safe notification output for PostToolUse hooks. |
+| `debug(message)` | Optional logging to `~/.claude/hooks-debug.log` (enable with `CLAUDE_FORGE_DEBUG=1`). |
+| `SECRET_PATTERNS[]` | 11 ERE patterns shared between secret-scan-pre.sh and secret-scan.sh (DRY). |
+| `SECRET_LABELS[]` | Human-readable labels for each pattern. |
+| `MAX_CONTENT_SIZE` | 1MB limit constant for content scanning. |
+
+The library is loaded via `source "$(cd "$(dirname "$0")" && pwd)/lib.sh"`, which resolves correctly for both symlink and plugin modes.
+
 ### Hook-Output: Modernes JSON-Format
 
-PreToolUse Hooks nutzen das JSON-Output-Format auf stdout:
+PreToolUse Hooks nutzen das JSON-Output-Format auf stdout (via `block()` from lib.sh):
 ```json
 {"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"..."}}
 ```
 Plus `exit 2` als Fallback fuer aeltere Claude Code Versionen.
+All string values are escaped via `jq -Rs` to prevent JSON injection.
 
-PostToolUse Hooks koennen Warnungen zurueckgeben:
+PostToolUse Hooks koennen Warnungen zurueckgeben (via `warn()` from lib.sh):
 ```json
 {"hookSpecificOutput":{"hookEventName":"PostToolUse","notification":"..."}}
 ```
@@ -106,6 +122,8 @@ PostToolUse Hooks koennen Warnungen zurueckgeben:
 
 1. **settings.json** nutzt `$HOME/.claude/hooks/` → funktioniert via Symlink
 2. **hooks.json** nutzt `${CLAUDE_PLUGIN_ROOT}/hooks/` → funktioniert als Plugin
+   - `${CLAUDE_PLUGIN_ROOT}` wird von Claude Code automatisch gesetzt wenn das Repo als Plugin geladen wird (`claude --plugin-dir`)
+   - Im Symlink-Modus wird hooks.json NICHT genutzt; stattdessen gelten die Hook-Definitionen in settings.json
 
 Timeouts muessen in beiden Dateien identisch sein — `validate.sh` prueft das.
 
@@ -125,20 +143,29 @@ Timeouts muessen in beiden Dateien identisch sein — `validate.sh` prueft das.
 Scannt `.tool_input.content` (Write) und `.tool_input.new_string` (Edit) VOR dem Schreiben.
 Bei High-Confidence Match wird die Operation blockiert (deny + exit 2).
 
-**Pragma-Allowlist:** Enthaelt der Content `# pragma: allowlist secret` oder
-`// pragma: allowlist secret`, wird der Scan uebersprungen. Nuetzlich fuer
-Test-Fixtures, Dokumentation und Beispiel-Code.
+**Content-Size-Limit:** Content ueber 1MB wird auf 1MB gekuerzt (DoS-Schutz).
 
-### secret-scan.sh: Erkannte Patterns
+**Zeilenweise Pragma-Allowlist:** `# pragma: allowlist secret` oder
+`// pragma: allowlist secret` ueberspringt NUR die Zeile in der es steht.
+Eine Pragma-Zeile schuetzt NICHT andere Zeilen im selben Content.
+
+### secret-scan: Erkannte Patterns (11)
+
+Definiert in `hooks/lib.sh`, gemeinsam genutzt von secret-scan-pre.sh und secret-scan.sh:
 
 | Pattern | Beispiel |
 |---|---|
 | Anthropic API Key | `sk-ant-...` |
 | OpenAI API Key | `sk-...` (48+ Zeichen) |
-| GitHub Token | `ghp_...` (36 Zeichen) |
+| GitHub PAT | `ghp_...` (36 Zeichen) |
+| GitHub OAuth/Server Token | `gho_...` / `ghs_...` (36+ Zeichen) |
+| GitHub Refresh Token | `ghr_...` (36+ Zeichen) |
 | AWS Access Key | `AKIA...` (16 Zeichen) |
 | JWT Token | `eyJ...eyJ...` |
 | Private Key Block | `-----BEGIN PRIVATE KEY-----` |
+| Stripe Live Key | `sk_live_...` (24+ Zeichen) |
+| Slack Token | `xoxb-...` / `xoxp-...` / `xoxa-...` |
+| Azure Storage Key | `AccountKey=...` (30+ Zeichen) |
 
 ### auto-format.sh: Unterstuetzte Formatter
 
@@ -201,7 +228,7 @@ validate.sh prueft in 9 Sektionen:
 5. **Skills** — YAML Frontmatter, Pflichtfelder
 6. **Commands** — YAML Frontmatter, Pflichtfelder
 7. **System-Tools** — Pflicht (node, python3, git, jq) + Optional (codex, ruff, shfmt)
-8. **Secrets-Scan** — 5 Patterns (Anthropic, OpenAI, GitHub, AWS, JWT)
+8. **Secrets-Scan** — 11 Patterns (Anthropic, OpenAI, GitHub PAT/OAuth/Server/Refresh, AWS, JWT, PEM, Stripe, Slack, Azure)
 9. **Hook-Konsistenz** — Timeout-Vergleich hooks.json vs. settings.json.example
 
 ## Warum Bash statt Python fuer Hooks?
@@ -215,11 +242,11 @@ validate.sh prueft in 9 Sektionen:
 
 | Test-Suite | Tests | Prueft |
 |---|---|---|
-| test-hooks.sh | 65 | bash-firewall, protect-files, secret-scan-pre, auto-format, secret-scan, session-logger |
+| test-hooks.sh | 87 | bash-firewall (34: basic+bypass), protect-files (27: basic+case-insensitive+allowlist+tampering), secret-scan (16: pre+post+pragma), auto-format (2), session-logger (2) |
 | test-update.sh | 6 | --help, VERSION, Nicht-Git-Repo, --check |
 | test-install.sh | 11 | Install/Uninstall Lifecycle |
 | test-codex.sh | 9 | Codex Wrapper (error handling, timeout validation, live) |
 | test-validate.sh | 1 | Validierungs-Durchlauf |
 
 CI (`test.yml`) fuehrt alle Tests auf ubuntu-22.04 aus (ausser test-codex.sh und test-validate.sh).
-Total: 92 tests (65 hooks + 11 install + 6 update + 9 codex + 1 validate).
+Total: 114 tests (87 hooks + 11 install + 6 update + 9 codex + 1 validate).

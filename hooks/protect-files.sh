@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# PreToolUse Hook — Geschuetzte Dateien
-# Blockiert Read/Write/Edit/Glob/Grep auf sensible Dateien.
-# Output: JSON auf stdout (modernes Format) + Exit 2 (legacy Fallback)
+# PreToolUse Hook — Protected Files
+# Blocks Read/Write/Edit/Glob/Grep on sensitive files.
+# Output: JSON on stdout (modern format) + Exit 2 (legacy fallback)
+# Compatible: Bash 3.2+ (macOS) and Bash 4+
+
+source "$(cd "$(dirname "$0")" && pwd)/lib.sh"
 
 INPUT=$(cat)
 TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // ""')
@@ -11,43 +14,41 @@ TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // ""')
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // empty')
 [[ -z "$FILE_PATH" ]] && exit 0
 
-# --- Moderne Hook-Output-Funktion ---
-block() {
-  local reason="$1"
-  printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"%s"}}' "$reason"
-  exit 2
-}
+debug "protect-files: tool=$TOOL_NAME path=$FILE_PATH"
+
+# Case-insensitive comparison (Bash 3.2+ compatible)
+FILE_PATH_LOWER=$(printf '%s' "$FILE_PATH" | tr '[:upper:]' '[:lower:]')
 
 PATTERNS=(".env" ".env." "secrets/" ".ssh/" ".aws/" ".gnupg/" ".git/" ".npmrc" ".netrc")
 EXTENSIONS=(".pem" ".key" ".p12" ".pfx" ".keystore")
 
-# Allowlist: safe .env template files
+# Allowlist: safe .env template files (check before blocking)
 ALLOWLIST=(".env.example" ".env.sample" ".env.template")
 for a in "${ALLOWLIST[@]}"; do
-  [[ "$FILE_PATH" == *"$a" ]] && exit 0
+  [[ "$FILE_PATH_LOWER" == *"$a" ]] && exit 0
 done
 
 # Hook-Tampering protection: block Write/Edit on hook config
 HOOK_PROTECTED=("hooks.json" "hooks/" "settings.json" "settings.local.json")
 if [[ "$TOOL_NAME" == "Write" || "$TOOL_NAME" == "Edit" ]]; then
   for hp in "${HOOK_PROTECTED[@]}"; do
-    [[ "$FILE_PATH" == *".claude/$hp"* ]] && block "'$FILE_PATH' ist geschuetzt (Hook-Konfiguration)"
+    [[ "$FILE_PATH_LOWER" == *".claude/$hp"* ]] && block "'$FILE_PATH' is protected (hook configuration)"
   done
 fi
 
 # package-lock.json: Only block Write/Edit, allow Read/Glob/Grep
-if [[ "$FILE_PATH" == *"package-lock.json"* ]]; then
+if [[ "$FILE_PATH_LOWER" == *"package-lock.json"* ]]; then
   if [[ "$TOOL_NAME" == "Write" || "$TOOL_NAME" == "Edit" ]]; then
-    block "'$FILE_PATH' ist geschuetzt (package-lock.json: nur Read erlaubt)"
+    block "'$FILE_PATH' is protected (package-lock.json: read-only)"
   fi
 fi
 
 for p in "${PATTERNS[@]}"; do
-  [[ "$FILE_PATH" == *"$p"* ]] && block "'$FILE_PATH' ist geschuetzt (Muster: '$p')"
+  [[ "$FILE_PATH_LOWER" == *"$p"* ]] && block "'$FILE_PATH' is protected (pattern: '$p')"
 done
 
 for e in "${EXTENSIONS[@]}"; do
-  [[ "$FILE_PATH" == *"$e" ]] && block "'$FILE_PATH' ist geschuetzt (Endung: '$e')"
+  [[ "$FILE_PATH_LOWER" == *"$e" ]] && block "'$FILE_PATH' is protected (extension: '$e')"
 done
 
 exit 0

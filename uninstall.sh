@@ -32,7 +32,7 @@ remove_if_symlink_to_repo() {
   if [[ -L "$target" ]]; then
     local link_target
     link_target="$(readlink -f "$target" 2>/dev/null || readlink "$target")"
-    if [[ "$link_target" == "$REPO_DIR"* ]]; then
+    if [[ "$link_target" == "$REPO_DIR/"* || "$link_target" == "$REPO_DIR" ]]; then
       if $DRY_RUN; then
         echo -e "  ${YELLOW}[DRY]${NC} Wuerde entfernen: $target"
       else
