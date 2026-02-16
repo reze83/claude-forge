@@ -1,46 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 120" width="520" height="120">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 100" width="480" height="100">
   <defs>
-    <linearGradient id="spark-d" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#fbbf24"/>
-      <stop offset="100%" style="stop-color:#f97316"/>
-    </linearGradient>
-    <linearGradient id="anvil-d" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#9ca3af"/>
-      <stop offset="100%" style="stop-color:#6b7280"/>
+    <linearGradient id="forge-g-d" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="55%" stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#c2410c"/>
     </linearGradient>
   </defs>
-
-  <!-- Anvil icon -->
-  <g transform="translate(16, 16)">
-    <!-- Anvil body -->
-    <path d="M10 52 L22 32 L66 32 L78 52 L70 52 L70 68 L18 68 L18 52 Z"
-          fill="url(#anvil-d)" stroke="#d1d5db" stroke-width="1.5"/>
-    <!-- Anvil horn -->
-    <path d="M66 32 Q88 32 92 42 L78 52 L66 42 Z"
-          fill="url(#anvil-d)" stroke="#d1d5db" stroke-width="1.5"/>
-    <!-- Anvil base -->
-    <rect x="12" y="68" width="64" height="8" rx="2" fill="#d1d5db"/>
-    <!-- Hammer -->
-    <rect x="34" y="6" width="6" height="28" rx="2" fill="#9ca3af" transform="rotate(-20, 37, 20)"/>
-    <rect x="24" y="2" width="26" height="10" rx="3" fill="#d1d5db" transform="rotate(-20, 37, 7)"/>
-    <!-- Sparks -->
-    <circle cx="62" cy="18" r="2.5" fill="url(#spark-d)" opacity="0.95"/>
-    <circle cx="72" cy="12" r="2" fill="url(#spark-d)" opacity="0.8"/>
-    <circle cx="56" cy="10" r="1.5" fill="url(#spark-d)" opacity="0.85"/>
-    <circle cx="78" cy="22" r="1.5" fill="url(#spark-d)" opacity="0.7"/>
-    <circle cx="68" cy="6" r="1.8" fill="url(#spark-d)" opacity="0.8"/>
+  <g transform="translate(12,8)">
+    <path fill="url(#forge-g-d)" d="M13 4h26q3 0 5 2l6 16q2 3 2 6t-2 6l-6 16q-2 2-5 2H13q-3 0-5-2L2 34q-2-3-2-6t2-6L8 6q2-2 5-2z"/>
+    <path fill="none" stroke="rgba(255,255,255,.12)" stroke-width="1.4" d="M16 10h20q2.5 0 4 1.8l4.5 10.2q1.5 2.5 1.5 6t-1.5 6L40 44.2q-1.5 1.8-4 1.8H16q-2.5 0-4-1.8L7.5 34Q6 31.5 6 28t1.5-6L12 11.8q1.5-1.8 4-1.8z"/>
+    <text x="26" y="28" font-family="Inter,system-ui,sans-serif" font-size="28" font-weight="800" fill="rgba(255,255,255,.85)" text-anchor="middle" dominant-baseline="central">CF</text>
   </g>
-
-  <!-- Text: claude-forge -->
-  <text x="124" y="58" font-family="'Segoe UI', system-ui, -apple-system, sans-serif" font-size="42" font-weight="700" fill="#f9fafb" letter-spacing="-0.5">
-    claude-forge
-  </text>
-
-  <!-- Tagline -->
-  <text x="126" y="82" font-family="'Segoe UI', system-ui, -apple-system, sans-serif" font-size="14" fill="#9ca3af" letter-spacing="0.5">
-    modular config for claude code
-  </text>
-
-  <!-- Accent line -->
-  <rect x="124" y="92" width="60" height="2.5" rx="1.25" fill="url(#spark-d)"/>
+  <text x="76" y="48" font-family="Inter,system-ui,sans-serif" font-size="38" font-weight="800" fill="#e2e8f0" letter-spacing="-1">claude<tspan fill="#ea580c">-forge</tspan></text>
+  <text x="78" y="68" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="500" fill="#94a3b8" letter-spacing="1.5">MODULAR CONFIG FOR CLAUDE CODE</text>
+  <rect x="78" y="78" width="36" height="2" rx="1" fill="#ea580c" opacity=".7"/>
 </svg>

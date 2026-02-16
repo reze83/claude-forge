@@ -20,8 +20,8 @@
 
 <br>
 
-<!-- Demo GIF — generate with: vhs docs/demo.tape -->
-<img src="docs/assets/demo.gif" alt="claude-forge Demo — Bash-Firewall blockiert gefaehrliche Befehle" width="700">
+<!-- Demo GIF — generate with: vhs docs/assets/demo.tape -->
+<img src="docs/assets/demo.gif" alt="claude-forge Demo — Multi-Model Workflow mit Claude und Codex" width="700">
 
 </div>
 
