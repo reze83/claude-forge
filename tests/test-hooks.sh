@@ -177,6 +177,56 @@ fi
 
 echo ""
 
+# --- bash-firewall.sh: bash -c / sh -c ---
+echo "-- bash-firewall.sh: bash -c Bypass --"
+assert_exit "Blockt bash -c"             2 "$FW" '{"tool_input":{"command":"bash -c \"rm -rf /\""}}'
+assert_exit "Blockt sh -c"              2 "$FW" '{"tool_input":{"command":"sh -c \"echo pwned\""}}'
+assert_exit "Erlaubt bash script.sh"    0 "$FW" '{"tool_input":{"command":"bash script.sh"}}'
+
+echo ""
+
+# --- protect-files.sh: .env.example Allowlist ---
+echo "-- protect-files.sh: Allowlist --"
+assert_exit "Erlaubt .env.example"       0 "$PF" '{"tool_input":{"file_path":"/home/c/project/.env.example"}}'
+assert_exit "Erlaubt .env.sample"        0 "$PF" '{"tool_input":{"file_path":"/home/c/project/.env.sample"}}'
+assert_exit "Erlaubt .env.template"      0 "$PF" '{"tool_input":{"file_path":"/home/c/project/.env.template"}}'
+assert_exit "Blockt .env.local weiterhin" 2 "$PF" '{"tool_input":{"file_path":"/home/c/.env.local"}}'
+
+echo ""
+
+# --- protect-files.sh: Hook-Tampering ---
+echo "-- protect-files.sh: Hook-Tampering --"
+assert_exit "Blockt hooks.json Write"    2 "$PF" '{"tool_name":"Write","tool_input":{"file_path":"/home/c/.claude/hooks.json"}}'
+assert_exit "Blockt hooks.json Edit"     2 "$PF" '{"tool_name":"Edit","tool_input":{"file_path":"/home/c/.claude/hooks.json"}}'
+assert_exit "Blockt hooks/ Write"        2 "$PF" '{"tool_name":"Write","tool_input":{"file_path":"/home/c/.claude/hooks/evil.sh"}}'
+assert_exit "Blockt settings.json Write" 2 "$PF" '{"tool_name":"Write","tool_input":{"file_path":"/home/c/.claude/settings.json"}}'
+assert_exit "Erlaubt hooks.json Read"    0 "$PF" '{"tool_name":"Read","tool_input":{"file_path":"/home/c/.claude/hooks.json"}}'
+
+echo ""
+
+# --- secret-scan-pre.sh ---
+echo "-- secret-scan-pre.sh --"
+SP="$HOOKS_DIR/secret-scan-pre.sh"
+
+# Nicht-Write/Edit Tools → exit 0
+assert_exit "Exit 0 fuer Read"          0 "$SP" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/test"}}'
+assert_exit "Exit 0 fuer Bash"          0 "$SP" '{"tool_name":"Bash","tool_input":{"command":"ls"}}'
+
+# Sauberer Content → exit 0
+assert_exit "Sauberer Write-Content"    0 "$SP" '{"tool_name":"Write","tool_input":{"file_path":"/tmp/t","content":"const x = 42;"}}'
+assert_exit "Sauberer Edit-Content"     0 "$SP" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/t","new_string":"const y = 99;"}}'
+
+# Secrets → exit 2
+assert_exit "Blockt Anthropic Key Write"  2 "$SP" '{"tool_name":"Write","tool_input":{"file_path":"/tmp/t","content":"key=sk-ant-abcdefghij1234567890ab"}}'
+assert_exit "Blockt AWS Key Edit"         2 "$SP" '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/t","new_string":"AKIAIOSFODNN7EXAMPLE1"}}'
+assert_exit "Blockt Private Key Write"    2 "$SP" '{"tool_name":"Write","tool_input":{"file_path":"/tmp/t","content":"-----BEGIN PRIVATE KEY-----"}}'
+assert_exit "Blockt GitHub Token Write"   2 "$SP" '{"tool_name":"Write","tool_input":{"file_path":"/tmp/t","content":"token=ghp_abcdefghijklmnopqrstuvwxyz1234567890"}}'
+
+# Pragma allowlist → exit 0
+assert_exit "Pragma allowlist erlaubt"    0 "$SP" '{"tool_name":"Write","tool_input":{"file_path":"/tmp/t","content":"sk-ant-abcdefghij1234567890ab # pragma: allowlist secret"}}'
+
+echo ""
+
 # --- Ergebnis ---
 echo "================================="
 echo -e "Tests: $((PASS + FAIL)) | ${GREEN}$PASS bestanden${NC} | ${RED}$FAIL fehlgeschlagen${NC}"

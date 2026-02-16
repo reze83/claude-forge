@@ -33,6 +33,7 @@ DENY_PATTERNS=(
   '\bnano\s+'
   '\bvi\s+'
   'pip\s+install\s+.*--break-system-packages'
+  '\b(bash|sh)\s+-c\s+'
 )
 
 DENY_REASONS=(
@@ -50,6 +51,7 @@ DENY_REASONS=(
   "Interaktive Editoren nicht unterstuetzt"
   "Interaktive Editoren nicht unterstuetzt"
   "pip --break-system-packages nicht erlaubt. venv verwenden."
+  "bash -c / sh -c nicht erlaubt. Befehle direkt ausfuehren."
 )
 
 for i in "${!DENY_PATTERNS[@]}"; do

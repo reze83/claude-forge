@@ -67,6 +67,14 @@
         "command": "bash $HOME/.claude/hooks/protect-files.sh",
         "timeout": 10
       }]
+    },
+    {
+      "matcher": "Write|Edit",
+      "hooks": [{
+        "type": "command",
+        "command": "bash $HOME/.claude/hooks/secret-scan-pre.sh",
+        "timeout": 10
+      }]
     }
   ],
   "PostToolUse": [

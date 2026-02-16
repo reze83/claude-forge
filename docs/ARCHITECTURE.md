@@ -78,14 +78,15 @@ wiederhergestellt. validate.sh Fehler loesen keinen Rollback aus.
 
 ## Hook-Architektur
 
-### 5 Hooks, 3 Event-Typen
+### 6 Hooks, 3 Event-Typen
 
 | Hook | Event | Matcher | Zweck |
 |---|---|---|---|
-| bash-firewall.sh | PreToolUse | Bash | Gefaehrliche Befehle blocken |
-| protect-files.sh | PreToolUse | Read\|Write\|Edit\|Glob\|Grep | Sensible Dateien schuetzen |
+| bash-firewall.sh | PreToolUse | Bash | Gefaehrliche Befehle blocken (inkl. `bash -c`/`sh -c`) |
+| protect-files.sh | PreToolUse | Read\|Write\|Edit\|Glob\|Grep | Sensible Dateien schuetzen + Hook-Tampering-Schutz |
+| secret-scan-pre.sh | PreToolUse | Write\|Edit | Secret-Erkennung in Content VOR dem Schreiben (deny) |
 | auto-format.sh | PostToolUse | Edit\|Write | Auto-Formatting (Polyglot) |
-| secret-scan.sh | PostToolUse | Edit\|Write | Secret-Erkennung in geschriebenen Dateien |
+| secret-scan.sh | PostToolUse | Edit\|Write | Secret-Erkennung in geschriebenen Dateien (warn) |
 | session-logger.sh | Stop | * | Session-Ende Log + Desktop-Notification |
 
 ### Hook-Output: Modernes JSON-Format
@@ -113,9 +114,20 @@ Timeouts muessen in beiden Dateien identisch sein — `validate.sh` prueft das.
 | Dateimuster | Read | Write | Edit | Glob/Grep |
 |---|---|---|---|---|
 | .env, .ssh/, .aws/, .gnupg/, .git/ | Blockiert | Blockiert | Blockiert | Blockiert |
+| .env.example, .env.sample, .env.template | Erlaubt | Erlaubt | Erlaubt | Erlaubt |
 | .npmrc, .netrc | Blockiert | Blockiert | Blockiert | Blockiert |
 | *.pem, *.key, *.p12, *.pfx | Blockiert | Blockiert | Blockiert | Blockiert |
 | package-lock.json | Erlaubt | Blockiert | Blockiert | Erlaubt |
+| .claude/hooks.json, .claude/hooks/, .claude/settings.json | Erlaubt | Blockiert | Blockiert | Erlaubt |
+
+### secret-scan-pre.sh: PreToolUse Secret-Scan
+
+Scannt `.tool_input.content` (Write) und `.tool_input.new_string` (Edit) VOR dem Schreiben.
+Bei High-Confidence Match wird die Operation blockiert (deny + exit 2).
+
+**Pragma-Allowlist:** Enthaelt der Content `# pragma: allowlist secret` oder
+`// pragma: allowlist secret`, wird der Scan uebersprungen. Nuetzlich fuer
+Test-Fixtures, Dokumentation und Beispiel-Code.
 
 ### secret-scan.sh: Erkannte Patterns
 
@@ -203,11 +215,11 @@ validate.sh prueft in 9 Sektionen:
 
 | Test-Suite | Tests | Prueft |
 |---|---|---|
-| test-hooks.sh | 44 | bash-firewall, protect-files, auto-format, secret-scan, session-logger |
+| test-hooks.sh | 65 | bash-firewall, protect-files, secret-scan-pre, auto-format, secret-scan, session-logger |
 | test-update.sh | 6 | --help, VERSION, Nicht-Git-Repo, --check |
 | test-install.sh | 11 | Install/Uninstall Lifecycle |
 | test-codex.sh | 9 | Codex Wrapper (error handling, timeout validation, live) |
 | test-validate.sh | 1 | Validierungs-Durchlauf |
 
 CI (`test.yml`) fuehrt alle Tests auf ubuntu-22.04 aus (ausser test-codex.sh und test-validate.sh).
-Total: 71 tests (68 existing + 3 new codex wrapper validation tests).
+Total: 92 tests (65 hooks + 11 install + 6 update + 9 codex + 1 validate).

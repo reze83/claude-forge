@@ -13,9 +13,9 @@
 
 <br><br>
 
-[![Version](https://img.shields.io/badge/version-0.2.2-blue?style=flat-square)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.2.3-blue?style=flat-square)](CHANGELOG.md)
 [![CI](https://img.shields.io/github/actions/workflow/status/reze83/claude-forge/test.yml?branch=main&style=flat-square&label=CI)](https://github.com/reze83/claude-forge/actions)
-[![Tests](https://img.shields.io/badge/tests-71%20passed-brightgreen?style=flat-square)](#)
+[![Tests](https://img.shields.io/badge/tests-92%20passed-brightgreen?style=flat-square)](#)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 
 <br>
@@ -71,9 +71,11 @@ claude --plugin-dir <pfad-zum-repo>
 
 | Hook | Funktion |
 |------|----------|
-| **Bash-Firewall** | Blockt `rm -rf /`, `git push main`, `chmod 777`, `eval`, interaktive Editoren u.v.m. |
-| **File-Protection** | Schuetzt `.env`, `.ssh/`, `.aws/`, `.npmrc`, `*.pem`, `*.key` vor Zugriff |
-| **Secret-Scan** | Erkennt geleakte API-Keys (Anthropic, OpenAI, GitHub, AWS), JWT-Tokens, Private Keys |
+| **Bash-Firewall** | Blockt `rm -rf /`, `git push main`, `chmod 777`, `eval`, `bash -c`, interaktive Editoren u.v.m. |
+| **File-Protection** | Schuetzt `.env`, `.ssh/`, `.aws/`, `.npmrc`, `*.pem`, `*.key` vor Zugriff. Allowlist fuer `.env.example`/`.env.sample` |
+| **Secret-Scan (Pre)** | Blockt Secrets in Write/Edit-Content BEVOR sie geschrieben werden. `# pragma: allowlist secret` zum Ueberspringen |
+| **Secret-Scan (Post)** | Warnt bei geleakten API-Keys (Anthropic, OpenAI, GitHub, AWS), JWT-Tokens, Private Keys |
+| **Hook-Tampering** | Schuetzt `.claude/hooks.json`, `.claude/hooks/`, `.claude/settings.json` vor Manipulation |
 
 ### Produktivitaet
 
@@ -101,7 +103,7 @@ bash update.sh --check  # Nur pruefen ob Updates verfuegbar
 
 | Typ | Anzahl | Inhalt |
 |-----|--------|--------|
-| Hooks | 5 | bash-firewall, protect-files, auto-format, secret-scan, session-logger |
+| Hooks | 6 | bash-firewall, protect-files, secret-scan-pre, auto-format, secret-scan, session-logger |
 | Agents | 3 | research, test-runner, security-auditor |
 | Skills | 4 | code-review, explain-code, deploy, project-init |
 | Commands | 7 | multi-model (5), forge-status, forge-update |
@@ -189,6 +191,7 @@ Hook manuell testen:
 ```bash
 echo '{"tool_input":{"command":"ls -la"}}' | bash hooks/bash-firewall.sh
 echo '{"tool_input":{"file_path":"/home/user/.env"}}' | bash hooks/protect-files.sh
+echo '{"tool_name":"Write","tool_input":{"file_path":"/tmp/t","content":"sk-ant-FAKE_KEY_HERE"}}' | bash hooks/secret-scan-pre.sh
 ```
 
 Validierung:
@@ -218,14 +221,15 @@ claude-forge/
 │   ├── bash-firewall.sh            Gefaehrliche Befehle blocken
 │   ├── protect-files.sh            Sensible Dateien schuetzen
 │   ├── auto-format.sh              Auto-Formatting (JS/TS/Python/Rust/Go/Shell)
-│   ├── secret-scan.sh              Secret-Erkennung nach Write/Edit
+│   ├── secret-scan-pre.sh           Secret-Erkennung VOR Write/Edit (deny)
+│   ├── secret-scan.sh              Secret-Erkennung nach Write/Edit (warn)
 │   └── session-logger.sh           Session-Ende Notification
 ├── rules/                          → ~/.claude/rules/ (symlinked)
 ├── agents/                         → ~/.claude/agents/
 ├── skills/                         → ~/.claude/skills/
 ├── commands/                       → ~/.claude/commands/
 ├── multi-model/                    → ~/.claude/multi-model/ (Codex CLI)
-├── tests/                          Test-Suite (68 Tests)
+├── tests/                          Test-Suite (92 Tests)
 └── docs/                           Dokumentation
     ├── ARCHITECTURE.md              Architektur-Uebersicht
     ├── demo.tape                    VHS Tape-Datei (GIF-Recording)
