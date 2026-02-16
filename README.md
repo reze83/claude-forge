@@ -1,16 +1,42 @@
 <div align="center">
 
-# claude-forge
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/logo-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/assets/logo-light.svg">
+  <img alt="claude-forge" src="docs/assets/logo-light.svg" width="480">
+</picture>
 
-**Modulares Claude Code Config-Repository**
-Security Hooks | Auto-Formatting | Secret-Scan | Multi-Model Support
+<br><br>
+
+<em>Modulares Claude Code Config-Repository</em><br>
+<sub>Security Hooks · Auto-Formatting · Secret-Scan · Multi-Model Support</sub>
+
+<br><br>
 
 [![Version](https://img.shields.io/badge/version-0.2.2-blue?style=flat-square)](CHANGELOG.md)
 [![CI](https://img.shields.io/github/actions/workflow/status/reze83/claude-forge/test.yml?branch=main&style=flat-square&label=CI)](https://github.com/reze83/claude-forge/actions)
 [![Tests](https://img.shields.io/badge/tests-71%20passed-brightgreen?style=flat-square)](#)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 
+<br>
+
+<!-- Demo GIF — generate with: vhs docs/demo.tape -->
+<img src="docs/assets/demo.gif" alt="claude-forge Demo — Bash-Firewall blockiert gefaehrliche Befehle" width="700">
+
 </div>
+
+---
+
+## Inhalt
+
+- [Quickstart](#quickstart)
+- [Features](#features)
+- [Komponenten](#komponenten)
+- [Voraussetzungen](#voraussetzungen)
+- [Multi-Model (Claude + Codex)](#multi-model-claude--codex)
+- [Troubleshooting](#troubleshooting)
+- [Verzeichnisstruktur](#verzeichnisstruktur)
+- [Deinstallation](#deinstallation)
 
 ---
 
@@ -200,7 +226,13 @@ claude-forge/
 ├── commands/                       → ~/.claude/commands/
 ├── multi-model/                    → ~/.claude/multi-model/ (Codex CLI)
 ├── tests/                          Test-Suite (68 Tests)
-└── docs/                           Architektur-Dokumentation
+└── docs/                           Dokumentation
+    ├── ARCHITECTURE.md              Architektur-Uebersicht
+    ├── demo.tape                    VHS Tape-Datei (GIF-Recording)
+    └── assets/                      Bilder & Medien
+        ├── logo-light.svg           Logo fuer Light-Mode
+        ├── logo-dark.svg            Logo fuer Dark-Mode
+        └── demo.gif                 Terminal-Demo (generiert)
 ```
 
 </details>
