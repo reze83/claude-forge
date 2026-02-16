@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2034
+set -euo pipefail
 # hooks/lib.sh — Shared functions for claude-forge hooks
 # Sourced by all hook scripts. NOT executed directly.
 # Compatible: Bash 3.2+ (macOS) and Bash 4+

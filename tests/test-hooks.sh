@@ -177,7 +177,7 @@ else
 fi
 
 # File with fake AWS key — should warn
-echo "AWS_KEY=AKIAIOSFODNN7EXAMPLE" > "$TMPDIR_TEST/secrets.txt"
+echo "AWS_KEY=AKIAIOSFODNN7EXAMPLE" > "$TMPDIR_TEST/secrets.txt" # pragma: allowlist secret
 SECRET_OUT=$(echo "{\"tool_input\":{\"file_path\":\"$TMPDIR_TEST/secrets.txt\"}}" | bash "$SS" 2>/dev/null)
 if [[ "$SECRET_OUT" == *"AWS Access Key"* ]]; then
   printf '  %b[PASS]%b Detects AWS Key\n' "$GREEN" "$NC"
