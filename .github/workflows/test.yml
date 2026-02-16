@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq jq shellcheck
+
+      - name: Validate JSON syntax
+        run: |
+          jq empty hooks/hooks.json
+          jq empty user-config/settings.json.example
+          jq empty .claude-plugin/plugin.json
+
+      - name: Validate shell syntax
+        run: |
+          for f in hooks/*.sh multi-model/*.sh install.sh uninstall.sh validate.sh update.sh; do
+            [ -f "$f" ] && bash -n "$f" && echo "OK: $f"
+          done
+
+      - name: Run ShellCheck
+        run: shellcheck -x --severity=warning hooks/*.sh multi-model/*.sh install.sh uninstall.sh validate.sh update.sh tests/*.sh
+
+      - name: Run hook tests
+        run: bash tests/test-hooks.sh
+
+      - name: Run update tests
+        run: bash tests/test-update.sh
+
+      - name: Install for validation
+        run: |
+          mkdir -p "$HOME/.claude"
+          bash install.sh
+
+      - name: Run validate tests
+        run: bash tests/test-validate.sh
+
+      - name: Run install tests
+        run: bash tests/test-install.sh
