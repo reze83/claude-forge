@@ -3,22 +3,15 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/logo-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="docs/assets/logo-light.svg">
-  <img alt="claude-forge" src="docs/assets/logo-light.svg" width="480">
+  <img alt="claude-forge" src="docs/assets/logo-light.svg" width="380">
 </picture>
 
-<br><br>
-
-<em>Modulares Claude Code Config-Repository</em><br>
-<sub>Security Hooks · Auto-Formatting · Secret-Scan · Multi-Model Support</sub>
-
-<br><br>
+<br>
 
 [![Version](https://img.shields.io/badge/version-0.3.0-blue?style=flat-square)](CHANGELOG.md)
 [![CI](https://img.shields.io/github/actions/workflow/status/reze83/claude-forge/test.yml?branch=main&style=flat-square&label=CI)](https://github.com/reze83/claude-forge/actions)
 [![Tests](https://img.shields.io/badge/tests-114%20passed-brightgreen?style=flat-square)](#)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
-
-<br>
 
 <!-- Demo GIF — generate with: vhs docs/assets/demo.tape -->
 <img src="docs/assets/demo.gif" alt="claude-forge Demo — Multi-Model Workflow mit Claude und Codex" width="700">
