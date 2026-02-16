@@ -21,6 +21,20 @@ block() {
 PATTERNS=(".env" ".env." "secrets/" ".ssh/" ".aws/" ".gnupg/" ".git/" ".npmrc" ".netrc")
 EXTENSIONS=(".pem" ".key" ".p12" ".pfx" ".keystore")
 
+# Allowlist: safe .env template files
+ALLOWLIST=(".env.example" ".env.sample" ".env.template")
+for a in "${ALLOWLIST[@]}"; do
+  [[ "$FILE_PATH" == *"$a" ]] && exit 0
+done
+
+# Hook-Tampering protection: block Write/Edit on hook config
+HOOK_PROTECTED=("hooks.json" "hooks/" "settings.json" "settings.local.json")
+if [[ "$TOOL_NAME" == "Write" || "$TOOL_NAME" == "Edit" ]]; then
+  for hp in "${HOOK_PROTECTED[@]}"; do
+    [[ "$FILE_PATH" == *".claude/$hp"* ]] && block "'$FILE_PATH' ist geschuetzt (Hook-Konfiguration)"
+  done
+fi
+
 # package-lock.json: Only block Write/Edit, allow Read/Glob/Grep
 if [[ "$FILE_PATH" == *"package-lock.json"* ]]; then
   if [[ "$TOOL_NAME" == "Write" || "$TOOL_NAME" == "Edit" ]]; then

@@ -17,6 +17,14 @@
           "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/protect-files.sh",
           "timeout": 10
         }]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [{
+          "type": "command",
+          "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/secret-scan-pre.sh",
+          "timeout": 10
+        }]
       }
     ],
     "PostToolUse": [

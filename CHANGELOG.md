@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-02-16
+
+### Added
+- secret-scan-pre.sh: new PreToolUse hook that scans Write/Edit content for secrets BEFORE writing (deny on match)
+- secret-scan-pre.sh: `# pragma: allowlist secret` / `// pragma: allowlist secret` to suppress false positives
+- protect-files.sh: allowlist for `.env.example`, `.env.sample`, `.env.template` (no longer blocked)
+- protect-files.sh: hook-tampering protection — blocks Write/Edit on `.claude/hooks.json`, `.claude/hooks/`, `.claude/settings.json`
+- bash-firewall.sh: `bash -c` / `sh -c` deny pattern to prevent command wrapping bypass
+- codex-wrapper.sh: `timeout` existence check with actionable error message for macOS users
+- test-hooks.sh: 21 new tests for all changes (92 total across all suites)
+
+### Changed
+- Hooks count: 5 → 6 (added secret-scan-pre.sh)
+
 ## [0.2.2] - 2026-02-16
 
 ### Fixed

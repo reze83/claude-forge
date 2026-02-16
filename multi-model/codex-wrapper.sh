@@ -97,6 +97,12 @@ OUTFILE="$(mktemp "${TMPBASE}/claude-codex-out-XXXXXX.txt")"
 ERRFILE="$(mktemp "${TMPBASE}/claude-codex-err-XXXXXX.txt")"
 trap 'rm -f "$OUTFILE" "$ERRFILE"' EXIT
 
+# --- timeout verfuegbar? (fehlt auf nativem macOS) ---
+if ! command -v timeout >/dev/null 2>&1; then
+  echo '{"status":"error","output":"timeout command not found. Install coreutils (brew install coreutils on macOS).","model":"codex"}'
+  exit 0
+fi
+
 # --- Codex ausfuehren (non-interactive via exec) ---
 cd "$WORKDIR"
 # shellcheck disable=SC2086
