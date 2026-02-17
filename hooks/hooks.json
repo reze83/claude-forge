@@ -86,7 +86,6 @@
     ],
     "TaskCompleted": [
       {
-        "matcher": "",
         "hooks": [{
           "type": "command",
           "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/task-gate.sh",
@@ -97,7 +96,6 @@
     ],
     "TeammateIdle": [
       {
-        "matcher": "",
         "hooks": [{
           "type": "command",
           "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/teammate-gate.sh",

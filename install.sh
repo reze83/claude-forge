@@ -24,21 +24,25 @@ NC='\033[0m'
 # --- Argumente ---
 for arg in "$@"; do
   case "$arg" in
-    --dry-run)  DRY_RUN=true ;;
+    --dry-run) DRY_RUN=true ;;
     --with-codex) WITH_CODEX=true ;;
-    --help|-h)
+    --help | -h)
       echo "Usage: install.sh [--dry-run] [--with-codex] [--help]"
       echo "  --dry-run     Zeigt was passieren wuerde, aendert nichts"
       echo "  --with-codex  Installiert zusaetzlich Codex CLI"
-      exit 0 ;;
+      exit 0
+      ;;
   esac
 done
 
 # --- Hilfsfunktionen ---
-log_ok()   { echo -e "  ${GREEN}[OK]${NC} $1"; }
+log_ok() { echo -e "  ${GREEN}[OK]${NC} $1"; }
 log_skip() { echo -e "  ${YELLOW}[SKIP]${NC} $1"; }
-log_err()  { echo -e "  ${RED}[ERR]${NC} $1"; ERRORS=$((ERRORS + 1)); }
-log_dry()  { echo -e "  ${YELLOW}[DRY]${NC} $1"; }
+log_err() {
+  echo -e "  ${RED}[ERR]${NC} $1"
+  ERRORS=$((ERRORS + 1))
+}
+log_dry() { echo -e "  ${YELLOW}[DRY]${NC} $1"; }
 
 INSTALLED_SYMLINKS=()
 
@@ -121,8 +125,8 @@ install_node() {
     local setup_script
     setup_script="$(mktemp "${TMPDIR:-/tmp}/nodesource-setup-XXXXXX.sh")"
     if curl -fsSL https://deb.nodesource.com/setup_20.x -o "$setup_script" 2>/dev/null; then
-      sudo -E bash "$setup_script" 2>/dev/null \
-        && sudo apt-get install -y -qq nodejs 2>/dev/null
+      sudo -E bash "$setup_script" 2>/dev/null &&
+        sudo apt-get install -y -qq nodejs 2>/dev/null
       local result=$?
       rm -f "$setup_script"
       [[ $result -eq 0 ]] && return 0
@@ -158,8 +162,8 @@ auto_install_optional() {
       python3 -m pip install --user "$pkg" 2>/dev/null && return 0
       # Fallback: venv-based install (Debian/Ubuntu block system pip)
       local venv_dir="$HOME/.local/venvs/claude-forge-tools"
-      if python3 -m venv "$venv_dir" 2>/dev/null \
-          && "$venv_dir/bin/pip" install "$pkg" 2>/dev/null; then
+      if python3 -m venv "$venv_dir" 2>/dev/null &&
+        "$venv_dir/bin/pip" install "$pkg" 2>/dev/null; then
         mkdir -p "$HOME/.local/bin"
         ln -sf "$venv_dir/bin/$cmd" "$HOME/.local/bin/$cmd"
         log_ok "$pkg installiert via venv ($venv_dir)"
@@ -250,6 +254,25 @@ for example_file in settings.json CLAUDE.md; do
   fi
 done
 
+# Sync hooks block from settings.json.example into existing settings.json
+EXAMPLE_SETTINGS="$REPO_DIR/user-config/settings.json.example"
+if [[ -f "$CLAUDE_DIR/settings.json" ]] && jq -e '.hooks' "$EXAMPLE_SETTINGS" >/dev/null 2>&1; then
+  if $DRY_RUN; then
+    log_dry "Wuerde hooks-Block in settings.json synchronisieren"
+  else
+    MERGED_TMP="$(mktemp "${TMPDIR:-/tmp}/settings-merged-XXXXXX.json")"
+    if jq -s '.[0] * {hooks: .[1].hooks}' \
+      "$CLAUDE_DIR/settings.json" "$EXAMPLE_SETTINGS" >"$MERGED_TMP" 2>/dev/null; then
+      backup_if_exists "$CLAUDE_DIR/settings.json"
+      mv "$MERGED_TMP" "$CLAUDE_DIR/settings.json"
+      log_ok "hooks-Block in settings.json synchronisiert"
+    else
+      rm -f "$MERGED_TMP"
+      log_err "hooks-Block konnte nicht synchronisiert werden"
+    fi
+  fi
+fi
+
 # MEMORY.md: Symlink (wird von Claude Code automatisch gepflegt)
 create_symlink "$REPO_DIR/user-config/MEMORY.md" "$CLAUDE_DIR/MEMORY.md"
 
@@ -318,8 +341,8 @@ if [[ -d "$HOME/.local/bin" ]] && [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; the
 fi
 if command -v npm >/dev/null 2>&1; then
   NPM_GLOBAL_BIN="$(npm prefix -g 2>/dev/null)/bin"
-  if [[ -n "$NPM_GLOBAL_BIN" && "$NPM_GLOBAL_BIN" != "/bin" && -d "$NPM_GLOBAL_BIN" ]] \
-      && [[ ":$PATH:" != *":$NPM_GLOBAL_BIN:"* ]]; then
+  if [[ -n "$NPM_GLOBAL_BIN" && "$NPM_GLOBAL_BIN" != "/bin" && -d "$NPM_GLOBAL_BIN" ]] &&
+    [[ ":$PATH:" != *":$NPM_GLOBAL_BIN:"* ]]; then
     PATH_HINTS+=("$NPM_GLOBAL_BIN")
   fi
 fi
