@@ -59,6 +59,16 @@ echo '{"custom": true}' >"$FAKE_HOME/.claude/settings.json"
 HOME="$FAKE_HOME" bash "$SCRIPT_DIR/install.sh" >/dev/null 2>&1
 assert "Zweite Installation ueberschreibt settings.json nicht" "grep -q 'custom' '$FAKE_HOME/.claude/settings.json'"
 
+# --- QA-Tools Sektion ---
+echo ""
+echo "-- QA-Tools Sektion --"
+QA_HOME=$(mktemp -d /tmp/claude-test-qa-XXXXXX)
+mkdir -p "$QA_HOME/.claude"
+# shellcheck disable=SC2034  # QATOOLS_OUT used via eval in assert()
+QATOOLS_OUT=$(HOME="$QA_HOME" bash "$SCRIPT_DIR/install.sh" 2>&1 || true)
+assert "QA-Tools Sektion laeuft ohne Fatal" "echo \"\$QATOOLS_OUT\" | grep -q 'Optionale QA-Tools'"
+rm -rf "$QA_HOME"
+
 # --- Hook-Sync Edge Cases ---
 echo ""
 echo "-- Hook-Sync --"

@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
   test:
     runs-on: ubuntu-22.04
@@ -13,6 +17,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -22,7 +28,8 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq jq shellcheck
+          sudo apt-get install -y -qq jq shellcheck bats
+          npm install -g markdownlint-cli2
 
       - name: Validate JSON syntax
         run: |
@@ -38,6 +45,25 @@ jobs:
 
       - name: Run ShellCheck
         run: shellcheck -x --severity=warning hooks/*.sh multi-model/*.sh install.sh uninstall.sh validate.sh update.sh tests/*.sh
+
+      - name: Run markdownlint
+        run: markdownlint-cli2 "**/*.md" "#node_modules"
+
+      - name: Check shell formatting (shfmt)
+        run: |
+          if command -v shfmt >/dev/null 2>&1; then
+            shfmt -d -i 2 -ci hooks/*.sh install.sh uninstall.sh validate.sh update.sh
+          fi
+
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run actionlint
+        run: |
+          bash <(curl -s https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+          ./actionlint
 
       - name: Run hook tests
         run: bash tests/test-hooks.sh

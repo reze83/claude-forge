@@ -183,6 +183,47 @@ _install_node_tool() {
   return 1
 }
 
+_install_github_binary() {
+  local cmd="$1"
+  local repo="$2"
+  local os arch tarball_url tarball_file
+
+  os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+  arch="$(uname -m)"
+  case "$arch" in
+    x86_64) arch="x86_64" ;;
+    aarch64 | arm64) arch="arm64" ;;
+    *) return 1 ;;
+  esac
+
+  # Fetch latest release tarball URL from GitHub API
+  tarball_url="$(curl -fsSL "https://api.github.com/repos/${repo}/releases/latest" 2>/dev/null |
+    jq -r --arg os "$os" --arg arch "$arch" \
+      '.assets[] | select(.name | test($os; "i")) | select(.name | test($arch)) | select(.name | test("\\.(tar\\.gz|tgz)$")) | .browser_download_url' |
+    head -1)"
+
+  if [[ -z "$tarball_url" || "$tarball_url" == "null" ]]; then
+    return 1
+  fi
+
+  tarball_file="$(mktemp "${TMPDIR:-/tmp}/github-binary-XXXXXX.tar.gz")"
+  if curl -fsSL "$tarball_url" -o "$tarball_file" 2>/dev/null; then
+    mkdir -p "$HOME/.local/bin"
+    tar -xzf "$tarball_file" -C "$HOME/.local/bin" "$cmd" 2>/dev/null ||
+      tar -xzf "$tarball_file" --strip-components=1 -C "$HOME/.local/bin" 2>/dev/null ||
+      {
+        rm -f "$tarball_file"
+        return 1
+      }
+    chmod +x "$HOME/.local/bin/$cmd"
+    rm -f "$tarball_file"
+    log_ok "$cmd installiert via GitHub Release ($repo)"
+    return 0
+  fi
+  rm -f "$tarball_file" 2>/dev/null || true
+  return 1
+}
+
 auto_install_optional() {
   local cmd="$1"
   local pkg="${2:-$1}"
@@ -196,15 +237,22 @@ auto_install_optional() {
     return 0
   fi
   echo -e "  ${YELLOW}[AUTO]${NC} Installiere $pkg..."
+  # bats-core: apt package name is "bats", brew name is "bats-core"
+  local apt_pkg="$pkg"
+  [[ "$pkg" == "bats-core" ]] && apt_pkg="bats"
   if command -v apt-get >/dev/null 2>&1; then
-    sudo apt-get install -y -qq "$pkg" 2>/dev/null && return 0
+    sudo apt-get install -y -qq "$apt_pkg" 2>/dev/null && return 0
   elif command -v brew >/dev/null 2>&1; then
     brew install "$pkg" 2>/dev/null && return 0
   fi
   if [[ "$pkg" == "ruff" ]]; then
     _install_python_tool "$cmd" "$pkg" && return 0
-  elif [[ "$pkg" == "prettier" ]]; then
+  elif [[ "$pkg" == "prettier" || "$pkg" == "markdownlint-cli2" ]]; then
     _install_node_tool "$cmd" "$pkg" && return 0
+  elif [[ "$pkg" == "gitleaks" ]]; then
+    _install_github_binary "gitleaks" "gitleaks/gitleaks" && return 0
+  elif [[ "$pkg" == "actionlint" ]]; then
+    _install_github_binary "actionlint" "rhysd/actionlint" && return 0
   fi
   echo -e "  ${YELLOW}[WARN]${NC} $pkg konnte nicht installiert werden (optional)"
   return 1
@@ -247,6 +295,15 @@ echo "-- Optionale Formatter --"
 auto_install_optional shfmt || true
 auto_install_optional ruff || true
 auto_install_optional prettier || true
+
+# --- Optionale QA-Tools ---
+echo ""
+echo "-- Optionale QA-Tools --"
+auto_install_optional shellcheck || true
+auto_install_optional bats bats-core || true
+auto_install_optional markdownlint-cli2 markdownlint-cli2 || true
+auto_install_optional gitleaks gitleaks || true
+auto_install_optional actionlint actionlint || true
 
 if pgrep -f "claude.*--plugin-dir.*claude-forge" >/dev/null 2>&1; then
   log_err "claude-forge laeuft als Plugin. Beende Claude und starte ohne --plugin-dir."

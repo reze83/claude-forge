@@ -67,6 +67,16 @@ install.sh                      uninstall.sh
 | prettier | apt/brew → npm install -g → Verify PATH → Symlink ~/.local/bin/                                                     |
 | shfmt    | apt/brew                                                                                                            |
 
+### Dependency-Fallbacks (optionale QA-Tools)
+
+| Tool              | Fallback-Kette                                                 |
+| ----------------- | -------------------------------------------------------------- |
+| shellcheck        | apt/brew                                                       |
+| bats-core         | apt (Paketname: bats) / brew (Paketname: bats-core)            |
+| markdownlint-cli2 | apt/brew → npm install -g via \_install_node_tool()            |
+| gitleaks          | apt/brew → GitHub Release Binary via \_install_github_binary() |
+| actionlint        | apt/brew → GitHub Release Binary via \_install_github_binary() |
+
 Nach der Installation prueft ein PATH-Check, ob `~/.local/bin` und das npm-global-bin
 Verzeichnis im PATH liegen. Falls nicht, wird eine konkrete `export PATH=...` Empfehlung ausgegeben.
 
@@ -254,7 +264,7 @@ validate.sh prueft in 9 Sektionen:
 4. **Agents** — YAML Frontmatter, Pflichtfelder
 5. **Skills** — YAML Frontmatter, Pflichtfelder
 6. **Commands** — YAML Frontmatter, Pflichtfelder
-7. **System-Tools** — Pflicht (node, python3, git, jq) + Optional (codex, ruff, shfmt)
+7. **System-Tools** — Pflicht (node, python3, git, jq) + Optional (codex, ruff, shfmt, shellcheck, bats-core, markdownlint-cli2, gitleaks, actionlint)
 8. **Secrets-Scan** — 11 Patterns (Anthropic, OpenAI, GitHub PAT/OAuth/Server/Refresh, AWS, JWT, PEM, Stripe, Slack, Azure)
 9. **Hook-Konsistenz** — Timeout-Vergleich hooks.json vs. settings.json.example
 
@@ -312,9 +322,9 @@ and `hookSpecificOutput.reason`.
 | ---------------- | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | test-hooks.sh    | 138   | bash-firewall (48: basic+bypass+subshell/pipe/backtick/herestring), protect-files (29: basic+case-insensitive+allowlist+tampering+non-ASCII), secret-scan (16: pre+post+pragma), auto-format (2), session-logger (3: basic+log-rotation), session-start (2), setup (3: basic+additionalContext+forgeVersion), post-failure (2), pre-compact (2), task-gate (2), teammate-gate (2), negative/error (22: corrupt JSON+empty stdin+missing fields+oversized) |
 | test-update.sh   | 6     | --help, VERSION, Nicht-Git-Repo, --check                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| test-install.sh  | 15    | Install/Uninstall Lifecycle, Hook-Sync Edge Cases (corrupt JSON, empty settings, dry-run)                                                                                                                                                                                                                                                                                                                                                                 |
+| test-install.sh  | 16    | Install/Uninstall Lifecycle, QA-Tools Section, Hook-Sync Edge Cases (corrupt JSON, empty settings, dry-run)                                                                                                                                                                                                                                                                                                                                               |
 | test-codex.sh    | 11    | Codex Wrapper (error handling, timeout validation incl. non-numeric, live)                                                                                                                                                                                                                                                                                                                                                                                |
 | test-validate.sh | 1     | Validierungs-Durchlauf                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 
-CI (`test.yml`) fuehrt alle Tests auf ubuntu-22.04 aus (ausser test-codex.sh und test-validate.sh). ShellCheck laeuft als zusaetzlicher statischer Analyse-Step.
-Total: 171 tests (138 hooks + 15 install + 6 update + 11 codex + 1 validate).
+CI (`test.yml`) fuehrt alle Tests auf ubuntu-22.04 aus (ausser test-codex.sh und test-validate.sh). ShellCheck, markdownlint, shfmt, gitleaks und actionlint laufen als zusaetzliche statische Analyse-Steps.
+Total: 172 tests (138 hooks + 16 install + 6 update + 11 codex + 1 validate).

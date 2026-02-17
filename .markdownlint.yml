@@ -1,0 +1,16 @@
+# markdownlint configuration
+# Rules disabled to match existing codebase style.
+# Tighten gradually in follow-up PRs.
+
+MD013: false # Line length (disabled — many long URLs/tables)
+MD022: false # Blanks around headings (commands/agents use compact style)
+MD024: false # Duplicate headings (CHANGELOG repeats ### Added/Fixed per version)
+MD031: false # Blanks around fences (compact style in commands/agents)
+MD032: false # Blanks around lists (compact style in commands/agents)
+MD033: false # Inline HTML (badges in README)
+MD037: false # Spaces inside emphasis (false positive with escaped underscores in tables)
+MD040: false # Fenced code language (some blocks are intentionally generic)
+MD041: false # First line h1 (frontmatter in skills/agents/commands)
+MD042: false # Empty links (badge links use (#) as placeholder)
+MD058: false # Blanks around tables (compact style in commands)
+MD060: false # Table column style (compact pipe style used throughout)

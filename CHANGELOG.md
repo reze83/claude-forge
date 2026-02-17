@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- install.sh: QA-Tools auto-installation (shellcheck, gitleaks, bats-core, markdownlint-cli2, actionlint) as optional dev tools
+- install.sh: `_install_github_binary()` helper — downloads latest release binaries from GitHub (used for gitleaks, actionlint)
+- install.sh: `auto_install_optional()` extended with fallbacks for markdownlint-cli2 (npm), gitleaks/actionlint (GitHub binary), bats-core (apt name mapping)
+- validate.sh: warning-level checks for shellcheck, bats-core, markdownlint-cli2, gitleaks, actionlint
+- test.yml: CI steps for markdownlint, shfmt formatting check, gitleaks secret scan, actionlint workflow linting
+- test-install.sh: QA-Tools section test (16 total, was 15)
+- .markdownlint.yml: markdownlint configuration (MD013/MD033/MD041 disabled)
 - setup.sh: new Setup hook — checks dependencies (git, jq, node >=20, python3 >=3.10), validates symlink health (hooks/, rules/, commands/), injects additionalContext
 - hooks/lib.sh: `context()` helper function — builds additionalContext JSON from key-value pairs using jq
 - hooks.json + settings.json.example: Setup event registered (timeout: 30s)
