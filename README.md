@@ -28,7 +28,6 @@
 - [Voraussetzungen](#voraussetzungen)
 - [Multi-Model (Claude + Codex)](#multi-model-claude--codex)
 - [Troubleshooting](#troubleshooting)
-- [Verzeichnisstruktur](#verzeichnisstruktur)
 - [Deinstallation](#deinstallation)
 
 ---
