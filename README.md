@@ -232,8 +232,7 @@ claude-forge/
 ├── VERSION                         Aktuelle Version
 ├── user-config/                    Vorlagen fuer ~/.claude/
 │   ├── settings.json.example       Hauptkonfiguration (kopiert bei Install)
-│   ├── CLAUDE.md.example           Globale Instruktionen (kopiert bei Install)
-│   └── MEMORY.md                   Persistenter Speicher (symlinked)
+│   └── CLAUDE.md.example           Globale Instruktionen (kopiert bei Install)
 ├── hooks/                          → ~/.claude/hooks/
 │   ├── lib.sh                      Shared library (block/warn/debug/patterns)
 │   ├── bash-firewall.sh            Gefaehrliche Befehle blocken

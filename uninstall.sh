@@ -20,11 +20,12 @@ NC='\033[0m'
 # --- Argumente ---
 for arg in "$@"; do
   case "$arg" in
-    --dry-run)  DRY_RUN=true ;;
-    --help|-h)
+    --dry-run) DRY_RUN=true ;;
+    --help | -h)
       echo "Usage: uninstall.sh [--dry-run] [--help]"
       echo "  --dry-run  Zeigt was entfernt wuerde, aendert nichts"
-      exit 0 ;;
+      exit 0
+      ;;
   esac
 done
 
@@ -51,7 +52,6 @@ fi
 echo ""
 
 # Symlinked components
-remove_if_symlink_to_repo "$CLAUDE_DIR/MEMORY.md"
 remove_if_symlink_to_repo "$CLAUDE_DIR/rules"
 remove_if_symlink_to_repo "$CLAUDE_DIR/hooks"
 remove_if_symlink_to_repo "$CLAUDE_DIR/commands"

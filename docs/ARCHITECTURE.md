@@ -14,7 +14,6 @@ Loesung: Das Repo ist beides — ein Plugin UND ein Symlink-basiertes Config-Rep
 | --------------------------------- | ----------------------- | ----------------- | --------------------- |
 | user-config/settings.json.example | ~/.claude/settings.json | Kopie (einmalig)  | Hauptkonfiguration    |
 | user-config/CLAUDE.md.example     | ~/.claude/CLAUDE.md     | Kopie (einmalig)  | Globale Instruktionen |
-| user-config/MEMORY.md             | ~/.claude/MEMORY.md     | Symlink           | Persistenter Speicher |
 | rules/                            | ~/.claude/rules/        | Symlink           | Constraint-Regeln     |
 | hooks/                            | ~/.claude/hooks/        | Symlink           | Hook-Scripts          |
 | commands/                         | ~/.claude/commands/     | Symlink           | Slash-Commands        |
@@ -73,13 +72,13 @@ install.sh                      uninstall.sh
 
 ### Dependency-Fallbacks (optionale QA-Tools)
 
-| Tool              | Fallback-Kette                                                 |
-| ----------------- | -------------------------------------------------------------- |
-| shellcheck        | apt/brew                                                       |
+| Tool              | Fallback-Kette                                                                                                       |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------- |
+| shellcheck        | apt/brew                                                                                                             |
 | bats-core         | apt (Paketname: bats) / brew (Paketname: bats-core) → git clone + install.sh nach ~/.local via \_install_bats_core() |
-| markdownlint-cli2 | apt/brew → npm install -g via \_install_node_tool()            |
-| gitleaks          | apt/brew → GitHub Release via \_install_github_binary() (arch: x86\_64/x64/amd64) |
-| actionlint        | apt/brew → GitHub Release via \_install_github_binary() (arch: x86\_64/x64/amd64) |
+| markdownlint-cli2 | apt/brew → npm install -g via \_install_node_tool()                                                                  |
+| gitleaks          | apt/brew → GitHub Release via \_install_github_binary() (arch: x86_64/x64/amd64)                                     |
+| actionlint        | apt/brew → GitHub Release via \_install_github_binary() (arch: x86_64/x64/amd64)                                     |
 
 Nach der Installation prueft ein PATH-Check, ob `~/.local/bin` und das npm-global-bin
 Verzeichnis im PATH liegen. Falls nicht, wird eine konkrete `export PATH=...` Empfehlung ausgegeben.

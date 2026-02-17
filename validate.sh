@@ -49,7 +49,6 @@ check_symlink() {
   fi
 }
 
-check_symlink "MEMORY.md"
 check_symlink "rules"
 check_symlink "hooks"
 check_symlink "commands"
