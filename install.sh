@@ -136,9 +136,57 @@ install_node() {
   return 1
 }
 
+_install_python_tool() {
+  local cmd="$1"
+  local pkg="$2"
+  local venv_dir
+
+  if command -v pip3 >/dev/null 2>&1; then
+    pip3 install --user "$pkg" 2>/dev/null && return 0
+  fi
+  if command -v python3 >/dev/null 2>&1; then
+    python3 -m pip install --user "$pkg" 2>/dev/null && return 0
+    # Fallback: venv-based install (Debian/Ubuntu block system pip)
+    venv_dir="$HOME/.local/venvs/claude-forge-tools"
+    if python3 -m venv "$venv_dir" 2>/dev/null &&
+      "$venv_dir/bin/pip" install "$pkg" 2>/dev/null; then
+      mkdir -p "$HOME/.local/bin"
+      ln -sf "$venv_dir/bin/$cmd" "$HOME/.local/bin/$cmd"
+      log_ok "$pkg installiert via venv ($venv_dir)"
+      return 0
+    fi
+  fi
+  return 1
+}
+
+_install_node_tool() {
+  local cmd="$1"
+  local pkg="$2"
+  local npm_bin
+
+  if command -v npm >/dev/null 2>&1; then
+    npm install -g "$pkg" 2>/dev/null || true
+    # Verify binary is in PATH after npm install
+    if command -v "$cmd" >/dev/null 2>&1; then
+      return 0
+    fi
+    # npm global bin may not be in PATH — create symlink as fallback
+    npm_bin="$(npm prefix -g 2>/dev/null)/bin/$cmd"
+    if [[ -x "$npm_bin" ]]; then
+      mkdir -p "$HOME/.local/bin"
+      ln -sf "$npm_bin" "$HOME/.local/bin/$cmd"
+      log_ok "$pkg installiert (Symlink: ~/.local/bin/$cmd)"
+      echo -e "  ${YELLOW}[INFO]${NC} npm global bin ist nicht im PATH. Stelle sicher, dass ~/.local/bin im PATH liegt."
+      return 0
+    fi
+  fi
+  return 1
+}
+
 auto_install_optional() {
   local cmd="$1"
   local pkg="${2:-$1}"
+
   if command -v "$cmd" >/dev/null 2>&1; then
     log_ok "$cmd bereits vorhanden"
     return 0
@@ -153,41 +201,10 @@ auto_install_optional() {
   elif command -v brew >/dev/null 2>&1; then
     brew install "$pkg" 2>/dev/null && return 0
   fi
-  # Language-specific fallbacks
   if [[ "$pkg" == "ruff" ]]; then
-    if command -v pip3 >/dev/null 2>&1; then
-      pip3 install --user "$pkg" 2>/dev/null && return 0
-    fi
-    if command -v python3 >/dev/null 2>&1; then
-      python3 -m pip install --user "$pkg" 2>/dev/null && return 0
-      # Fallback: venv-based install (Debian/Ubuntu block system pip)
-      local venv_dir="$HOME/.local/venvs/claude-forge-tools"
-      if python3 -m venv "$venv_dir" 2>/dev/null &&
-        "$venv_dir/bin/pip" install "$pkg" 2>/dev/null; then
-        mkdir -p "$HOME/.local/bin"
-        ln -sf "$venv_dir/bin/$cmd" "$HOME/.local/bin/$cmd"
-        log_ok "$pkg installiert via venv ($venv_dir)"
-        return 0
-      fi
-    fi
+    _install_python_tool "$cmd" "$pkg" && return 0
   elif [[ "$pkg" == "prettier" ]]; then
-    if command -v npm >/dev/null 2>&1; then
-      npm install -g "$pkg" 2>/dev/null || true
-      # Verify binary is in PATH after npm install
-      if command -v "$cmd" >/dev/null 2>&1; then
-        return 0
-      fi
-      # npm global bin may not be in PATH — create symlink as fallback
-      local npm_bin
-      npm_bin="$(npm prefix -g 2>/dev/null)/bin/$cmd"
-      if [[ -x "$npm_bin" ]]; then
-        mkdir -p "$HOME/.local/bin"
-        ln -sf "$npm_bin" "$HOME/.local/bin/$cmd"
-        log_ok "$pkg installiert (Symlink: ~/.local/bin/$cmd)"
-        echo -e "  ${YELLOW}[INFO]${NC} npm global bin ist nicht im PATH. Stelle sicher, dass ~/.local/bin im PATH liegt."
-        return 0
-      fi
-    fi
+    _install_node_tool "$cmd" "$pkg" && return 0
   fi
   echo -e "  ${YELLOW}[WARN]${NC} $pkg konnte nicht installiert werden (optional)"
   return 1

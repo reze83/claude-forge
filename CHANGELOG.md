@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub issue/PR templates (bug report, feature request, pull request)
 - GitHub repository topics (claude-code, hooks, security, cli, multi-model, codex, bash, developer-tools)
 - output-styles/ directory for future custom output styles
-- plugin.json: outputStyles and lspServers fields
+- plugin.json: outputStyles field
 - plugin.json: repository, license, keywords, author object
 - hooks.json + settings.json.example: SessionStart, PostToolUseFailure, PreCompact, TaskCompleted, TeammateIdle events registered
 - install.sh: auto-sync hooks block from settings.json.example into existing ~/.claude/settings.json on update (preserves user settings)
@@ -24,8 +24,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - bash-firewall.sh: 5 new deny patterns — command substitution, backtick substitution, process substitution, pipe-to-shell (incl. absolute paths), herestring protection (25 total)
 - codex-wrapper.sh: integer validation for --timeout (non-numeric values now return structured JSON error)
 - test.yml: ShellCheck static analysis step in CI pipeline
-- test-hooks.sh: 17 new tests — subshell/pipe/backtick/herestring bypass (14), log rotation (1), non-ASCII paths (2) (104 total)
+- test-hooks.sh: 17 new tests — subshell/pipe/backtick/herestring bypass (14), log rotation (1), non-ASCII paths (2)
+- test-hooks.sh: 9 new tests for 5 new hooks — session-start (2), post-failure (2), pre-compact (2), task-gate (2), teammate-gate (2) (113 total)
 - test-codex.sh: 2 new tests — non-numeric timeout validation (11 total)
+- install.sh: `_install_python_tool()` and `_install_node_tool()` helper functions extracted from `auto_install_optional()`
 - .gitignore: IDE files (.idea, .vscode, \*.swp), coverage directories
 
 ### Fixed
@@ -40,6 +42,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ARCHITECTURE.md: Hook table updated (6→11 hooks, 3→8 event types), warn() description corrected, block() exit code documentation fixed
 - README.md: hook count updated (6→11), test badge updated (114→133), directory structure updated
 - plugin.json: version synced to 0.3.0 (was 0.2.1)
+- plugin.json: removed `hooks` field (auto-loaded from hooks/hooks.json per plugin spec)
+- plugin.json: removed empty `lspServers` field
+- settings.json.example: replaced deprecated `includeCoAuthoredBy` with `attribution` object
 - secret-scan.sh: added `--` before file path argument to prevent flag interpretation
 - test-hooks.sh: all block tests updated from expected exit 2 to exit 0 (matching block() fix)
 - test-hooks.sh: added EXIT trap for temp directory cleanup on abnormal exit
