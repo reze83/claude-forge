@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- install.sh: sudo credential caching at install start (`sudo -v`) — prompts for password once, skipped in dry-run and when passwordless
 - install.sh: QA-Tools auto-installation (shellcheck, gitleaks, bats-core, markdownlint-cli2, actionlint) as optional dev tools
 - install.sh: `_install_github_binary()` helper — downloads latest release binaries from GitHub (used for gitleaks, actionlint)
 - install.sh: `auto_install_optional()` extended with fallbacks for markdownlint-cli2 (npm), gitleaks/actionlint (GitHub binary), bats-core (apt name mapping)
@@ -44,6 +45,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - .gitignore: IDE files (.idea, .vscode, \*.swp), coverage directories
 
 ### Fixed
+
+- install.sh: `_install_github_binary()` arch mapping — `uname -m` returns `x86_64` but GitHub assets use `x64` (gitleaks) or `amd64` (actionlint); now matches all variants via regex `(x86_64|x64|amd64)`
+- install.sh: apt-based tool installation (bats, shellcheck) failed silently when sudo required a password; now prompts once at install start
 
 - codex-wrapper.sh: suppress `codex exec` stdout to prevent duplicate output (output is read from `-o` file); fixes invalid JSON in wrapper response
 - bash-firewall.sh, protect-files.sh, secret-scan-pre.sh, secret-scan.sh, auto-format.sh: defensive jq error handling — corrupt/empty JSON input no longer crashes hooks (exit 0 on parse failure)

@@ -44,11 +44,15 @@ duerfen NICHT gleichzeitig aktiv sein. Sonst werden Hooks doppelt geladen.
 ```
 install.sh                      uninstall.sh
     │                               │
-    ├── Auto-Install Dependencies   ├── Symlinks entfernen (readlink check)
-    │   ├── Pflicht: git,jq,node,   │   └── Nur wenn Ziel → Repo
-    │   │   python3                  ├── Backup-Hinweis anzeigen
-    │   └── Optional: shfmt,ruff,   └── --dry-run Modus
-    │       prettier (mit Fallbacks)
+    ├── sudo -v (Passwort cachen)   ├── Symlinks entfernen (readlink check)
+    ├── Auto-Install Dependencies   │   └── Nur wenn Ziel → Repo
+    │   ├── Pflicht: git,jq,node,   ├── Backup-Hinweis anzeigen
+    │   │   python3                  └── --dry-run Modus
+    │   ├── Optional: shfmt,ruff,
+    │   │   prettier (mit Fallbacks)
+    │   └── QA-Tools: shellcheck,
+    │       bats,markdownlint-cli2,
+    │       gitleaks,actionlint
     ├── Plugin-Modus Check          update.sh
     ├── Backup bestehender Dateien      │
     ├── Symlinks erstellen              ├── git fetch + Changelog anzeigen
@@ -74,8 +78,8 @@ install.sh                      uninstall.sh
 | shellcheck        | apt/brew                                                       |
 | bats-core         | apt (Paketname: bats) / brew (Paketname: bats-core)            |
 | markdownlint-cli2 | apt/brew → npm install -g via \_install_node_tool()            |
-| gitleaks          | apt/brew → GitHub Release Binary via \_install_github_binary() |
-| actionlint        | apt/brew → GitHub Release Binary via \_install_github_binary() |
+| gitleaks          | apt/brew → GitHub Release via \_install_github_binary() (arch: x86\_64/x64/amd64) |
+| actionlint        | apt/brew → GitHub Release via \_install_github_binary() (arch: x86\_64/x64/amd64) |
 
 Nach der Installation prueft ein PATH-Check, ob `~/.local/bin` und das npm-global-bin
 Verzeichnis im PATH liegen. Falls nicht, wird eine konkrete `export PATH=...` Empfehlung ausgegeben.
