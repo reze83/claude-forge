@@ -19,7 +19,7 @@ Bash-basiertes Security- & Productivity-Framework fuer Claude Code CLI.
 ## Hook-Entwicklung
 - Output nur via `block()`/`warn()` aus `hooks/lib.sh` — nie manuell JSON bauen
 - Source-Pattern: `source "$(cd "$(dirname "$0")" && pwd)/lib.sh"`
-- Exit-Codes: 0=Allow, 2=Block (PreToolUse), 1=Script-Error
+- Exit-Codes: 0=Success (JSON wird verarbeitet), 2=Block (JSON wird IGNORIERT, stderr→Claude), 1=Script-Error
 - Secret-Patterns nur in `hooks/lib.sh` pflegen (DRY)
 - Neuer Hook → Eintrag in hooks/hooks.json UND user-config/settings.json.example (identische Timeouts)
 - `printf` statt `echo -e` (POSIX-Portabilitaet)
