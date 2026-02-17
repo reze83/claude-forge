@@ -12,7 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - install.sh: sudo credential caching at install start (`sudo -v`) — prompts for password once, skipped in dry-run and when passwordless
 - install.sh: QA-Tools auto-installation (shellcheck, gitleaks, bats-core, markdownlint-cli2, actionlint) as optional dev tools
 - install.sh: `_install_github_binary()` helper — downloads latest release binaries from GitHub (used for gitleaks, actionlint)
-- install.sh: `auto_install_optional()` extended with fallbacks for markdownlint-cli2 (npm), gitleaks/actionlint (GitHub binary), bats-core (apt name mapping)
+- install.sh: `auto_install_optional()` extended with fallbacks for markdownlint-cli2 (npm), gitleaks/actionlint (GitHub binary), bats-core (apt name mapping → git clone)
+- install.sh: `_install_bats_core()` helper — clones bats-core from GitHub and installs to ~/.local (no sudo required)
 - validate.sh: warning-level checks for shellcheck, bats-core, markdownlint-cli2, gitleaks, actionlint
 - test.yml: CI steps for markdownlint, shfmt formatting check, gitleaks secret scan, actionlint workflow linting
 - test-install.sh: QA-Tools section test (16 total, was 15)
