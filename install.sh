@@ -262,6 +262,12 @@ auto_install_optional() {
 echo "=== claude-forge installer ==="
 echo ""
 
+# Cache sudo credentials upfront (prompts for password once if needed)
+if ! $DRY_RUN && command -v sudo >/dev/null 2>&1 && ! sudo -n true 2>/dev/null; then
+  echo -e "${YELLOW}[INFO]${NC} Einige Pakete benoetigen sudo. Bitte Passwort eingeben:"
+  sudo -v || echo -e "  ${YELLOW}[WARN]${NC} sudo nicht verfuegbar — apt-Pakete werden uebersprungen"
+fi
+
 echo "-- Pre-Checks (Pflicht) --"
 if ! command -v git >/dev/null 2>&1; then
   auto_install git || log_err "git nicht gefunden und konnte nicht installiert werden."
