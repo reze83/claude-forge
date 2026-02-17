@@ -189,10 +189,10 @@ _install_github_binary() {
   local os arch tarball_url tarball_file
 
   os="$(uname -s | tr '[:upper:]' '[:lower:]')"
-  arch="$(uname -m)"
-  case "$arch" in
-    x86_64) arch="x86_64" ;;
-    aarch64 | arm64) arch="arm64" ;;
+  # Map uname -m to regex matching common GitHub release naming conventions
+  case "$(uname -m)" in
+    x86_64) arch="(x86_64|x64|amd64)" ;;
+    aarch64 | arm64) arch="(arm64|aarch64)" ;;
     *) return 1 ;;
   esac
 
