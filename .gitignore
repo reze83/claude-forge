@@ -36,3 +36,12 @@ venv/
 # Coverage
 coverage/
 *.lcov
+
+# Claude Code local state
+.claude/
+
+# Sandbox artifacts (bwrap write-protection stubs)
+/HEAD
+/config
+/objects
+/refs
