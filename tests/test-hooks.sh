@@ -356,6 +356,34 @@ fi
 
 echo ""
 
+# --- setup.sh ---
+echo "-- setup.sh --"
+SETUP="$HOOKS_DIR/setup.sh"
+
+# Valid Setup payload
+assert_exit "Exit 0 for Setup input" 0 "$SETUP" '{}'
+
+# Output should contain additionalContext
+SETUP_OUT=$(echo '{}' | bash "$SETUP" 2>/dev/null || true)
+if [[ "$SETUP_OUT" == *"additionalContext"* ]]; then
+  printf '  %b[PASS]%b additionalContext in setup output\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b additionalContext missing in setup output: %s\n' "$RED" "$NC" "$SETUP_OUT"
+  FAIL=$((FAIL + 1))
+fi
+
+# forgeVersion should be in output
+if [[ "$SETUP_OUT" == *"forgeVersion"* ]]; then
+  printf '  %b[PASS]%b forgeVersion in setup output\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b forgeVersion missing in setup output: %s\n' "$RED" "$NC" "$SETUP_OUT"
+  FAIL=$((FAIL + 1))
+fi
+
+echo ""
+
 # --- post-failure.sh ---
 echo "-- post-failure.sh --"
 PFAIL="$HOOKS_DIR/post-failure.sh"
@@ -377,6 +405,7 @@ assert_exit "PF: Exit 0 on corrupt JSON" 0 "$PF" '{not-json'
 assert_exit "SP: Exit 0 on corrupt JSON" 0 "$SP" '{not-json'
 assert_exit "AF: Exit 0 on corrupt JSON" 0 "$AF" '{not-json'
 assert_exit "SESS: Exit 0 on corrupt JSON" 0 "$SESS" '{not-json'
+assert_exit "SETUP: Exit 0 on corrupt JSON" 0 "$SETUP" '{not-json'
 assert_exit "PFAIL: Exit 0 on corrupt JSON" 0 "$PFAIL" '{not-json'
 
 # 2) Empty stdin (all should gracefully exit 0)
@@ -385,6 +414,7 @@ assert_exit "PF: Exit 0 on empty stdin" 0 "$PF" ''
 assert_exit "SP: Exit 0 on empty stdin" 0 "$SP" ''
 assert_exit "AF: Exit 0 on empty stdin" 0 "$AF" ''
 assert_exit "SESS: Exit 0 on empty stdin" 0 "$SESS" ''
+assert_exit "SETUP: Exit 0 on empty stdin" 0 "$SETUP" ''
 assert_exit "PFAIL: Exit 0 on empty stdin" 0 "$PFAIL" ''
 
 # 3) Missing tool_input field (all should gracefully exit 0)
@@ -393,6 +423,7 @@ assert_exit "PF: Exit 0 without tool_input" 0 "$PF" '{"tool_name":"Write"}'
 assert_exit "SP: Exit 0 without tool_input" 0 "$SP" '{"tool_name":"Write"}'
 assert_exit "AF: Exit 0 without tool_input" 0 "$AF" '{"tool_name":"Write"}'
 assert_exit "SESS: Exit 0 without tool_input" 0 "$SESS" '{"session_id":"sess_123"}'
+assert_exit "SETUP: Exit 0 with minimal input" 0 "$SETUP" '{}'
 assert_exit "PFAIL: Exit 0 without tool_input" 0 "$PFAIL" '{"tool_name":"Read","error":"denied"}'
 
 # 4) Oversized input to secret-scan-pre.sh (>1MB should be handled gracefully)

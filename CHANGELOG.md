@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- setup.sh: new Setup hook — checks dependencies (git, jq, node >=20, python3 >=3.10), validates symlink health (hooks/, rules/, commands/), injects additionalContext
+- hooks/lib.sh: `context()` helper function — builds additionalContext JSON from key-value pairs using jq
+- hooks.json + settings.json.example: Setup event registered (timeout: 30s)
+- test-hooks.sh: 6 new tests for setup.sh (138 total)
 - 5 new hook scripts: session-start.sh (SessionStart), post-failure.sh (PostToolUseFailure), pre-compact.sh (PreCompact), task-gate.sh (TaskCompleted), teammate-gate.sh (TeammateIdle)
 - SECURITY.md: security policy with vulnerability reporting and architecture overview
 - GitHub issue/PR templates (bug report, feature request, pull request)

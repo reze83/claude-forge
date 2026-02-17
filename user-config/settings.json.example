@@ -102,6 +102,17 @@
         }]
       }
     ],
+    "Setup": [
+      {
+        "matcher": "",
+        "hooks": [{
+          "type": "command",
+          "command": "bash $HOME/.claude/hooks/setup.sh",
+          "timeout": 30,
+          "statusMessage": "Checking setup requirements..."
+        }]
+      }
+    ],
     "SessionStart": [
       {
         "matcher": "",
