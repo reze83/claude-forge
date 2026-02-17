@@ -224,6 +224,25 @@ _install_github_binary() {
   return 1
 }
 
+_install_bats_core() {
+  local tmp_dir prefix
+  tmp_dir="$(mktemp -d "${TMPDIR:-/tmp}/bats-core-XXXXXX")"
+  prefix="${HOME}/.local"
+  git clone --depth 1 https://github.com/bats-core/bats-core.git "$tmp_dir" 2>/dev/null || { rm -rf "$tmp_dir"; return 1; }
+  mkdir -p "$prefix"
+  bash "$tmp_dir/install.sh" "$prefix" 2>/dev/null || { rm -rf "$tmp_dir"; return 1; }
+  rm -rf "$tmp_dir"
+  # Ensure ~/.local/bin is in PATH for current session
+  if ! command -v bats >/dev/null 2>&1; then
+    export PATH="$prefix/bin:$PATH"
+  fi
+  if command -v bats >/dev/null 2>&1; then
+    log_ok "bats-core installiert via git clone ($prefix)"
+    return 0
+  fi
+  return 1
+}
+
 auto_install_optional() {
   local cmd="$1"
   local pkg="${2:-$1}"
@@ -253,6 +272,8 @@ auto_install_optional() {
     _install_github_binary "gitleaks" "gitleaks/gitleaks" && return 0
   elif [[ "$pkg" == "actionlint" ]]; then
     _install_github_binary "actionlint" "rhysd/actionlint" && return 0
+  elif [[ "$pkg" == "bats-core" ]]; then
+    _install_bats_core && return 0
   fi
   echo -e "  ${YELLOW}[WARN]${NC} $pkg konnte nicht installiert werden (optional)"
   return 1

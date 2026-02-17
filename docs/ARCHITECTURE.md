@@ -76,7 +76,7 @@ install.sh                      uninstall.sh
 | Tool              | Fallback-Kette                                                 |
 | ----------------- | -------------------------------------------------------------- |
 | shellcheck        | apt/brew                                                       |
-| bats-core         | apt (Paketname: bats) / brew (Paketname: bats-core)            |
+| bats-core         | apt (Paketname: bats) / brew (Paketname: bats-core) → git clone + install.sh nach ~/.local via \_install_bats_core() |
 | markdownlint-cli2 | apt/brew → npm install -g via \_install_node_tool()            |
 | gitleaks          | apt/brew → GitHub Release via \_install_github_binary() (arch: x86\_64/x64/amd64) |
 | actionlint        | apt/brew → GitHub Release via \_install_github_binary() (arch: x86\_64/x64/amd64) |

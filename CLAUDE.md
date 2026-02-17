@@ -40,7 +40,7 @@ Bash-basiertes Security- & Productivity-Framework fuer Claude Code CLI.
 - `sudo -v` am Anfang cached Passwort einmalig (uebersprungen bei dry-run und passwordless sudo)
 - Neue Tool-Fallbacks in `auto_install_optional()`: npm via `_install_node_tool()`, GitHub Releases via `_install_github_binary()`
 - `_install_github_binary()` Arch-Mapping: `x86_64` → Regex `(x86_64|x64|amd64)`, `aarch64` → `(arm64|aarch64)`
-- `bats-core` Sonderfall: apt-Paketname ist `bats`, brew ist `bats-core`
+- `bats-core` Sonderfall: apt-Paketname ist `bats`, brew ist `bats-core`, Fallback via `_install_bats_core()` (git clone nach ~/.local, kein sudo)
 - Optionale Tools duerfen fehlschlagen (nur Warning, kein Abbruch)
 
 ## Doc-Sync (projektspezifisch)
