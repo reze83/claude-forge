@@ -47,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- update.sh: `git stash pop` merge conflicts now auto-resolved by accepting remote version (local changes in install dir are not authoritative)
 - install.sh: `_install_github_binary()` arch mapping — `uname -m` returns `x86_64` but GitHub assets use `x64` (gitleaks) or `amd64` (actionlint); now matches all variants via regex `(x86_64|x64|amd64)`
 - install.sh: apt-based tool installation (bats, shellcheck) failed silently when sudo required a password; now prompts once at install start
 

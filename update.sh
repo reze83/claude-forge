@@ -20,10 +20,11 @@ NC='\033[0m'
 for arg in "$@"; do
   case "$arg" in
     --check) CHECK_ONLY=true ;;
-    --help|-h)
+    --help | -h)
       echo "Usage: update.sh [--check] [--help]"
       echo "  --check  Nur pruefen ob Updates verfuegbar sind"
-      exit 0 ;;
+      exit 0
+      ;;
   esac
 done
 
@@ -117,8 +118,14 @@ bash "$REPO_DIR/install.sh"
 if $STASHED; then
   echo ""
   echo "-- Lokale Aenderungen wiederherstellen --"
-  git stash pop && echo -e "  ${GREEN}[OK]${NC} Stash wiederhergestellt." \
-    || echo -e "${YELLOW}[WARN]${NC} Stash-Konflikte. Manuell loesen: git stash pop"
+  if git stash pop; then
+    echo -e "  ${GREEN}[OK]${NC} Stash wiederhergestellt."
+  else
+    echo -e "${YELLOW}[INFO]${NC} Stash-Konflikte — uebernehme Remote-Version."
+    git checkout -- . 2>/dev/null
+    git stash drop 2>/dev/null || true
+    echo -e "  ${GREEN}[OK]${NC} Konflikte aufgeloest (Remote-Version uebernommen)."
+  fi
 fi
 
 echo ""
