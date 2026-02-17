@@ -35,10 +35,11 @@ check_python_version() {
 # --- Main ---
 
 main() {
-  local input script_dir forge_dir version
+  local script_dir forge_dir version
   local dep_status="ok" dep_missing="" symlink_status="ok" symlink_broken=""
 
-  input="$(cat 2>/dev/null || true)"
+  # Drain stdin (hook receives JSON on stdin)
+  cat >/dev/null 2>&1 || true
 
   script_dir="$(cd "$(dirname "$0")" && pwd)"
   forge_dir="$(cd "$script_dir/.." && pwd 2>/dev/null || printf '%s' "$script_dir")"
@@ -73,8 +74,6 @@ main() {
   for dir in "${symlink_dirs[@]}"; do
     local target="$HOME/.claude/$dir"
     if [[ -L "$target" ]]; then
-      local resolved
-      resolved="$(readlink "$target" 2>/dev/null || true)"
       if [[ ! -d "$target" ]]; then
         symlink_status="broken"
         symlink_broken="${symlink_broken:+${symlink_broken}, }${dir}"
