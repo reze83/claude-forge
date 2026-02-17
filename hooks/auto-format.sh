@@ -7,8 +7,8 @@ set -euo pipefail
 
 source "$(cd "$(dirname "$0")" && pwd)/lib.sh"
 
-INPUT=$(cat)
-FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
+INPUT=$(cat 2>/dev/null || true)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null) || FILE_PATH=""
 [[ -z "$FILE_PATH" ]] && exit 0
 [[ -f "$FILE_PATH" ]] || exit 0
 
@@ -40,7 +40,7 @@ format_result=0
 
 case "$FILE_PATH" in
   # JavaScript/TypeScript/Web (Prettier)
-  *.js|*.jsx|*.ts|*.tsx|*.json|*.css|*.scss|*.html|*.md|*.yaml|*.yml)
+  *.js | *.jsx | *.ts | *.tsx | *.json | *.css | *.scss | *.html | *.md | *.yaml | *.yml)
     PRETTIER_CMD=$(find_prettier) || true
     if [[ -n "$PRETTIER_CMD" ]]; then
       "$PRETTIER_CMD" --write "$FILE_PATH" 2>/dev/null || format_result=$?

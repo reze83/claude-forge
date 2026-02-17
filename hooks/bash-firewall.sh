@@ -7,8 +7,8 @@ set -euo pipefail
 
 source "$(cd "$(dirname "$0")" && pwd)/lib.sh"
 
-INPUT=$(cat)
-CMD=$(echo "$INPUT" | jq -r '.tool_input.command // ""')
+INPUT=$(cat 2>/dev/null || true)
+CMD=$(echo "$INPUT" | jq -r '.tool_input.command // ""' 2>/dev/null) || CMD=""
 
 # --- Input normalization (strips absolute paths, prefixes, excess whitespace) ---
 normalize_cmd() {
@@ -16,11 +16,14 @@ normalize_cmd() {
 
   # Collapse whitespace and trim
   cmd="$(printf '%s' "$cmd" | tr '\n' ' ' | sed -E 's/[[:space:]]+/ /g; s/^ //; s/ $//')"
-  [[ -z "$cmd" ]] && { printf ''; return; }
+  [[ -z "$cmd" ]] && {
+    printf ''
+    return
+  }
 
   # Split into array
   local -a parts
-  read -r -a parts <<< "$cmd"
+  read -r -a parts <<<"$cmd"
 
   # Strip command/exec prefix (shift to actual command)
   local idx=0
