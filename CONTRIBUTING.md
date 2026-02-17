@@ -22,18 +22,20 @@
 
 ### Output Format
 
-PreToolUse hooks that block must output JSON and exit with code 2:
+PreToolUse hooks that block must output JSON and exit with code 0 (so Claude Code processes the JSON):
 
 ```json
 {"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"..."}}
 ```
 
+Use `block()` from `hooks/lib.sh` — never craft JSON manually.
+
 ### Exit Codes
 
 | Code | Meaning |
 |------|---------|
-| 0 | Allow / Success |
-| 2 | Block (PreToolUse) |
+| 0 | Success — stdout JSON is processed by Claude Code |
+| 2 | Blocking error — stdout JSON is IGNORED, stderr is fed to Claude |
 | 1 | Script error |
 
 ### Timeout Consistency
@@ -45,15 +47,15 @@ Hook timeouts must match between `hooks/hooks.json` (plugin mode) and `user-conf
 Run all tests before committing:
 
 ```bash
-bash tests/test-hooks.sh      # Hook unit tests (44 tests)
+bash tests/test-hooks.sh      # Hook unit tests (104 tests)
 bash tests/test-update.sh     # Update script tests (6 tests)
 bash tests/test-install.sh    # Install/uninstall tests (11 tests)
-bash tests/test-codex.sh      # Codex wrapper tests (6 tests)
+bash tests/test-codex.sh      # Codex wrapper tests (11 tests)
 bash tests/test-validate.sh   # Validation tests (1 test)
 bash validate.sh              # Full validation suite
 ```
 
-Total: 68 tests
+Total: 133 tests
 
 ### Adding Tests
 

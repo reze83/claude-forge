@@ -78,16 +78,21 @@ wiederhergestellt. validate.sh Fehler loesen keinen Rollback aus.
 
 ## Hook-Architektur
 
-### 6 Hooks, 3 Event-Typen
+### 11 Hooks, 8 Event-Typen
 
 | Hook | Event | Matcher | Zweck |
 |---|---|---|---|
 | bash-firewall.sh | PreToolUse | Bash | Gefaehrliche Befehle blocken — Input-Normalisierung (abs. Pfade, command/exec/env Prefix), 25 Deny-Patterns (inkl. Subshell/Pipe/Backtick/Herestring-Schutz) |
 | protect-files.sh | PreToolUse | Read\|Write\|Edit\|Glob\|Grep | Sensible Dateien schuetzen + Hook-Tampering-Schutz |
 | secret-scan-pre.sh | PreToolUse | Write\|Edit | Secret-Erkennung in Content VOR dem Schreiben (deny) |
-| auto-format.sh | PostToolUse | Edit\|Write | Auto-Formatting (Polyglot) |
+| auto-format.sh | PostToolUse | Edit\|Write | Auto-Formatting (Polyglot, async) |
 | secret-scan.sh | PostToolUse | Edit\|Write | Secret-Erkennung in geschriebenen Dateien (warn) |
-| session-logger.sh | Stop | * | Session-Ende Log + Desktop-Notification |
+| session-start.sh | SessionStart | * | Session-Init: Version als additionalContext, Logging |
+| post-failure.sh | PostToolUseFailure | * | Tool-Fehler Logging + additionalContext |
+| pre-compact.sh | PreCompact | * | Context-Compaction Logging |
+| task-gate.sh | TaskCompleted | * | Quality Gate: Hook-Tests vor Task-Abschluss (opt-in via CLAUDE_FORGE_TASK_GATE=1) |
+| teammate-gate.sh | TeammateIdle | * | Uncommitted-Changes Check vor Teammate-Idle (opt-in via CLAUDE_FORGE_TEAMMATE_GATE=1) |
+| session-logger.sh | SessionEnd | * | Session-Ende Log + Desktop-Notification |
 
 ### Shared Library: hooks/lib.sh
 
@@ -96,7 +101,7 @@ All hooks source a shared library that provides:
 | Function | Purpose |
 |---|---|
 | `block(reason)` | JSON-safe deny output using `jq -Rs` escaping. Prevents JSON injection from user-controlled paths. |
-| `warn(message)` | JSON-safe notification output for PostToolUse hooks. |
+| `warn(message)` | JSON-safe systemMessage output for PostToolUse hooks. |
 | `debug(message)` | Optional logging to `~/.claude/hooks-debug.log` (enable with `CLAUDE_FORGE_DEBUG=1`). |
 | `SECRET_PATTERNS[]` | 11 ERE patterns shared between secret-scan-pre.sh and secret-scan.sh (DRY). |
 | `SECRET_LABELS[]` | Human-readable labels for each pattern. |
@@ -110,12 +115,12 @@ PreToolUse Hooks nutzen das JSON-Output-Format auf stdout (via `block()` from li
 ```json
 {"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"..."}}
 ```
-Plus `exit 2` als Fallback fuer aeltere Claude Code Versionen.
+Exit 0 ensures stdout JSON is processed by Claude Code (exit 2 would cause JSON to be ignored).
 All string values are escaped via `jq -Rs` to prevent JSON injection.
 
 PostToolUse Hooks koennen Warnungen zurueckgeben (via `warn()` from lib.sh):
 ```json
-{"hookSpecificOutput":{"hookEventName":"PostToolUse","notification":"..."}}
+{"systemMessage":"..."}
 ```
 
 ### Hook-Pfade: Zwei Systeme
@@ -231,6 +236,47 @@ validate.sh prueft in 9 Sektionen:
 7. **System-Tools** — Pflicht (node, python3, git, jq) + Optional (codex, ruff, shfmt)
 8. **Secrets-Scan** — 11 Patterns (Anthropic, OpenAI, GitHub PAT/OAuth/Server/Refresh, AWS, JWT, PEM, Stripe, Slack, Azure)
 9. **Hook-Konsistenz** — Timeout-Vergleich hooks.json vs. settings.json.example
+
+## Hook Handler Types
+
+Claude Code supports three handler types for hooks. claude-forge currently uses `command` handlers
+but documents all three for reference:
+
+| Type | Description | Use Case |
+|------|-----------|----------|
+| `command` | Shell command (bash script). Receives JSON on stdin, returns JSON on stdout. | All current claude-forge hooks |
+| `prompt` | Single-turn LLM call. The hook text is sent as a prompt to a model. | Semantic analysis, summarization |
+| `agent` | Multi-turn LLM agent with tool access. Has full conversation capabilities. | Complex decision-making, multi-step validation |
+
+### Handler Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `type` | string | `"command"`, `"prompt"`, or `"agent"` |
+| `command` | string | Shell command to execute (command type only) |
+| `prompt` | string | LLM prompt text (prompt/agent types only) |
+| `model` | string | Model to use (prompt/agent types only, e.g. `"claude-haiku-4-5-20251001"`) |
+| `timeout` | number | Max execution time in seconds |
+| `statusMessage` | string | Message shown in Claude Code UI while hook runs |
+| `async` | boolean | Run hook asynchronously (PostToolUse only) |
+| `once` | boolean | Run hook only once per session |
+
+### Universal JSON Output Fields
+
+All hook handlers can return these fields in their JSON output:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `continue` | boolean | Whether to continue processing |
+| `stopReason` | string | Reason for stopping the session |
+| `suppressOutput` | boolean | Suppress tool output from being shown |
+| `systemMessage` | string | Message shown to the user |
+
+### Event-Specific Output
+
+PreToolUse hooks use `hookSpecificOutput.permissionDecision` (`"allow"` / `"deny"` / `"ask"`)
+with `hookSpecificOutput.permissionDecisionReason`. PostToolUse hooks can use `hookSpecificOutput.decision`
+and `hookSpecificOutput.reason`.
 
 ## Warum Bash statt Python fuer Hooks?
 

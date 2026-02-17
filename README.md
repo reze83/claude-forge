@@ -10,7 +10,7 @@
 
 [![Version](https://img.shields.io/badge/version-0.3.0-blue?style=flat-square)](CHANGELOG.md)
 [![CI](https://img.shields.io/github/actions/workflow/status/reze83/claude-forge/test.yml?branch=main&style=flat-square&label=CI)](https://github.com/reze83/claude-forge/actions)
-[![Tests](https://img.shields.io/badge/tests-114%20passed-brightgreen?style=flat-square)](#)
+[![Tests](https://img.shields.io/badge/tests-133%20passed-brightgreen?style=flat-square)](#)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 
 <!-- Demo GIF — generate with: vhs docs/assets/demo.tape -->
@@ -74,8 +74,13 @@ claude --plugin-dir <pfad-zum-repo>
 
 | Hook / Command | Funktion |
 |----------------|----------|
-| **Auto-Format** | Formatiert JS/TS/Python/Rust/Go/Shell automatisch nach jedem Edit |
+| **Auto-Format** | Formatiert JS/TS/Python/Rust/Go/Shell automatisch nach jedem Edit (async) |
 | **Multi-Model** | Delegiert Tasks an Codex CLI — 5 Workflow-Commands (`/multi-*`) |
+| **Session-Start** | Forge-Version als Context, Session-Logging |
+| **Post-Failure** | Tool-Fehler Logging + Context-Hinweis |
+| **Pre-Compact** | Context-Compaction Logging |
+| **Task-Gate** | Quality Gate: Hook-Tests vor Task-Abschluss (opt-in) |
+| **Teammate-Gate** | Uncommitted-Changes Check vor Teammate-Idle (opt-in) |
 | **Session-Logger** | Desktop-Notification + Log bei Session-Ende |
 
 ### Self-Management
@@ -96,7 +101,7 @@ bash update.sh --check  # Nur pruefen ob Updates verfuegbar
 
 | Typ | Anzahl | Inhalt |
 |-----|--------|--------|
-| Hooks | 6 | bash-firewall, protect-files, secret-scan-pre, auto-format, secret-scan, session-logger |
+| Hooks | 11 | bash-firewall, protect-files, secret-scan-pre, auto-format, secret-scan, session-start, post-failure, pre-compact, task-gate, teammate-gate, session-logger |
 | Agents | 3 | research, test-runner, security-auditor |
 | Skills | 4 | code-review, explain-code, deploy, project-init |
 | Commands | 7 | multi-model (5), forge-status, forge-update |
@@ -216,18 +221,24 @@ claude-forge/
 │   ├── CLAUDE.md.example           Globale Instruktionen (kopiert bei Install)
 │   └── MEMORY.md                   Persistenter Speicher (symlinked)
 ├── hooks/                          → ~/.claude/hooks/
+│   ├── lib.sh                      Shared library (block/warn/debug/patterns)
 │   ├── bash-firewall.sh            Gefaehrliche Befehle blocken
 │   ├── protect-files.sh            Sensible Dateien schuetzen
 │   ├── auto-format.sh              Auto-Formatting (JS/TS/Python/Rust/Go/Shell)
-│   ├── secret-scan-pre.sh           Secret-Erkennung VOR Write/Edit (deny)
+│   ├── secret-scan-pre.sh          Secret-Erkennung VOR Write/Edit (deny)
 │   ├── secret-scan.sh              Secret-Erkennung nach Write/Edit (warn)
+│   ├── session-start.sh            Session-Init + Version Context
+│   ├── post-failure.sh             Tool-Fehler Logging
+│   ├── pre-compact.sh              Compaction Logging
+│   ├── task-gate.sh                Quality Gate (TaskCompleted)
+│   ├── teammate-gate.sh            Uncommitted-Changes Gate (TeammateIdle)
 │   └── session-logger.sh           Session-Ende Notification
 ├── rules/                          → ~/.claude/rules/ (symlinked)
 ├── agents/                         → ~/.claude/agents/
 ├── skills/                         → ~/.claude/skills/
 ├── commands/                       → ~/.claude/commands/
 ├── multi-model/                    → ~/.claude/multi-model/ (Codex CLI)
-├── tests/                          Test-Suite (114 Tests)
+├── tests/                          Test-Suite (133 Tests)
 └── docs/                           Dokumentation
     ├── ARCHITECTURE.md              Architektur-Uebersicht
     ├── demo.tape                    VHS Tape-Datei (GIF-Recording)

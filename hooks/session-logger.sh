@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# Stop Hook — Session end notification + log
+# SessionEnd Hook — Session end notification + log
 # Sends desktop notification and logs timestamp.
+# SessionEnd fires once when session terminates (not on every Claude response).
 # Must NEVER block — always exit 0.
 
 LOG_DIR="${CLAUDE_LOG_DIR:-$HOME/.claude}"

@@ -19,21 +19,24 @@ debug() {
 
 # --- JSON-safe block function (PreToolUse) ---
 # Uses jq for proper JSON escaping to prevent injection
+# Exit 0 + JSON: Claude Code reads permissionDecision:"deny" from stdout
+# (exit 2 would cause JSON to be ignored — see hooks reference)
 block() {
   local reason
   reason=$(printf '%s' "$1" | jq -Rs .)
   debug "BLOCK: $1"
   printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":%s}}' "$reason"
-  exit 2
+  exit 0
 }
 
 # --- JSON-safe warn function (PostToolUse) ---
 # Uses jq for proper JSON escaping to prevent injection
+# systemMessage: shown to user as warning (documented universal field)
 warn() {
   local message
   message=$(printf '%s' "$1" | jq -Rs .)
   debug "WARN: $1"
-  printf '{"hookSpecificOutput":{"hookEventName":"PostToolUse","notification":%s}}' "$message"
+  printf '{"systemMessage":%s}' "$message"
 }
 
 # --- Secret Patterns (ERE — no PCRE, Bash 3.2+ compatible) ---

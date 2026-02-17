@@ -8,15 +8,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- 5 new hook scripts: session-start.sh (SessionStart), post-failure.sh (PostToolUseFailure), pre-compact.sh (PreCompact), task-gate.sh (TaskCompleted), teammate-gate.sh (TeammateIdle)
+- SECURITY.md: security policy with vulnerability reporting and architecture overview
+- GitHub issue/PR templates (bug report, feature request, pull request)
+- GitHub repository topics (claude-code, hooks, security, cli, multi-model, codex, bash, developer-tools)
+- output-styles/ directory for future custom output styles
+- plugin.json: outputStyles and lspServers fields
+- plugin.json: repository, license, keywords, author object
+- hooks.json + settings.json.example: SessionStart, PostToolUseFailure, PreCompact, TaskCompleted, TeammateIdle events registered
+- statusMessage field on all hook definitions
+- async: true on auto-format hook (PostToolUse)
+- ARCHITECTURE.md: Hook Handler Types documentation (command/prompt/agent), universal JSON output fields, event-specific output
 - bash-firewall.sh: 5 new deny patterns — command substitution, backtick substitution, process substitution, pipe-to-shell (incl. absolute paths), herestring protection (25 total)
 - codex-wrapper.sh: integer validation for --timeout (non-numeric values now return structured JSON error)
 - test.yml: ShellCheck static analysis step in CI pipeline
 - test-hooks.sh: 17 new tests — subshell/pipe/backtick/herestring bypass (14), log rotation (1), non-ASCII paths (2) (104 total)
 - test-codex.sh: 2 new tests — non-numeric timeout validation (11 total)
+- .gitignore: IDE files (.idea, .vscode, *.swp), coverage directories
 
 ### Fixed
+- **CRITICAL:** block() exit code — changed from exit 2 to exit 0 so Claude Code processes the JSON output (exit 2 causes stdout JSON to be ignored per hooks reference)
+- **CRITICAL:** warn() output field — changed from undocumented `notification` to documented `systemMessage` universal field
+- session-logger.sh: event type corrected from Stop to SessionEnd
+- settings.json.example: hooks now properly nested under `"hooks"` key (was at top-level)
+- task-gate.sh: path sanitization for CLAUDE_FORGE_DIR to prevent command injection
+- CONTRIBUTING.md: exit code documentation updated (0=JSON processed, 2=JSON ignored), test counts corrected (133 total)
+- ARCHITECTURE.md: Hook table updated (6→11 hooks, 3→8 event types), warn() description corrected, block() exit code documentation fixed
+- README.md: hook count updated (6→11), test badge updated (114→133), directory structure updated
 - plugin.json: version synced to 0.3.0 (was 0.2.1)
 - secret-scan.sh: added `--` before file path argument to prevent flag interpretation
+- test-hooks.sh: all block tests updated from expected exit 2 to exit 0 (matching block() fix)
 - test-hooks.sh: added EXIT trap for temp directory cleanup on abnormal exit
 - install.sh: moved `local` declaration out of for-loop in cleanup_on_error()
 - test.yml: ShellCheck severity set to `warning` (info-level SC1091/SC2016/SC2015 are false positives)

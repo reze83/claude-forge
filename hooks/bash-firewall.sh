@@ -2,7 +2,7 @@
 set -euo pipefail
 # PreToolUse Hook — Bash Firewall
 # Reads JSON from stdin, checks command against deny patterns.
-# Output: JSON on stdout (modern format) + Exit 2 (legacy fallback)
+# Output: JSON on stdout (exit 0 ensures JSON is processed by Claude Code)
 # Compatible: Bash 3.2+ (macOS) and Bash 4+
 
 source "$(cd "$(dirname "$0")" && pwd)/lib.sh"

@@ -20,8 +20,19 @@ __pycache__/
 .venv/
 venv/
 
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
 # Credentials
 .env*
 *.pem
 *.key
 .credentials*
+
+# Coverage
+coverage/
+*.lcov

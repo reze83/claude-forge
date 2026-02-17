@@ -7,7 +7,8 @@
         "hooks": [{
           "type": "command",
           "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/bash-firewall.sh",
-          "timeout": 10
+          "timeout": 10,
+          "statusMessage": "Checking bash command safety..."
         }]
       },
       {
@@ -15,7 +16,8 @@
         "hooks": [{
           "type": "command",
           "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/protect-files.sh",
-          "timeout": 10
+          "timeout": 10,
+          "statusMessage": "Checking file access..."
         }]
       },
       {
@@ -23,7 +25,8 @@
         "hooks": [{
           "type": "command",
           "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/secret-scan-pre.sh",
-          "timeout": 10
+          "timeout": 10,
+          "statusMessage": "Scanning for secrets..."
         }]
       }
     ],
@@ -33,7 +36,9 @@
         "hooks": [{
           "type": "command",
           "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/auto-format.sh",
-          "timeout": 30
+          "timeout": 30,
+          "async": true,
+          "statusMessage": "Formatting code..."
         }]
       },
       {
@@ -41,17 +46,74 @@
         "hooks": [{
           "type": "command",
           "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/secret-scan.sh",
-          "timeout": 10
+          "timeout": 10,
+          "statusMessage": "Post-write secret scan..."
         }]
       }
     ],
-    "Stop": [
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [{
+          "type": "command",
+          "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/session-start.sh",
+          "timeout": 10,
+          "statusMessage": "Initializing session..."
+        }]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "matcher": "",
+        "hooks": [{
+          "type": "command",
+          "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/post-failure.sh",
+          "timeout": 10,
+          "statusMessage": "Logging tool failure..."
+        }]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "",
+        "hooks": [{
+          "type": "command",
+          "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/pre-compact.sh",
+          "timeout": 10,
+          "statusMessage": "Preparing compaction..."
+        }]
+      }
+    ],
+    "TaskCompleted": [
+      {
+        "matcher": "",
+        "hooks": [{
+          "type": "command",
+          "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/task-gate.sh",
+          "timeout": 60,
+          "statusMessage": "Running task quality gate..."
+        }]
+      }
+    ],
+    "TeammateIdle": [
+      {
+        "matcher": "",
+        "hooks": [{
+          "type": "command",
+          "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/teammate-gate.sh",
+          "timeout": 10,
+          "statusMessage": "Checking teammate readiness..."
+        }]
+      }
+    ],
+    "SessionEnd": [
       {
         "matcher": "",
         "hooks": [{
           "type": "command",
           "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/session-logger.sh",
-          "timeout": 15
+          "timeout": 15,
+          "statusMessage": "Logging session..."
         }]
       }
     ]
