@@ -5,7 +5,7 @@ Bash-basiertes Security- & Productivity-Framework fuer Claude Code CLI.
 ## Git
 
 - Solo-Projekt: Feature-Branch + PR (bash-firewall blockiert Push auf main)
-- CI (test.yml) validiert nach Push
+- CI (test.yml) validiert nach Push: ShellCheck, markdownlint, shfmt, gitleaks, actionlint + Tests
 
 ## Bash 3.2+ Kompatibilitaet (macOS)
 
@@ -33,6 +33,13 @@ Bash-basiertes Security- & Productivity-Framework fuer Claude Code CLI.
 
 - `bash tests/test-hooks.sh` vor jedem Commit
 - Test-Pattern: `assert_exit "Beschreibung" <exit_code> "$SCRIPT" '<json>'`
+- CI fuehrt zusaetzlich: markdownlint, shfmt -d, gitleaks, actionlint
+
+## install.sh Erweiterungen
+
+- Neue Tool-Fallbacks in `auto_install_optional()`: npm via `_install_node_tool()`, GitHub Releases via `_install_github_binary()`
+- `bats-core` Sonderfall: apt-Paketname ist `bats`, brew ist `bats-core`
+- Optionale Tools duerfen fehlschlagen (nur Warning, kein Abbruch)
 
 ## Doc-Sync (projektspezifisch)
 
@@ -40,3 +47,4 @@ Bash-basiertes Security- & Productivity-Framework fuer Claude Code CLI.
 - Neuer Hook/Skill/Command → docs/ARCHITECTURE.md (Dateipfade-Tabelle)
 - Konvention geaendert → CONTRIBUTING.md
 - Test-Anzahl geaendert → CONTRIBUTING.md (Abschnitt Testing), README.md (Badge), docs/ARCHITECTURE.md (Test-Tabelle)
+- Neues Markdown-Muster verletzt Linter → .markdownlint.yml pruefen
