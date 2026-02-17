@@ -33,9 +33,9 @@ echo ""
 
 # --- Dateien & Symlinks ---
 echo "-- Dateien & Symlinks --"
-[[ -f "$REPO_DIR/VERSION" ]]          && pass "VERSION vorhanden"       || fail "VERSION vorhanden"
+[[ -f "$REPO_DIR/VERSION" ]] && pass "VERSION vorhanden" || fail "VERSION vorhanden"
 [[ -f "$CLAUDE_DIR/settings.json" ]] && pass "settings.json vorhanden" || fail "settings.json vorhanden"
-[[ -f "$CLAUDE_DIR/CLAUDE.md" ]]     && pass "CLAUDE.md vorhanden"     || fail "CLAUDE.md vorhanden"
+[[ -f "$CLAUDE_DIR/CLAUDE.md" ]] && pass "CLAUDE.md vorhanden" || fail "CLAUDE.md vorhanden"
 
 check_symlink() {
   local name="$1"
@@ -58,12 +58,12 @@ check_symlink "multi-model"
 # --- JSON-Validitaet ---
 echo ""
 echo "-- JSON-Validitaet --"
-jq empty "$REPO_DIR/user-config/settings.json.example" 2>/dev/null \
-  && pass "settings.json.example valides JSON" || fail "settings.json.example valides JSON"
-jq empty "$REPO_DIR/hooks/hooks.json" 2>/dev/null \
-  && pass "hooks.json valides JSON" || fail "hooks.json valides JSON"
-jq empty "$REPO_DIR/.claude-plugin/plugin.json" 2>/dev/null \
-  && pass "plugin.json valides JSON" || fail "plugin.json valides JSON"
+jq empty "$REPO_DIR/user-config/settings.json.example" 2>/dev/null &&
+  pass "settings.json.example valides JSON" || fail "settings.json.example valides JSON"
+jq empty "$REPO_DIR/hooks/hooks.json" 2>/dev/null &&
+  pass "hooks.json valides JSON" || fail "hooks.json valides JSON"
+jq empty "$REPO_DIR/.claude-plugin/plugin.json" 2>/dev/null &&
+  pass "plugin.json valides JSON" || fail "plugin.json valides JSON"
 
 # --- Hook-Scripts ---
 echo ""
@@ -71,12 +71,12 @@ echo "-- Hook-Scripts --"
 for hook in "$REPO_DIR/hooks/"*.sh; do
   [[ -f "$hook" ]] || continue
   name="$(basename "$hook")"
-  [[ -x "$hook" ]] \
-    && pass "$name ist ausfuehrbar" || fail "$name ist ausfuehrbar"
-  head -1 "$hook" | grep -q '^#!/' 2>/dev/null \
-    && pass "$name hat Shebang" || fail "$name hat Shebang"
-  head -3 "$hook" | grep -q 'set -euo pipefail' 2>/dev/null \
-    && pass "$name hat set -euo pipefail" || fail "$name hat set -euo pipefail"
+  [[ -x "$hook" ]] &&
+    pass "$name ist ausfuehrbar" || fail "$name ist ausfuehrbar"
+  head -1 "$hook" | grep -q '^#!/' 2>/dev/null &&
+    pass "$name hat Shebang" || fail "$name hat Shebang"
+  head -3 "$hook" | grep -q 'set -euo pipefail' 2>/dev/null &&
+    pass "$name hat set -euo pipefail" || fail "$name hat set -euo pipefail"
 done
 
 # --- Agents ---
@@ -85,12 +85,12 @@ echo "-- Agents --"
 for agent in "$REPO_DIR/agents/"*.md; do
   [[ -f "$agent" ]] || continue
   name="$(basename "$agent")"
-  head -1 "$agent" | grep -q '^---' 2>/dev/null \
-    && pass "$name hat YAML Frontmatter" || fail "$name hat YAML Frontmatter"
-  grep -q '^name:' "$agent" 2>/dev/null \
-    && pass "$name hat name: Feld" || fail "$name hat name: Feld"
-  grep -q '^description:' "$agent" 2>/dev/null \
-    && pass "$name hat description: Feld" || fail "$name hat description: Feld"
+  head -1 "$agent" | grep -q '^---' 2>/dev/null &&
+    pass "$name hat YAML Frontmatter" || fail "$name hat YAML Frontmatter"
+  grep -q '^name:' "$agent" 2>/dev/null &&
+    pass "$name hat name: Feld" || fail "$name hat name: Feld"
+  grep -q '^description:' "$agent" 2>/dev/null &&
+    pass "$name hat description: Feld" || fail "$name hat description: Feld"
 done
 
 # --- Skills ---
@@ -99,10 +99,10 @@ echo "-- Skills --"
 for skill in "$REPO_DIR/skills/"*/SKILL.md; do
   [[ -f "$skill" ]] || continue
   name="$(basename "$(dirname "$skill")")"
-  head -1 "$skill" | grep -q '^---' 2>/dev/null \
-    && pass "$name/SKILL.md hat Frontmatter" || fail "$name/SKILL.md hat Frontmatter"
-  grep -q '^name:' "$skill" 2>/dev/null \
-    && pass "$name/SKILL.md hat name: Feld" || fail "$name/SKILL.md hat name: Feld"
+  head -1 "$skill" | grep -q '^---' 2>/dev/null &&
+    pass "$name/SKILL.md hat Frontmatter" || fail "$name/SKILL.md hat Frontmatter"
+  grep -q '^name:' "$skill" 2>/dev/null &&
+    pass "$name/SKILL.md hat name: Feld" || fail "$name/SKILL.md hat name: Feld"
 done
 
 # --- Commands ---
@@ -111,10 +111,10 @@ echo "-- Commands --"
 for cmd in "$REPO_DIR/commands/"*.md; do
   [[ -f "$cmd" ]] || continue
   name="$(basename "$cmd")"
-  head -1 "$cmd" | grep -q '^---' 2>/dev/null \
-    && pass "$name hat Frontmatter" || fail "$name hat Frontmatter"
-  grep -q '^description:' "$cmd" 2>/dev/null \
-    && pass "$name hat description: Feld" || fail "$name hat description: Feld"
+  head -1 "$cmd" | grep -q '^---' 2>/dev/null &&
+    pass "$name hat Frontmatter" || fail "$name hat Frontmatter"
+  grep -q '^description:' "$cmd" 2>/dev/null &&
+    pass "$name hat description: Feld" || fail "$name hat description: Feld"
 done
 
 # --- Tools ---
@@ -129,18 +129,28 @@ else
   fail "node >= 20 (aktuell: ${NODE_VER:-nicht installiert})"
 fi
 
-python3 -c 'import sys; assert sys.version_info >= (3,10)' 2>/dev/null \
-  && pass "python3 >= 3.10" || fail "python3 >= 3.10"
-git --version >/dev/null 2>&1 \
-  && pass "git vorhanden" || fail "git vorhanden"
-jq --version >/dev/null 2>&1 \
-  && pass "jq vorhanden" || fail "jq vorhanden"
-command -v codex >/dev/null 2>&1 \
-  && pass "codex CLI" || warning "codex CLI"
-command -v ruff >/dev/null 2>&1 \
-  && pass "ruff vorhanden" || warning "ruff vorhanden"
-command -v shfmt >/dev/null 2>&1 \
-  && pass "shfmt vorhanden" || warning "shfmt vorhanden"
+python3 -c 'import sys; assert sys.version_info >= (3,10)' 2>/dev/null &&
+  pass "python3 >= 3.10" || fail "python3 >= 3.10"
+git --version >/dev/null 2>&1 &&
+  pass "git vorhanden" || fail "git vorhanden"
+jq --version >/dev/null 2>&1 &&
+  pass "jq vorhanden" || fail "jq vorhanden"
+command -v codex >/dev/null 2>&1 &&
+  pass "codex CLI" || warning "codex CLI"
+command -v ruff >/dev/null 2>&1 &&
+  pass "ruff vorhanden" || warning "ruff vorhanden"
+command -v shfmt >/dev/null 2>&1 &&
+  pass "shfmt vorhanden" || warning "shfmt vorhanden"
+command -v shellcheck >/dev/null 2>&1 &&
+  pass "shellcheck vorhanden" || warning "shellcheck vorhanden"
+command -v bats >/dev/null 2>&1 &&
+  pass "bats-core vorhanden" || warning "bats-core vorhanden"
+command -v markdownlint-cli2 >/dev/null 2>&1 &&
+  pass "markdownlint-cli2 vorhanden" || warning "markdownlint-cli2 vorhanden"
+command -v gitleaks >/dev/null 2>&1 &&
+  pass "gitleaks vorhanden" || warning "gitleaks vorhanden"
+command -v actionlint >/dev/null 2>&1 &&
+  pass "actionlint vorhanden" || warning "actionlint vorhanden"
 
 # --- Secrets-Check ---
 echo ""
@@ -149,22 +159,22 @@ echo "-- Secrets-Scan --"
 check_no_secret() {
   local desc="$1" pattern="$2"
   # Scan all files; exclude lines containing pragma allowlist and test assertion lines
-  if grep -rIn "$pattern" "$REPO_DIR/" --include='*.json' --include='*.md' --include='*.sh' 2>/dev/null \
-      | grep -v 'pragma: allowlist secret' \
-      | grep -v 'assert_exit' \
-      | grep -v 'check_no_secret' \
-      | grep -q .; then
+  if grep -rIn "$pattern" "$REPO_DIR/" --include='*.json' --include='*.md' --include='*.sh' 2>/dev/null |
+    grep -v 'pragma: allowlist secret' |
+    grep -v 'assert_exit' |
+    grep -v 'check_no_secret' |
+    grep -q .; then
     fail "$desc"
   else
     pass "$desc"
   fi
 }
 
-check_no_secret "Kein Anthropic Key"  'sk-ant-[a-zA-Z0-9_-]\{20,\}'
-check_no_secret "Kein OpenAI Key"     'sk-[a-zA-Z0-9]\{48,\}'
-check_no_secret "Kein GitHub Token"   'ghp_[a-zA-Z0-9]\{36\}'
+check_no_secret "Kein Anthropic Key" 'sk-ant-[a-zA-Z0-9_-]\{20,\}'
+check_no_secret "Kein OpenAI Key" 'sk-[a-zA-Z0-9]\{48,\}'
+check_no_secret "Kein GitHub Token" 'ghp_[a-zA-Z0-9]\{36\}'
 check_no_secret "Kein AWS Access Key" 'AKIA[0-9A-Z]\{16\}'
-check_no_secret "Kein JWT Token"      'eyJ[a-zA-Z0-9_-]*\.eyJ[a-zA-Z0-9_-]*\.'
+check_no_secret "Kein JWT Token" 'eyJ[a-zA-Z0-9_-]*\.eyJ[a-zA-Z0-9_-]*\.'
 
 # --- Hook-Konsistenz ---
 echo ""

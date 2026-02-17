@@ -1,0 +1,4 @@
+# markdownlint configuration
+MD013: false # Line length (disabled — many long URLs/tables)
+MD033: false # Inline HTML (badges in README)
+MD041: false # First line h1 (frontmatter in skills/agents/commands)
