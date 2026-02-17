@@ -7,11 +7,11 @@ set -euo pipefail
 
 source "$(cd "$(dirname "$0")" && pwd)/lib.sh"
 
-INPUT=$(cat)
-TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // ""')
+INPUT=$(cat 2>/dev/null || true)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // ""' 2>/dev/null) || TOOL_NAME=""
 
 # Extract file_path from tool_input (Read/Write/Edit use file_path, Glob/Grep use path)
-FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // empty')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // empty' 2>/dev/null) || FILE_PATH=""
 [[ -z "$FILE_PATH" ]] && exit 0
 
 debug "protect-files: tool=$TOOL_NAME path=$FILE_PATH"

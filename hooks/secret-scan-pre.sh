@@ -7,14 +7,14 @@ set -euo pipefail
 
 source "$(cd "$(dirname "$0")" && pwd)/lib.sh"
 
-INPUT=$(cat)
-TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // ""')
+INPUT=$(cat 2>/dev/null || true)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // ""' 2>/dev/null) || TOOL_NAME=""
 
 # Only scan Write and Edit operations
 case "$TOOL_NAME" in
-  Write) CONTENT=$(echo "$INPUT" | jq -r '.tool_input.content // ""') ;;
-  Edit)  CONTENT=$(echo "$INPUT" | jq -r '.tool_input.new_string // ""') ;;
-  *)     exit 0 ;;
+  Write) CONTENT=$(echo "$INPUT" | jq -r '.tool_input.content // ""' 2>/dev/null) || CONTENT="" ;;
+  Edit) CONTENT=$(echo "$INPUT" | jq -r '.tool_input.new_string // ""' 2>/dev/null) || CONTENT="" ;;
+  *) exit 0 ;;
 esac
 
 [[ -z "$CONTENT" ]] && exit 0
@@ -41,6 +41,6 @@ while IFS= read -r line; do
       block "SECRET BLOCKED: ${SECRET_LABELS[$i]} detected in content"
     fi
   done
-done <<< "$CONTENT"
+done <<<"$CONTENT"
 
 exit 0

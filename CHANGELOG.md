@@ -28,11 +28,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - test-hooks.sh: 9 new tests for 5 new hooks — session-start (2), post-failure (2), pre-compact (2), task-gate (2), teammate-gate (2) (113 total)
 - test-codex.sh: 2 new tests — non-numeric timeout validation (11 total)
 - install.sh: `_install_python_tool()` and `_install_node_tool()` helper functions extracted from `auto_install_optional()`
+- test-hooks.sh: 19 negative/error tests — corrupt JSON (6), empty stdin (6), missing tool_input (6), oversized input (1) (132 total)
+- test-install.sh: 4 hook-sync edge-case tests — corrupt JSON, empty settings, dry-run (15 total)
 - .gitignore: IDE files (.idea, .vscode, \*.swp), coverage directories
 
 ### Fixed
 
 - codex-wrapper.sh: suppress `codex exec` stdout to prevent duplicate output (output is read from `-o` file); fixes invalid JSON in wrapper response
+- bash-firewall.sh, protect-files.sh, secret-scan-pre.sh, secret-scan.sh, auto-format.sh: defensive jq error handling — corrupt/empty JSON input no longer crashes hooks (exit 0 on parse failure)
 - **CRITICAL:** block() exit code — changed from exit 2 to exit 0 so Claude Code processes the JSON output (exit 2 causes stdout JSON to be ignored per hooks reference)
 - **CRITICAL:** warn() output field — changed from undocumented `notification` to documented `systemMessage` universal field
 - session-logger.sh: event type corrected from Stop to SessionEnd
