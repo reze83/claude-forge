@@ -189,10 +189,10 @@ _install_github_binary() {
   local os arch tarball_url tarball_file
 
   os="$(uname -s | tr '[:upper:]' '[:lower:]')"
-  arch="$(uname -m)"
-  case "$arch" in
-    x86_64) arch="x86_64" ;;
-    aarch64 | arm64) arch="arm64" ;;
+  # Map uname -m to regex matching common GitHub release naming conventions
+  case "$(uname -m)" in
+    x86_64) arch="(x86_64|x64|amd64)" ;;
+    aarch64 | arm64) arch="(arm64|aarch64)" ;;
     *) return 1 ;;
   esac
 
@@ -261,6 +261,12 @@ auto_install_optional() {
 # --- Pre-Checks ---
 echo "=== claude-forge installer ==="
 echo ""
+
+# Cache sudo credentials upfront (prompts for password once if needed)
+if ! $DRY_RUN && command -v sudo >/dev/null 2>&1 && ! sudo -n true 2>/dev/null; then
+  echo -e "${YELLOW}[INFO]${NC} Einige Pakete benoetigen sudo. Bitte Passwort eingeben:"
+  sudo -v || echo -e "  ${YELLOW}[WARN]${NC} sudo nicht verfuegbar — apt-Pakete werden uebersprungen"
+fi
 
 echo "-- Pre-Checks (Pflicht) --"
 if ! command -v git >/dev/null 2>&1; then
