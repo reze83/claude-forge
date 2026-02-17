@@ -18,7 +18,8 @@ main() {
 
   forge_dir="${CLAUDE_FORGE_DIR:-${HOME}/.claude/claude-forge}"
   # Sanitize path — reject shell metacharacters to prevent command injection
-  if [[ "$forge_dir" =~ [;\|\&\$\`] ]]; then
+  local unsafe_pattern='[;|&$`]'
+  if [[ "$forge_dir" =~ $unsafe_pattern ]]; then
     printf 'Task gate failed: invalid characters in forge directory path\n' >&2
     exit 2
   fi
