@@ -228,9 +228,15 @@ _install_bats_core() {
   local tmp_dir prefix
   tmp_dir="$(mktemp -d "${TMPDIR:-/tmp}/bats-core-XXXXXX")"
   prefix="${HOME}/.local"
-  git clone --depth 1 https://github.com/bats-core/bats-core.git "$tmp_dir" 2>/dev/null || { rm -rf "$tmp_dir"; return 1; }
+  git clone --depth 1 https://github.com/bats-core/bats-core.git "$tmp_dir" 2>/dev/null || {
+    rm -rf "$tmp_dir"
+    return 1
+  }
   mkdir -p "$prefix"
-  bash "$tmp_dir/install.sh" "$prefix" 2>/dev/null || { rm -rf "$tmp_dir"; return 1; }
+  bash "$tmp_dir/install.sh" "$prefix" 2>/dev/null || {
+    rm -rf "$tmp_dir"
+    return 1
+  }
   rm -rf "$tmp_dir"
   # Ensure ~/.local/bin is in PATH for current session
   if ! command -v bats >/dev/null 2>&1; then
@@ -373,9 +379,6 @@ if [[ -f "$CLAUDE_DIR/settings.json" ]] && jq -e '.hooks' "$EXAMPLE_SETTINGS" >/
     fi
   fi
 fi
-
-# MEMORY.md: Symlink (wird von Claude Code automatisch gepflegt)
-create_symlink "$REPO_DIR/user-config/MEMORY.md" "$CLAUDE_DIR/MEMORY.md"
 
 # Rules: Symlink aus Repo-Root
 create_symlink "$REPO_DIR/rules" "$CLAUDE_DIR/rules"

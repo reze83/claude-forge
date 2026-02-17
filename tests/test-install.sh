@@ -47,7 +47,6 @@ echo "-- Installation --"
 HOME="$FAKE_HOME" bash "$SCRIPT_DIR/install.sh" >/dev/null 2>&1
 assert "settings.json vorhanden (Kopie)" "[[ -f '$FAKE_HOME/.claude/settings.json' && ! -L '$FAKE_HOME/.claude/settings.json' ]]"
 assert "CLAUDE.md vorhanden (Kopie)" "[[ -f '$FAKE_HOME/.claude/CLAUDE.md' && ! -L '$FAKE_HOME/.claude/CLAUDE.md' ]]"
-assert "MEMORY.md ist Symlink" "[[ -L '$FAKE_HOME/.claude/MEMORY.md' ]]"
 assert "hooks/ ist Symlink" "[[ -L '$FAKE_HOME/.claude/hooks' ]]"
 assert "rules/ ist Symlink" "[[ -L '$FAKE_HOME/.claude/rules' ]]"
 assert "commands/ ist Symlink" "[[ -L '$FAKE_HOME/.claude/commands' ]]"
@@ -102,7 +101,6 @@ rm -rf "$SYNC_HOME"
 echo ""
 echo "-- Deinstallation --"
 HOME="$FAKE_HOME" bash "$SCRIPT_DIR/uninstall.sh" >/dev/null 2>&1
-assert "MEMORY.md Symlink entfernt" "[[ ! -L '$FAKE_HOME/.claude/MEMORY.md' ]]"
 assert "hooks/ Symlink entfernt" "[[ ! -L '$FAKE_HOME/.claude/hooks' ]]"
 assert "settings.json bleibt (Kopie)" "[[ -f '$FAKE_HOME/.claude/settings.json' ]]"
 
