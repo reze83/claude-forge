@@ -13,7 +13,7 @@ HOOKS_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 debug() {
   if [[ "${CLAUDE_FORGE_DEBUG:-0}" == "1" ]]; then
     printf '%s [DEBUG] %s\n' "$(date -Iseconds 2>/dev/null || date)" "$1" \
-      >> "${HOME}/.claude/hooks-debug.log" 2>/dev/null || true
+      >>"${HOME}/.claude/hooks-debug.log" 2>/dev/null || true
   fi
 }
 
@@ -37,6 +37,18 @@ warn() {
   message=$(printf '%s' "$1" | jq -Rs .)
   debug "WARN: $1"
   printf '{"systemMessage":%s}' "$message"
+}
+
+# --- JSON context builder (Setup/SessionStart) ---
+# Builds additionalContext JSON from key-value pairs
+# Usage: context "key1" "val1" "key2" "val2"
+context() {
+  local args=()
+  while [[ $# -gt 0 ]]; do
+    args+=("--arg" "$1" "$2")
+    shift 2
+  done
+  jq -cn "${args[@]}" '$ARGS.named' 2>/dev/null || printf '{}'
 }
 
 # --- Secret Patterns (ERE — no PCRE, Bash 3.2+ compatible) ---
@@ -70,4 +82,4 @@ SECRET_LABELS=(
 )
 
 # --- Constants ---
-readonly MAX_CONTENT_SIZE=1048576  # 1MB limit for secret scanning
+readonly MAX_CONTENT_SIZE=1048576 # 1MB limit for secret scanning

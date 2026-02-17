@@ -10,7 +10,7 @@
 
 [![Version](https://img.shields.io/badge/version-0.3.0-blue?style=flat-square)](CHANGELOG.md)
 [![CI](https://img.shields.io/github/actions/workflow/status/reze83/claude-forge/test.yml?branch=main&style=flat-square&label=CI)](https://github.com/reze83/claude-forge/actions)
-[![Tests](https://img.shields.io/badge/tests-165%20passed-brightgreen?style=flat-square)](#)
+[![Tests](https://img.shields.io/badge/tests-171%20passed-brightgreen?style=flat-square)](#)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 
 <!-- Demo GIF — generate with: vhs docs/assets/demo.tape -->
@@ -76,6 +76,7 @@ claude --plugin-dir <pfad-zum-repo>
 | ------------------ | ------------------------------------------------------------------------- |
 | **Auto-Format**    | Formatiert JS/TS/Python/Rust/Go/Shell automatisch nach jedem Edit (async) |
 | **Multi-Model**    | Delegiert Tasks an Codex CLI — 5 Workflow-Commands (`/multi-*`)           |
+| **Setup**          | Dependency-Check, Symlink-Health, Projekt-Context bei `--init`            |
 | **Session-Start**  | Forge-Version als Context, Session-Logging                                |
 | **Post-Failure**   | Tool-Fehler Logging + Context-Hinweis                                     |
 | **Pre-Compact**    | Context-Compaction Logging                                                |
@@ -99,13 +100,13 @@ bash update.sh --check  # Nur pruefen ob Updates verfuegbar
 
 ## Komponenten
 
-| Typ      | Anzahl | Inhalt                                                                                                                                                      |
-| -------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Hooks    | 11     | bash-firewall, protect-files, secret-scan-pre, auto-format, secret-scan, session-start, post-failure, pre-compact, task-gate, teammate-gate, session-logger |
-| Agents   | 3      | research, test-runner, security-auditor                                                                                                                     |
-| Skills   | 4      | code-review, explain-code, deploy, project-init                                                                                                             |
-| Commands | 7      | multi-model (5), forge-status, forge-update                                                                                                                 |
-| Rules    | 4      | git-workflow, security, token-optimierung, code-standards                                                                                                   |
+| Typ      | Anzahl | Inhalt                                                                                                                                                             |
+| -------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Hooks    | 12     | bash-firewall, protect-files, secret-scan-pre, auto-format, secret-scan, setup, session-start, post-failure, pre-compact, task-gate, teammate-gate, session-logger |
+| Agents   | 3      | research, test-runner, security-auditor                                                                                                                            |
+| Skills   | 4      | code-review, explain-code, deploy, project-init                                                                                                                    |
+| Commands | 7      | multi-model (5), forge-status, forge-update                                                                                                                        |
+| Rules    | 4      | git-workflow, security, token-optimierung, code-standards                                                                                                          |
 
 ---
 
@@ -230,6 +231,7 @@ claude-forge/
 │   ├── auto-format.sh              Auto-Formatting (JS/TS/Python/Rust/Go/Shell)
 │   ├── secret-scan-pre.sh          Secret-Erkennung VOR Write/Edit (deny)
 │   ├── secret-scan.sh              Secret-Erkennung nach Write/Edit (warn)
+│   ├── setup.sh                    Setup-Check (Dependencies + Symlinks)
 │   ├── session-start.sh            Session-Init + Version Context
 │   ├── post-failure.sh             Tool-Fehler Logging
 │   ├── pre-compact.sh              Compaction Logging
@@ -241,7 +243,7 @@ claude-forge/
 ├── skills/                         → ~/.claude/skills/
 ├── commands/                       → ~/.claude/commands/
 ├── multi-model/                    → ~/.claude/multi-model/ (Codex CLI)
-├── tests/                          Test-Suite (165 Tests)
+├── tests/                          Test-Suite (171 Tests)
 └── docs/                           Dokumentation
     ├── ARCHITECTURE.md              Architektur-Uebersicht
     ├── demo.tape                    VHS Tape-Datei (GIF-Recording)
