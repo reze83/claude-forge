@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- codex-wrapper.sh: suppress `codex exec` stdout to prevent duplicate output (output is read from `-o` file); fixes invalid JSON in wrapper response
 - **CRITICAL:** block() exit code — changed from exit 2 to exit 0 so Claude Code processes the JSON output (exit 2 causes stdout JSON to be ignored per hooks reference)
 - **CRITICAL:** warn() output field — changed from undocumented `notification` to documented `systemMessage` universal field
 - session-logger.sh: event type corrected from Stop to SessionEnd

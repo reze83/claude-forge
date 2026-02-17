@@ -30,16 +30,28 @@ fi
 # --- Argumente ---
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --sandbox|--prompt|--workdir|--timeout)
+    --sandbox | --prompt | --workdir | --timeout)
       if [[ $# -lt 2 ]]; then
         echo "{\"status\":\"error\",\"output\":\"Missing value for $1\",\"model\":\"codex\"}"
         exit 0
       fi
       ;;&
-    --sandbox) SANDBOX="$2"; shift 2 ;;
-    --prompt)  PROMPT="$2"; shift 2 ;;
-    --workdir) WORKDIR="$2"; shift 2 ;;
-    --timeout) TIMEOUT="$2"; shift 2 ;;
+    --sandbox)
+      SANDBOX="$2"
+      shift 2
+      ;;
+    --prompt)
+      PROMPT="$2"
+      shift 2
+      ;;
+    --workdir)
+      WORKDIR="$2"
+      shift 2
+      ;;
+    --timeout)
+      TIMEOUT="$2"
+      shift 2
+      ;;
     *)
       echo "{\"status\":\"error\",\"output\":\"Unknown argument: $1\",\"model\":\"codex\"}"
       exit 0
@@ -79,9 +91,9 @@ fi
 
 # --- Sandbox-Modus mappen (Codex CLI v0.101+) ---
 case "$SANDBOX" in
-  read)  SANDBOX_FLAG="read-only" ;;
+  read) SANDBOX_FLAG="read-only" ;;
   write) SANDBOX_FLAG="workspace-write" ;;
-  full)  SANDBOX_FLAG="danger-full-access" ;;
+  full) SANDBOX_FLAG="danger-full-access" ;;
   *)
     echo "{\"status\":\"error\",\"output\":\"Invalid sandbox mode: $SANDBOX (use read|write|full)\",\"model\":\"codex\"}"
     exit 0
@@ -119,7 +131,7 @@ timeout "$TIMEOUT" codex exec \
   --sandbox "$SANDBOX_FLAG" \
   $SKIP_GIT_FLAG \
   -o "$OUTFILE" \
-  "$PROMPT" 2>"$ERRFILE" || {
+  "$PROMPT" >/dev/null 2>"$ERRFILE" || {
   EXIT_CODE=$?
   STDERR_MSG=""
   [[ -s "$ERRFILE" ]] && STDERR_MSG="$(cat "$ERRFILE")"
