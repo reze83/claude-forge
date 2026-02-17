@@ -34,14 +34,25 @@
 
 ## Quickstart
 
+**Standard-Installation:**
+
 ```bash
-git clone https://github.com/reze83/claude-forge.git ~/.claude/claude-forge
-cd ~/.claude/claude-forge
+git clone https://github.com/reze83/claude-forge.git "${XDG_DATA_HOME:-$HOME/.local/share}"/claude-forge
+cd "${XDG_DATA_HOME:-$HOME/.local/share}"/claude-forge
 bash install.sh
 ```
 
+**Mit Codex CLI (Multi-Model):**
+
+```bash
+git clone https://github.com/reze83/claude-forge.git "${XDG_DATA_HOME:-$HOME/.local/share}"/claude-forge
+cd "${XDG_DATA_HOME:-$HOME/.local/share}"/claude-forge
+bash install.sh --with-codex
+```
+
 > [!TIP]
-> Der Clone-Pfad ist frei waehlbar, z.B. auch `${XDG_DATA_HOME:-$HOME/.local/share}/claude-forge`.
+> Der Clone-Pfad ist frei waehlbar — `install.sh` erkennt seinen Standort automatisch und erstellt Symlinks nach `~/.claude/`.
+> Empfohlen wird ein Pfad **ausserhalb** von `~/.claude/`, damit das Claude Code Konfigurationsverzeichnis sauber bleibt.
 
 <details>
 <summary><strong>Alternative: Plugin-Modus</strong></summary>
