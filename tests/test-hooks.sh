@@ -331,6 +331,88 @@ assert_exit "Blocks secret on non-pragma line" 0 "$SP" '{"tool_name":"Write","to
 
 echo ""
 
+# Use writable HOME for hooks that log under ~/.claude in this sandbox.
+ORIG_HOME="${HOME:-}"
+TEST_HOME="$TMPDIR_TEST/home"
+mkdir -p "$TEST_HOME/.claude"
+export HOME="$TEST_HOME"
+
+# --- session-start.sh ---
+echo "-- session-start.sh --"
+SESS="$HOOKS_DIR/session-start.sh"
+
+# Valid SessionStart payload
+assert_exit "Exit 0 for SessionStart input" 0 "$SESS" '{"session_id":"sess_123","source":"cli","model":"claude-3-5-sonnet"}'
+
+# Output should contain context payload
+SESS_OUT=$(echo '{"session_id":"sess_123","source":"cli","model":"claude-3-5-sonnet"}' | bash "$SESS" 2>/dev/null || true)
+if [[ "$SESS_OUT" == *"additionalContext"* || "$SESS_OUT" == *"systemMessage"* ]]; then
+  printf '  %b[PASS]%b Returns additional context output\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b Missing additional context/system message: %s\n' "$RED" "$NC" "$SESS_OUT"
+  FAIL=$((FAIL + 1))
+fi
+
+echo ""
+
+# --- post-failure.sh ---
+echo "-- post-failure.sh --"
+PFAIL="$HOOKS_DIR/post-failure.sh"
+
+# Valid PostToolUseFailure payload
+assert_exit "Exit 0 for PostToolUseFailure input" 0 "$PFAIL" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/x"},"error":"permission denied","is_interrupt":false}'
+
+# Missing error field should be handled gracefully
+assert_exit "Exit 0 when error field is missing" 0 "$PFAIL" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/x"},"is_interrupt":false}'
+
+echo ""
+
+# --- pre-compact.sh ---
+echo "-- pre-compact.sh --"
+PC="$HOOKS_DIR/pre-compact.sh"
+
+# Manual and auto triggers should both pass
+assert_exit "Exit 0 for manual trigger" 0 "$PC" '{"trigger":"manual"}'
+assert_exit "Exit 0 for auto trigger"   0 "$PC" '{"trigger":"auto"}'
+
+echo ""
+
+# --- task-gate.sh ---
+echo "-- task-gate.sh --"
+TG="$HOOKS_DIR/task-gate.sh"
+
+# Opt-in gate: disabled by default
+assert_exit "Exit 0 when task gate is not set" 0 "$TG" '{"task_id":"t1","task_subject":"done","task_description":"desc"}'
+
+# Enabled gate should enforce checks (invalid forge dir -> blocked)
+export CLAUDE_FORGE_TASK_GATE=1
+export CLAUDE_FORGE_DIR="$TMPDIR_TEST/does-not-exist"
+assert_exit "Exit 2 when task gate enabled with missing forge dir" 2 "$TG" '{"task_id":"t1","task_subject":"done","task_description":"desc"}'
+unset CLAUDE_FORGE_TASK_GATE
+unset CLAUDE_FORGE_DIR
+
+echo ""
+
+# --- teammate-gate.sh ---
+echo "-- teammate-gate.sh --"
+TMG="$HOOKS_DIR/teammate-gate.sh"
+
+# Opt-in gate: disabled by default
+assert_exit "Exit 0 when teammate gate is not set" 0 "$TMG" '{"teammate_name":"alice","team_name":"core"}'
+
+# Enabled gate in non-git dir should pass
+export CLAUDE_FORGE_TEAMMATE_GATE=1
+(
+  cd "$TMPDIR_TEST" || exit 1
+  assert_exit "Exit 0 when teammate gate enabled outside git repo" 0 "$TMG" '{"teammate_name":"alice","team_name":"core"}'
+)
+unset CLAUDE_FORGE_TEAMMATE_GATE
+
+echo ""
+
+export HOME="$ORIG_HOME"
+
 # --- Ergebnis ---
 echo "================================="
 printf 'Tests: %d | %b%d passed%b | %b%d failed%b\n' $((PASS + FAIL)) "$GREEN" "$PASS" "$NC" "$RED" "$FAIL" "$NC"

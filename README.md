@@ -10,7 +10,7 @@
 
 [![Version](https://img.shields.io/badge/version-0.3.0-blue?style=flat-square)](CHANGELOG.md)
 [![CI](https://img.shields.io/github/actions/workflow/status/reze83/claude-forge/test.yml?branch=main&style=flat-square&label=CI)](https://github.com/reze83/claude-forge/actions)
-[![Tests](https://img.shields.io/badge/tests-133%20passed-brightgreen?style=flat-square)](#)
+[![Tests](https://img.shields.io/badge/tests-142%20passed-brightgreen?style=flat-square)](#)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 
 <!-- Demo GIF — generate with: vhs docs/assets/demo.tape -->
@@ -62,26 +62,26 @@ claude --plugin-dir <pfad-zum-repo>
 
 ### Security
 
-| Hook | Funktion |
-|------|----------|
-| **Bash-Firewall** | Blockt `rm -rf /`, `git push main`, `chmod 777`, `eval`, `bash -c` — inkl. Bypass-Schutz (absolute Pfade, command/env/exec Prefix, getrennte Flags, Refspec, Force-Push) |
-| **File-Protection** | Schuetzt `.env`, `.ssh/`, `.aws/`, `.npmrc`, `*.pem`, `*.key` (case-insensitive). Allowlist fuer `.env.example`/`.env.sample` |
-| **Secret-Scan (Pre)** | Blockt 11 Secret-Patterns in Write/Edit-Content BEVOR sie geschrieben werden. Pragma-Allowlist gilt pro Zeile |
-| **Secret-Scan (Post)** | Warnt bei 11 Secret-Typen: Anthropic, OpenAI, GitHub (PAT/OAuth/Server/Refresh), AWS, JWT, PEM, Stripe, Slack, Azure |
-| **Hook-Tampering** | Schuetzt `.claude/hooks.json`, `.claude/hooks/`, `.claude/settings.json` vor Manipulation |
+| Hook                   | Funktion                                                                                                                                                                 |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Bash-Firewall**      | Blockt `rm -rf /`, `git push main`, `chmod 777`, `eval`, `bash -c` — inkl. Bypass-Schutz (absolute Pfade, command/env/exec Prefix, getrennte Flags, Refspec, Force-Push) |
+| **File-Protection**    | Schuetzt `.env`, `.ssh/`, `.aws/`, `.npmrc`, `*.pem`, `*.key` (case-insensitive). Allowlist fuer `.env.example`/`.env.sample`                                            |
+| **Secret-Scan (Pre)**  | Blockt 11 Secret-Patterns in Write/Edit-Content BEVOR sie geschrieben werden. Pragma-Allowlist gilt pro Zeile                                                            |
+| **Secret-Scan (Post)** | Warnt bei 11 Secret-Typen: Anthropic, OpenAI, GitHub (PAT/OAuth/Server/Refresh), AWS, JWT, PEM, Stripe, Slack, Azure                                                     |
+| **Hook-Tampering**     | Schuetzt `.claude/hooks.json`, `.claude/hooks/`, `.claude/settings.json` vor Manipulation                                                                                |
 
 ### Produktivitaet
 
-| Hook / Command | Funktion |
-|----------------|----------|
-| **Auto-Format** | Formatiert JS/TS/Python/Rust/Go/Shell automatisch nach jedem Edit (async) |
-| **Multi-Model** | Delegiert Tasks an Codex CLI — 5 Workflow-Commands (`/multi-*`) |
-| **Session-Start** | Forge-Version als Context, Session-Logging |
-| **Post-Failure** | Tool-Fehler Logging + Context-Hinweis |
-| **Pre-Compact** | Context-Compaction Logging |
-| **Task-Gate** | Quality Gate: Hook-Tests vor Task-Abschluss (opt-in) |
-| **Teammate-Gate** | Uncommitted-Changes Check vor Teammate-Idle (opt-in) |
-| **Session-Logger** | Desktop-Notification + Log bei Session-Ende |
+| Hook / Command     | Funktion                                                                  |
+| ------------------ | ------------------------------------------------------------------------- |
+| **Auto-Format**    | Formatiert JS/TS/Python/Rust/Go/Shell automatisch nach jedem Edit (async) |
+| **Multi-Model**    | Delegiert Tasks an Codex CLI — 5 Workflow-Commands (`/multi-*`)           |
+| **Session-Start**  | Forge-Version als Context, Session-Logging                                |
+| **Post-Failure**   | Tool-Fehler Logging + Context-Hinweis                                     |
+| **Pre-Compact**    | Context-Compaction Logging                                                |
+| **Task-Gate**      | Quality Gate: Hook-Tests vor Task-Abschluss (opt-in)                      |
+| **Teammate-Gate**  | Uncommitted-Changes Check vor Teammate-Idle (opt-in)                      |
+| **Session-Logger** | Desktop-Notification + Log bei Session-Ende                               |
 
 ### Self-Management
 
@@ -99,13 +99,13 @@ bash update.sh --check  # Nur pruefen ob Updates verfuegbar
 
 ## Komponenten
 
-| Typ | Anzahl | Inhalt |
-|-----|--------|--------|
-| Hooks | 11 | bash-firewall, protect-files, secret-scan-pre, auto-format, secret-scan, session-start, post-failure, pre-compact, task-gate, teammate-gate, session-logger |
-| Agents | 3 | research, test-runner, security-auditor |
-| Skills | 4 | code-review, explain-code, deploy, project-init |
-| Commands | 7 | multi-model (5), forge-status, forge-update |
-| Rules | 4 | git-workflow, security, token-optimierung, code-standards |
+| Typ      | Anzahl | Inhalt                                                                                                                                                      |
+| -------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Hooks    | 11     | bash-firewall, protect-files, secret-scan-pre, auto-format, secret-scan, session-start, post-failure, pre-compact, task-gate, teammate-gate, session-logger |
+| Agents   | 3      | research, test-runner, security-auditor                                                                                                                     |
+| Skills   | 4      | code-review, explain-code, deploy, project-init                                                                                                             |
+| Commands | 7      | multi-model (5), forge-status, forge-update                                                                                                                 |
+| Rules    | 4      | git-workflow, security, token-optimierung, code-standards                                                                                                   |
 
 ---
 
@@ -113,9 +113,9 @@ bash update.sh --check  # Nur pruefen ob Updates verfuegbar
 
 `install.sh` installiert fehlende Dependencies automatisch (apt/brew/pip/npm mit Fallbacks).
 
-| | Pakete |
-|---|--------|
-| **Pflicht** | git, jq, node >= 20, python3 >= 3.10 |
+|              | Pakete                                            |
+| ------------ | ------------------------------------------------- |
+| **Pflicht**  | git, jq, node >= 20, python3 >= 3.10              |
 | **Optional** | shfmt, ruff, prettier (Auto-Formatter), Codex CLI |
 
 > [!NOTE]
@@ -133,13 +133,13 @@ bash install.sh --with-codex
 # oder manuell: bash multi-model/codex-setup.sh
 ```
 
-| Command | Beschreibung |
-|---------|-------------|
+| Command           | Beschreibung                                       |
+| ----------------- | -------------------------------------------------- |
 | `/multi-workflow` | Claude plant, Codex implementiert, Claude reviewed |
-| `/multi-plan` | Parallele Plaene von Claude und Codex |
-| `/multi-execute` | Direkte Codex-Delegation (read/write) |
-| `/multi-backend` | Backend/Algorithmen an Codex (read-only) |
-| `/multi-frontend` | Frontend von Claude, Codex reviewed |
+| `/multi-plan`     | Parallele Plaene von Claude und Codex              |
+| `/multi-execute`  | Direkte Codex-Delegation (read/write)              |
+| `/multi-backend`  | Backend/Algorithmen an Codex (read-only)           |
+| `/multi-frontend` | Frontend von Claude, Codex reviewed                |
 
 </details>
 
@@ -186,6 +186,7 @@ bash install.sh --with-codex
 <summary><strong>Debugging</strong></summary>
 
 Hook manuell testen:
+
 ```bash
 echo '{"tool_input":{"command":"ls -la"}}' | bash hooks/bash-firewall.sh
 echo '{"tool_input":{"file_path":"/home/user/.env"}}' | bash hooks/protect-files.sh
@@ -193,11 +194,13 @@ echo '{"tool_name":"Write","tool_input":{"file_path":"/tmp/t","content":"sk-ant-
 ```
 
 Debug-Logging aktivieren:
+
 ```bash
 export CLAUDE_FORGE_DEBUG=1  # Schreibt nach ~/.claude/hooks-debug.log
 ```
 
 Validierung:
+
 ```bash
 bash validate.sh
 ```
@@ -238,7 +241,7 @@ claude-forge/
 ├── skills/                         → ~/.claude/skills/
 ├── commands/                       → ~/.claude/commands/
 ├── multi-model/                    → ~/.claude/multi-model/ (Codex CLI)
-├── tests/                          Test-Suite (133 Tests)
+├── tests/                          Test-Suite (142 Tests)
 └── docs/                           Dokumentation
     ├── ARCHITECTURE.md              Architektur-Uebersicht
     ├── demo.tape                    VHS Tape-Datei (GIF-Recording)

@@ -8,11 +8,16 @@
   },
   "repository": "https://github.com/reze83/claude-forge",
   "license": "MIT",
-  "keywords": ["security", "hooks", "multi-model", "codex", "formatting", "secret-scan"],
+  "keywords": [
+    "security",
+    "hooks",
+    "multi-model",
+    "codex",
+    "formatting",
+    "secret-scan"
+  ],
   "commands": "./commands/",
   "agents": "./agents/",
   "skills": "./skills/",
-  "hooks": "./hooks/hooks.json",
-  "outputStyles": "./output-styles/",
-  "lspServers": {}
+  "outputStyles": "./output-styles/"
 }
