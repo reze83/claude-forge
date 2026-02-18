@@ -135,6 +135,38 @@
         }]
       }
     ],
+    "SubagentStart": [
+      {
+        "matcher": "",
+        "hooks": [{
+          "type": "command",
+          "command": "bash $HOME/.claude/hooks/subagent-start.sh",
+          "timeout": 10,
+          "statusMessage": "Logging subagent start..."
+        }]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "matcher": "",
+        "hooks": [{
+          "type": "command",
+          "command": "bash $HOME/.claude/hooks/subagent-stop.sh",
+          "timeout": 10,
+          "statusMessage": "Logging subagent stop..."
+        }]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [{
+          "type": "command",
+          "command": "bash $HOME/.claude/hooks/stop.sh",
+          "timeout": 10,
+          "statusMessage": "Turn complete..."
+        }]
+      }
+    ],
     "TaskCompleted": [
       {
         "hooks": [{

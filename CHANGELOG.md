@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- hooks/subagent-start.sh: new SubagentStart hook — logs subagent spawn (agent_type, agent_id, session_id)
+- hooks/subagent-stop.sh: new SubagentStop hook — logs subagent completion (agent_type, agent_id, stop_hook_active)
+- hooks/stop.sh: new Stop hook — logs Claude turn completion + desktop notification; skips when stop_hook_active=true to prevent recursion
+- hooks/hooks.json + settings.json.example: SubagentStart, SubagentStop, Stop events registered (timeout: 10s each)
+- tests/test-hooks.sh: 6 new tests for subagent-start (2), subagent-stop (2), stop (2) — 138 → 144 total
 - settings.json.example: `autoUpdatesChannel: latest`
 - settings.json.example: `sandbox.autoAllowBashIfSandboxed: true` — ensures Bash allow-list entries are respected inside sandbox
 - settings.json.example: `CLAUDE_CODE_DISABLE_AUTO_MEMORY=0` — opt users into auto memory regardless of gradual rollout
