@@ -37,22 +37,28 @@ echo "-- Dateien & Symlinks --"
 [[ -f "$CLAUDE_DIR/settings.json" ]] && pass "settings.json vorhanden" || fail "settings.json vorhanden"
 [[ -f "$CLAUDE_DIR/CLAUDE.md" ]] && pass "CLAUDE.md vorhanden" || fail "CLAUDE.md vorhanden"
 
-check_symlink() {
+check_dir_with_symlinks() {
   local name="$1"
   local target="$CLAUDE_DIR/$name"
-  if [[ ! -L "$target" ]]; then
-    fail "$name ist kein Symlink"
-  elif [[ ! -e "$target" ]]; then
-    fail "$name → $(readlink "$target") (Ziel existiert nicht)"
+  if [[ ! -d "$target" ]]; then
+    fail "$name Verzeichnis fehlt"
+    return
+  fi
+  local link_count=0
+  for item in "$target"/*; do
+    [[ -L "$item" ]] && link_count=$((link_count + 1))
+  done
+  if [[ $link_count -gt 0 ]]; then
+    pass "$name/ ($link_count Datei-Symlinks)"
   else
-    pass "$name → $(readlink "$target")"
+    fail "$name/ hat keine Datei-Symlinks"
   fi
 }
 
-check_symlink "rules"
-check_symlink "hooks"
-check_symlink "commands"
-check_symlink "multi-model"
+check_dir_with_symlinks "rules"
+check_dir_with_symlinks "hooks"
+check_dir_with_symlinks "commands"
+check_dir_with_symlinks "multi-model"
 
 # --- JSON-Validitaet ---
 echo ""

@@ -55,13 +55,13 @@ Run all tests before committing:
 ```bash
 bash tests/test-hooks.sh      # Hook unit tests (144 tests)
 bash tests/test-update.sh     # Update script tests (6 tests)
-bash tests/test-install.sh    # Install/uninstall tests (14 tests)
+bash tests/test-install.sh    # Install/uninstall tests (16 tests)
 bash tests/test-codex.sh      # Codex wrapper tests (11 tests)
 bash tests/test-validate.sh   # Validation tests (1 test)
 bash validate.sh              # Full validation suite
 ```
 
-Total: 176 tests
+Total: 178 tests
 
 ### Adding Tests
 

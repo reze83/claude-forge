@@ -51,19 +51,19 @@ if $DRY_RUN; then
 fi
 echo ""
 
-# Symlinked components
-remove_if_symlink_to_repo "$CLAUDE_DIR/rules"
-remove_if_symlink_to_repo "$CLAUDE_DIR/hooks"
-remove_if_symlink_to_repo "$CLAUDE_DIR/commands"
-remove_if_symlink_to_repo "$CLAUDE_DIR/multi-model"
-
-# Agents (einzeln)
-for agent in "$REPO_DIR/agents/"*.md; do
-  [[ -f "$agent" ]] || continue
-  remove_if_symlink_to_repo "$CLAUDE_DIR/agents/$(basename "$agent")"
+# Alle Datei-Symlinks in Verzeichnissen entfernen (neues Layout)
+for dir in rules hooks commands multi-model agents; do
+  if [[ -d "$CLAUDE_DIR/$dir" ]]; then
+    for item in "$CLAUDE_DIR/$dir"/*; do
+      [[ -e "$item" || -L "$item" ]] || continue
+      remove_if_symlink_to_repo "$item"
+    done
+  fi
+  # Fallback: alte Directory-Symlinks (vor v2) ebenfalls entfernen
+  remove_if_symlink_to_repo "$CLAUDE_DIR/$dir"
 done
 
-# Skills (einzeln)
+# Skills (einzeln — Unterverzeichnisse)
 for skill_dir in "$REPO_DIR/skills/"*/; do
   [[ -d "$skill_dir" ]] || continue
   remove_if_symlink_to_repo "$CLAUDE_DIR/skills/$(basename "$skill_dir")"

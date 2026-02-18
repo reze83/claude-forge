@@ -47,9 +47,11 @@ echo "-- Installation --"
 HOME="$FAKE_HOME" bash "$SCRIPT_DIR/install.sh" >/dev/null 2>&1
 assert "settings.json vorhanden (Kopie)" "[[ -f '$FAKE_HOME/.claude/settings.json' && ! -L '$FAKE_HOME/.claude/settings.json' ]]"
 assert "CLAUDE.md vorhanden (Kopie)" "[[ -f '$FAKE_HOME/.claude/CLAUDE.md' && ! -L '$FAKE_HOME/.claude/CLAUDE.md' ]]"
-assert "hooks/ ist Symlink" "[[ -L '$FAKE_HOME/.claude/hooks' ]]"
-assert "rules/ ist Symlink" "[[ -L '$FAKE_HOME/.claude/rules' ]]"
-assert "commands/ ist Symlink" "[[ -L '$FAKE_HOME/.claude/commands' ]]"
+assert "hooks/ ist Verzeichnis" "[[ -d '$FAKE_HOME/.claude/hooks' && ! -L '$FAKE_HOME/.claude/hooks' ]]"
+assert "hooks/ enthaelt Datei-Symlinks" "[[ -L '$FAKE_HOME/.claude/hooks/bash-firewall.sh' ]]"
+assert "rules/ ist Verzeichnis" "[[ -d '$FAKE_HOME/.claude/rules' && ! -L '$FAKE_HOME/.claude/rules' ]]"
+assert "rules/ enthaelt Datei-Symlinks" "[[ -L '$FAKE_HOME/.claude/rules/git-workflow.md' ]]"
+assert "commands/ ist Verzeichnis" "[[ -d '$FAKE_HOME/.claude/commands' && ! -L '$FAKE_HOME/.claude/commands' ]]"
 
 # --- Idempotenz ---
 echo ""
@@ -77,7 +79,7 @@ SYNC_HOME=$(mktemp -d /tmp/claude-test-sync-XXXXXX)
 mkdir -p "$SYNC_HOME/.claude"
 printf '{invalid json\n' >"$SYNC_HOME/.claude/settings.json"
 SYNC_OUT=$(HOME="$SYNC_HOME" bash "$SCRIPT_DIR/install.sh" 2>&1 || true)
-assert "Corrupt settings.json -> sync fails gracefully" "echo '$SYNC_OUT' | grep -q 'hooks-Block konnte nicht synchronisiert werden'"
+assert "Corrupt settings.json -> sync fails gracefully" "echo '$SYNC_OUT' | grep -q 'settings.json konnte nicht synchronisiert werden'"
 rm -rf "$SYNC_HOME"
 
 # Empty settings.json — sync should add hooks block
@@ -93,7 +95,7 @@ SYNC_HOME=$(mktemp -d /tmp/claude-test-sync-XXXXXX)
 mkdir -p "$SYNC_HOME/.claude"
 echo '{"custom":true}' >"$SYNC_HOME/.claude/settings.json"
 SYNC_OUT=$(HOME="$SYNC_HOME" bash "$SCRIPT_DIR/install.sh" --dry-run 2>&1 || true)
-assert "Dry-run -> sync only logs" "echo '$SYNC_OUT' | grep -q 'Wuerde hooks-Block'"
+assert "Dry-run -> sync only logs" "echo '$SYNC_OUT' | grep -q 'Wuerde settings.json mit Template mergen'"
 assert "Dry-run -> settings.json unchanged" "! jq -e '.hooks' '$SYNC_HOME/.claude/settings.json' >/dev/null 2>&1"
 rm -rf "$SYNC_HOME"
 
@@ -101,7 +103,7 @@ rm -rf "$SYNC_HOME"
 echo ""
 echo "-- Deinstallation --"
 HOME="$FAKE_HOME" bash "$SCRIPT_DIR/uninstall.sh" >/dev/null 2>&1
-assert "hooks/ Symlink entfernt" "[[ ! -L '$FAKE_HOME/.claude/hooks' ]]"
+assert "hooks/ Datei-Symlinks entfernt" "[[ ! -L '$FAKE_HOME/.claude/hooks/bash-firewall.sh' ]]"
 assert "settings.json bleibt (Kopie)" "[[ -f '$FAKE_HOME/.claude/settings.json' ]]"
 
 echo ""

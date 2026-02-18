@@ -10,7 +10,7 @@
 
 [![Version](https://img.shields.io/badge/version-0.3.0-blue?style=flat-square)](CHANGELOG.md)
 [![CI](https://img.shields.io/github/actions/workflow/status/reze83/claude-forge/test.yml?branch=main&style=flat-square&label=CI)](https://github.com/reze83/claude-forge/actions)
-[![Tests](https://img.shields.io/badge/tests-176%20passed-brightgreen?style=flat-square)](#)
+[![Tests](https://img.shields.io/badge/tests-178%20passed-brightgreen?style=flat-square)](#)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 
 <!-- Demo GIF — generate with: vhs docs/assets/demo.tape -->
@@ -247,12 +247,12 @@ claude-forge/
 │   ├── task-gate.sh                Quality Gate (TaskCompleted)
 │   ├── teammate-gate.sh            Uncommitted-Changes Gate (TeammateIdle)
 │   └── session-logger.sh           Session-Ende Notification
-├── rules/                          → ~/.claude/rules/ (symlinked)
-├── agents/                         → ~/.claude/agents/
-├── skills/                         → ~/.claude/skills/
-├── commands/                       → ~/.claude/commands/
-├── multi-model/                    → ~/.claude/multi-model/ (Codex CLI)
-├── tests/                          Test-Suite (176 Tests)
+├── rules/                          → ~/.claude/rules/*.md (Datei-Symlinks)
+├── agents/                         → ~/.claude/agents/*.md (Datei-Symlinks)
+├── skills/                         → ~/.claude/skills/*/ (Dir-Symlinks)
+├── commands/                       → ~/.claude/commands/* (Datei-Symlinks)
+├── multi-model/                    → ~/.claude/multi-model/* (Datei-Symlinks)
+├── tests/                          Test-Suite (178 Tests)
 └── docs/                           Dokumentation
     ├── ARCHITECTURE.md              Architektur-Uebersicht
     ├── demo.tape                    VHS Tape-Datei (GIF-Recording)
