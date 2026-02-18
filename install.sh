@@ -261,7 +261,7 @@ _install_python_tool() {
     # Fallback: venv-based install (Debian/Ubuntu block system pip)
     venv_dir="$HOME/.local/venvs/claude-forge-tools"
     if python3 -m venv "$venv_dir" 2>/dev/null &&
-      "$venv_dir/bin/pip" install "$pkg" 2>/dev/null; then
+      PIP_USER=0 "$venv_dir/bin/pip" install "$pkg" 2>/dev/null; then
       mkdir -p "$HOME/.local/bin"
       ln -sf "$venv_dir/bin/$cmd" "$HOME/.local/bin/$cmd"
       log_ok "$pkg installiert via venv ($venv_dir)"
