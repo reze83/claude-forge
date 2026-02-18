@@ -89,9 +89,16 @@ create_symlink() {
     return
   fi
 
+  # Skip if symlink already points to correct target
+  if [[ -L "$target" ]] && [[ "$(readlink "$target")" == "$source" ]]; then
+    log_skip "$target bereits korrekt verlinkt"
+    return
+  fi
+
   backup_if_exists "$target"
   mkdir -p "$(dirname "$target")"
-  ln -sfn "$source" "$target"
+  rm -f "$target"
+  ln -sn "$source" "$target"
   INSTALLED_SYMLINKS+=("$target")
   log_ok "Verlinkt: $target → $source"
 }
