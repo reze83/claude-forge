@@ -250,11 +250,10 @@ SL="$HOOKS_DIR/session-logger.sh"
 assert_exit "Exit 0 (must never block)" 0 "$SL" '{}'
 
 # Log file is written
-mkdir -p "$HOME/.claude" 2>/dev/null || true
-TEST_LOG="$HOME/.claude/session-log.txt"
+TEST_LOG="$TMPDIR_TEST/session-log.txt"
 BEFORE_COUNT=0
 [[ -f "$TEST_LOG" ]] && BEFORE_COUNT=$(wc -l <"$TEST_LOG")
-echo '{}' | bash "$SL" >/dev/null 2>/dev/null || true
+echo '{}' | CLAUDE_LOG_DIR="$TMPDIR_TEST" bash "$SL" >/dev/null 2>/dev/null || true
 AFTER_COUNT=0
 [[ -f "$TEST_LOG" ]] && AFTER_COUNT=$(wc -l <"$TEST_LOG")
 if [[ "$AFTER_COUNT" -gt "$BEFORE_COUNT" ]]; then

@@ -14,7 +14,7 @@ main() {
   log_file="${HOME}/.claude/hooks-debug.log"
   if mkdir -p "${HOME}/.claude" 2>/dev/null && touch "$log_file" 2>/dev/null; then
     printf '%s teammate_idle teammate=%s team=%s\n' \
-      "$timestamp" "$teammate_name" "$team_name" >> "$log_file"
+      "$timestamp" "$teammate_name" "$team_name" >>"$log_file"
   fi
 
   if [[ "${CLAUDE_FORGE_TEAMMATE_GATE:-0}" != "1" ]]; then

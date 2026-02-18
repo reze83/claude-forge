@@ -16,7 +16,7 @@ main() {
   log_file="${HOME}/.claude/hooks-debug.log"
   log_line="$(jq -cn --arg ts "$timestamp" --arg tool_name "$tool_name" --arg tool_input "$tool_input" --arg error "$error_text" --arg is_interrupt "$is_interrupt" '{timestamp:$ts,event:"PostToolUseFailure",tool_name:$tool_name,tool_input:$tool_input,error:$error,is_interrupt:$is_interrupt}' 2>/dev/null || printf '{"timestamp":"%s","event":"PostToolUseFailure"}' "$timestamp")"
   if mkdir -p "${HOME}/.claude" 2>/dev/null && touch "$log_file" 2>/dev/null; then
-    printf '%s\n' "$log_line" >> "$log_file"
+    printf '%s\n' "$log_line" >>"$log_file"
   fi
 
   printf '{"additionalContext":"Tool execution failed. Check filesystem permissions and verify referenced files exist and are accessible."}\n'

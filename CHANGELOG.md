@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- fix(tests): session-logger test uses CLAUDE_LOG_DIR for sandbox isolation (TMPDIR_TEST instead of $HOME/.claude)
+- fix(hooks): session-logger.sh creates LOG_DIR if missing (defensive mkdir before write)
+- chore: add .gitleaks.toml to allowlist test-hooks.sh (intentional fake secrets for detection testing)
+- chore: add .editorconfig for consistent shfmt formatting (2-space indent, switch_case_indent)
+
 ### Added
 
 - hooks/subagent-start.sh: new SubagentStart hook — logs subagent spawn (agent_type, agent_id, session_id)

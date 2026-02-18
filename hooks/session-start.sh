@@ -16,7 +16,7 @@ main() {
   if mkdir -p "${HOME}/.claude" 2>/dev/null && touch "$log_file" 2>/dev/null; then
     (
       printf '%s session_start session_id=%s source=%s model=%s\n' \
-        "$timestamp" "$session_id" "$source_name" "$model" >> "$log_file"
+        "$timestamp" "$session_id" "$source_name" "$model" >>"$log_file"
     ) 2>/dev/null || true
   fi
 

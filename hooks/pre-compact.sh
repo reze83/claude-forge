@@ -12,7 +12,7 @@ main() {
   local log_file
   log_file="${HOME}/.claude/hooks-debug.log"
   if mkdir -p "${HOME}/.claude" 2>/dev/null && touch "$log_file" 2>/dev/null; then
-    printf '%s pre_compact trigger=%s\n' "$timestamp" "$trigger" >> "$log_file"
+    printf '%s pre_compact trigger=%s\n' "$timestamp" "$trigger" >>"$log_file"
   fi
 
   exit 0

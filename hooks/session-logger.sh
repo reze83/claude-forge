@@ -12,17 +12,18 @@ TIMESTAMP="$(date -Iseconds 2>/dev/null || date)"
 MSG="Claude Code Session beendet"
 
 # Write log entry
-printf '%s | %s\n' "$TIMESTAMP" "$MSG" >> "$LOG_FILE" 2>/dev/null || true
+mkdir -p "$LOG_DIR" 2>/dev/null || true
+printf '%s | %s\n' "$TIMESTAMP" "$MSG" >>"$LOG_FILE" 2>/dev/null || true
 
 # Atomic log rotation using mkdir as portable lock (no flock needed)
 LOCK_DIR="${LOG_FILE}.lock"
 if mkdir "$LOCK_DIR" 2>/dev/null; then
   # We got the lock — perform rotation
   if [[ -f "$LOG_FILE" ]]; then
-    LINE_COUNT=$(wc -l < "$LOG_FILE" 2>/dev/null || printf '0')
+    LINE_COUNT=$(wc -l <"$LOG_FILE" 2>/dev/null || printf '0')
     if [[ "$LINE_COUNT" -gt "$MAX_LOG_LINES" ]]; then
-      tail -n "$MAX_LOG_LINES" "$LOG_FILE" > "$LOG_FILE.tmp" 2>/dev/null \
-        && mv "$LOG_FILE.tmp" "$LOG_FILE" 2>/dev/null || true
+      tail -n "$MAX_LOG_LINES" "$LOG_FILE" >"$LOG_FILE.tmp" 2>/dev/null &&
+        mv "$LOG_FILE.tmp" "$LOG_FILE" 2>/dev/null || true
     fi
   fi
   rmdir "$LOCK_DIR" 2>/dev/null || true
