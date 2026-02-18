@@ -11,7 +11,7 @@ Bash-basiertes Security- & Productivity-Framework fuer Claude Code CLI.
 ```bash
 # Tests
 bash tests/test-hooks.sh        # Hook unit tests (144 tests)
-bash tests/test-install.sh      # Install/Uninstall lifecycle (16 tests)
+bash tests/test-install.sh      # Install/Uninstall lifecycle (14 tests)
 bash tests/test-update.sh       # Update script (6 tests)
 bash tests/test-codex.sh        # Codex wrapper (11 tests)
 bash tests/test-validate.sh     # Validation run (1 test)
