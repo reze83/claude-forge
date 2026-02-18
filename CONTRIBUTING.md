@@ -61,7 +61,7 @@ bash tests/test-validate.sh   # Validation tests (1 test)
 bash validate.sh              # Full validation suite
 ```
 
-Total: 193 tests
+Total: 196 tests
 
 ### Adding Tests
 

@@ -112,6 +112,19 @@
         ]
       }
     ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/smithery-context.sh",
+            "timeout": 10,
+            "statusMessage": "Loading available MCP tools..."
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "matcher": "",

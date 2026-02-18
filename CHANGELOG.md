@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- hooks/smithery-context.sh: new UserPromptSubmit hook — injects connected Smithery MCP servers as `additionalContext` on every prompt (graceful no-op if smithery not installed)
+- rules/smithery.md: new rule — describes how to discover and use Smithery MCP tools from context
+- hooks/hooks.json + settings.json.example: UserPromptSubmit event registered (timeout: 10s)
+- tests/test-hooks.sh: 3 new tests for smithery-context (159→162)
 - hooks/lib.sh: `block_or_warn()` — dry-run aware block; respects `CLAUDE_FORGE_DRY_RUN=1` for user-defined patterns only
 - hooks/lib.sh: local-patterns loader — sources `~/.claude/local-patterns.sh` with permission check (skipped if group/world-writable)
 - hooks/bash-firewall.sh: apply local patterns via `block_or_warn()` with array-length guard and safe grep
