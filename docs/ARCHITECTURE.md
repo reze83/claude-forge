@@ -93,20 +93,22 @@ wiederhergestellt. validate.sh Fehler loesen keinen Rollback aus.
 
 ### 12 Hooks, 9 Event-Typen
 
-| Hook               | Event              | Matcher                       | Zweck                                                                                                                                                        |
-| ------------------ | ------------------ | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| bash-firewall.sh   | PreToolUse         | Bash                          | Gefaehrliche Befehle blocken — Input-Normalisierung (abs. Pfade, command/exec/env Prefix), 25 Deny-Patterns (inkl. Subshell/Pipe/Backtick/Herestring-Schutz) |
-| protect-files.sh   | PreToolUse         | Read\|Write\|Edit\|Glob\|Grep | Sensible Dateien schuetzen + Hook-Tampering-Schutz                                                                                                           |
-| secret-scan-pre.sh | PreToolUse         | Write\|Edit                   | Secret-Erkennung in Content VOR dem Schreiben (deny)                                                                                                         |
-| auto-format.sh     | PostToolUse        | Edit\|Write                   | Auto-Formatting (Polyglot, async)                                                                                                                            |
-| secret-scan.sh     | PostToolUse        | Edit\|Write                   | Secret-Erkennung in geschriebenen Dateien (warn)                                                                                                             |
-| setup.sh           | Setup              | \*                            | Dependency-Check (git, jq, node >=20, python3 >=3.10), Symlink-Health, additionalContext                                                                     |
-| session-start.sh   | SessionStart       | \*                            | Session-Init: Version als additionalContext, Logging                                                                                                         |
-| post-failure.sh    | PostToolUseFailure | \*                            | Tool-Fehler Logging + additionalContext                                                                                                                      |
-| pre-compact.sh     | PreCompact         | \*                            | Context-Compaction Logging                                                                                                                                   |
-| task-gate.sh       | TaskCompleted      | _(no matcher)_                | Quality Gate: Hook-Tests vor Task-Abschluss (opt-in via CLAUDE_FORGE_TASK_GATE=1)                                                                            |
-| teammate-gate.sh   | TeammateIdle       | _(no matcher)_                | Uncommitted-Changes Check vor Teammate-Idle (opt-in via CLAUDE_FORGE_TEAMMATE_GATE=1)                                                                        |
-| session-logger.sh  | SessionEnd         | \*                            | Session-Ende Log + Desktop-Notification                                                                                                                      |
+| Hook               | Event              | Matcher                       | Modus            | Zweck                                                                                                                                                        |
+| ------------------ | ------------------ | ----------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| bash-firewall.sh   | PreToolUse         | Bash                          | Symlink + Plugin | Gefaehrliche Befehle blocken — Input-Normalisierung (abs. Pfade, command/exec/env Prefix), 25 Deny-Patterns (inkl. Subshell/Pipe/Backtick/Herestring-Schutz) |
+| protect-files.sh   | PreToolUse         | Read\|Write\|Edit\|Glob\|Grep | Symlink + Plugin | Sensible Dateien schuetzen + Hook-Tampering-Schutz                                                                                                           |
+| secret-scan-pre.sh | PreToolUse         | Write\|Edit                   | Symlink + Plugin | Secret-Erkennung in Content VOR dem Schreiben (deny)                                                                                                         |
+| auto-format.sh     | PostToolUse        | Edit\|Write                   | Symlink + Plugin | Auto-Formatting (Polyglot, async)                                                                                                                            |
+| secret-scan.sh     | PostToolUse        | Edit\|Write                   | Symlink + Plugin | Secret-Erkennung in geschriebenen Dateien (warn)                                                                                                             |
+| setup.sh           | Setup ¹            | \*                            | Plugin only      | Dependency-Check (git, jq, node >=20, python3 >=3.10), Symlink-Health, additionalContext                                                                     |
+| session-start.sh   | SessionStart       | \*                            | Symlink + Plugin | Session-Init: Version als additionalContext, Logging                                                                                                         |
+| post-failure.sh    | PostToolUseFailure | \*                            | Symlink + Plugin | Tool-Fehler Logging + additionalContext                                                                                                                      |
+| pre-compact.sh     | PreCompact         | \*                            | Symlink + Plugin | Context-Compaction Logging                                                                                                                                   |
+| task-gate.sh       | TaskCompleted ¹    | _(no matcher)_                | Plugin only      | Quality Gate: Hook-Tests vor Task-Abschluss (opt-in via CLAUDE_FORGE_TASK_GATE=1)                                                                            |
+| teammate-gate.sh   | TeammateIdle ¹     | _(no matcher)_                | Plugin only      | Uncommitted-Changes Check vor Teammate-Idle (opt-in via CLAUDE_FORGE_TEAMMATE_GATE=1)                                                                        |
+| session-logger.sh  | SessionEnd         | \*                            | Symlink + Plugin | Session-Ende Log + Desktop-Notification                                                                                                                      |
+
+¹ `Setup`, `TaskCompleted` und `TeammateIdle` sind **keine offiziellen Claude Code Hook-Events** (nicht in der offiziellen Dokumentation). Sie sind nur in `hooks.json` registriert und feuern ausschliesslich im Plugin-Modus, falls Claude Code sie intern unterstuetzt. Im Symlink-Modus (settings.json.example) sind sie nicht aktiv.
 
 ### Shared Library: hooks/lib.sh
 

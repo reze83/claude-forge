@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- settings.json.example: `autoUpdatesChannel: latest`
+- settings.json.example: `sandbox.autoAllowBashIfSandboxed: true` — ensures Bash allow-list entries are respected inside sandbox
+- settings.json.example: `CLAUDE_CODE_DISABLE_AUTO_MEMORY=0` — opt users into auto memory regardless of gradual rollout
+
+### Changed
+
+- settings.json.example: removed non-official hook events `Setup`, `TaskCompleted`, `TeammateIdle` (not in official Claude Code docs; these only fire in plugin mode via hooks.json)
+- settings.json.example: removed hardcoded `CLAUDE_CODE_TMPDIR` env var (sandbox sets `$TMPDIR` automatically with correct UID subpath)
+- settings.json.example: removed redundant Bash allows for dedicated-tool operations (`cat`, `head`, `tail`, `find`, `sed`, `awk`) — Claude uses Read/Grep/Glob/Edit instead
+
 - install.sh: sudo credential caching at install start (`sudo -v`) — prompts for password once, skipped in dry-run and when passwordless
 - install.sh: QA-Tools auto-installation (shellcheck, gitleaks, bats-core, markdownlint-cli2, actionlint) as optional dev tools
 - install.sh: `_install_github_binary()` helper — downloads latest release binaries from GitHub (used for gitleaks, actionlint)
