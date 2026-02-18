@@ -77,11 +77,11 @@ install.sh                         uninstall.sh
 
 ### Dependency-Fallbacks (optionale Formatter)
 
-| Tool     | Fallback-Kette                                                                                                      |
-| -------- | ------------------------------------------------------------------------------------------------------------------- |
-| ruff     | apt/brew → pip3 install --user → python3 -m pip → venv (~/.local/venvs/claude-forge-tools/) + Symlink ~/.local/bin/ |
-| prettier | apt/brew → npm install -g → Verify PATH → Symlink ~/.local/bin/                                                     |
-| shfmt    | apt/brew                                                                                                            |
+| Tool     | Fallback-Kette                                                                                                                    |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| ruff     | apt/brew → pip3 install --user → python3 -m pip → venv (`PIP_USER=0`, ~/.local/venvs/claude-forge-tools/) + Symlink ~/.local/bin/ |
+| prettier | apt/brew → npm install -g → Verify PATH → Symlink ~/.local/bin/                                                                   |
+| shfmt    | apt/brew                                                                                                                          |
 
 ### Dependency-Fallbacks (optionale QA-Tools)
 
