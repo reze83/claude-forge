@@ -96,6 +96,111 @@ create_symlink() {
   log_ok "Verlinkt: $target → $source"
 }
 
+# Verlinkt alle Dateien eines Verzeichnisses einzeln (Verzeichnis wird als echtes Dir angelegt)
+link_dir_contents() {
+  local source_dir="$1"
+  local target_dir="$2"
+  local pattern="${3:-*}"
+
+  mkdir -p "$target_dir"
+  local count=0
+  for item in "$source_dir"/$pattern; do
+    [[ -e "$item" ]] || continue
+    create_symlink "$item" "$target_dir/$(basename "$item")"
+    count=$((count + 1))
+  done
+  if [[ $count -eq 0 ]]; then
+    log_skip "Keine Dateien in $source_dir"
+  fi
+}
+
+# --- Sync-Funktionen ---
+sync_settings_json() {
+  local example_settings="$REPO_DIR/user-config/settings.json.example"
+  local user_settings="$CLAUDE_DIR/settings.json"
+  local merged_tmp
+
+  if [[ ! -f "$example_settings" ]]; then
+    log_err "settings.json.example fehlt"
+    return 1
+  fi
+
+  if [[ ! -f "$user_settings" ]]; then
+    log_skip "settings.json fehlt (sync uebersprungen)"
+    return 0
+  fi
+
+  if $DRY_RUN; then
+    log_dry "Wuerde settings.json mit Template mergen (hooks aus Template)"
+    return 0
+  fi
+
+  merged_tmp="$(mktemp "${TMPDIR:-/tmp}/settings-merged-XXXXXX.json")"
+  if jq -s '.[0] as $tpl | .[1] as $usr | ($tpl * $usr) | .hooks = $tpl.hooks' \
+    "$example_settings" "$user_settings" >"$merged_tmp" 2>/dev/null; then
+    backup_if_exists "$user_settings"
+    mv "$merged_tmp" "$user_settings"
+    log_ok "settings.json mit Template synchronisiert"
+  else
+    rm -f "$merged_tmp"
+    log_err "settings.json konnte nicht synchronisiert werden"
+    return 1
+  fi
+}
+
+sync_claude_md() {
+  local example_md="$REPO_DIR/user-config/CLAUDE.md.example"
+  local user_md="$CLAUDE_DIR/CLAUDE.md"
+  local line
+  local missing_count=0
+  local missing_lines=""
+
+  if [[ ! -f "$example_md" ]]; then
+    log_err "CLAUDE.md.example fehlt"
+    return 1
+  fi
+
+  if [[ ! -f "$user_md" ]]; then
+    log_skip "CLAUDE.md fehlt (sync uebersprungen)"
+    return 0
+  fi
+
+  while IFS= read -r line; do
+    [[ "$line" == @* ]] || continue
+    if ! grep -Fxq -- "$line" "$user_md" 2>/dev/null; then
+      missing_lines="${missing_lines}${line}
+"
+      missing_count=$((missing_count + 1))
+    fi
+  done <"$example_md"
+
+  if [[ $missing_count -eq 0 ]]; then
+    log_skip "Keine @import-Zeilen zu synchronisieren"
+    return 0
+  fi
+
+  if $DRY_RUN; then
+    log_dry "Wuerde $missing_count @import-Zeile(n) an CLAUDE.md anhaengen"
+    return 0
+  fi
+
+  # Ensure trailing newline before appending
+  if [[ -s "$user_md" ]]; then
+    local last_char
+    last_char="$(tail -c1 "$user_md" 2>/dev/null || true)"
+    if [[ "$last_char" != "" ]]; then
+      printf '\n' >>"$user_md"
+    fi
+  fi
+
+  printf '%s' "$missing_lines" >>"$user_md" || {
+    log_err "CLAUDE.md konnte nicht aktualisiert werden"
+    return 1
+  }
+
+  log_ok "$missing_count @import-Zeile(n) in CLAUDE.md synchronisiert"
+}
+
 # --- Auto-Install fehlender Dependencies ---
 auto_install() {
   local pkg="$1"
@@ -357,49 +462,32 @@ for example_file in settings.json CLAUDE.md; do
       log_ok "$example_file aus .example erstellt"
     fi
   else
-    log_skip "$example_file existiert bereits (nicht ueberschrieben)"
+    log_skip "$example_file existiert bereits"
   fi
 done
 
-# Sync hooks block from settings.json.example into existing settings.json
-EXAMPLE_SETTINGS="$REPO_DIR/user-config/settings.json.example"
-if [[ -f "$CLAUDE_DIR/settings.json" ]] && jq -e '.hooks' "$EXAMPLE_SETTINGS" >/dev/null 2>&1; then
-  if $DRY_RUN; then
-    log_dry "Wuerde hooks-Block in settings.json synchronisieren"
-  else
-    MERGED_TMP="$(mktemp "${TMPDIR:-/tmp}/settings-merged-XXXXXX.json")"
-    if jq -s '.[0] * {hooks: .[1].hooks}' \
-      "$CLAUDE_DIR/settings.json" "$EXAMPLE_SETTINGS" >"$MERGED_TMP" 2>/dev/null; then
-      backup_if_exists "$CLAUDE_DIR/settings.json"
-      mv "$MERGED_TMP" "$CLAUDE_DIR/settings.json"
-      log_ok "hooks-Block in settings.json synchronisiert"
-    else
-      rm -f "$MERGED_TMP"
-      log_err "hooks-Block konnte nicht synchronisiert werden"
-    fi
-  fi
-fi
+# Sync: Template-Defaults in bestehende User-Dateien mergen
+sync_settings_json
+sync_claude_md
 
-# Rules: Symlink aus Repo-Root
-create_symlink "$REPO_DIR/rules" "$CLAUDE_DIR/rules"
-
-# --- Phase 2: Hooks ---
+# --- Phase 2: Rules (einzeln verlinken) ---
 echo ""
-echo "-- Phase 2: Hooks --"
-create_symlink "$REPO_DIR/hooks" "$CLAUDE_DIR/hooks"
+echo "-- Phase 2: Rules --"
+link_dir_contents "$REPO_DIR/rules" "$CLAUDE_DIR/rules" "*.md"
 
-# --- Phase 3: Agents (einzeln verlinken) ---
+# --- Phase 3: Hooks (einzeln verlinken) ---
 echo ""
-echo "-- Phase 3: Agents --"
-mkdir -p "$CLAUDE_DIR/agents"
-for agent in "$REPO_DIR/agents/"*.md; do
-  [[ -f "$agent" ]] || continue
-  create_symlink "$agent" "$CLAUDE_DIR/agents/$(basename "$agent")"
-done
+echo "-- Phase 3: Hooks --"
+link_dir_contents "$REPO_DIR/hooks" "$CLAUDE_DIR/hooks"
 
-# --- Phase 4: Skills (einzeln verlinken) ---
+# --- Phase 4: Agents (einzeln verlinken) ---
 echo ""
-echo "-- Phase 4: Skills --"
+echo "-- Phase 4: Agents --"
+link_dir_contents "$REPO_DIR/agents" "$CLAUDE_DIR/agents" "*.md"
+
+# --- Phase 5: Skills (einzeln verlinken) ---
+echo ""
+echo "-- Phase 5: Skills --"
 mkdir -p "$CLAUDE_DIR/skills"
 for skill_dir in "$REPO_DIR/skills/"*/; do
   [[ -d "$skill_dir" ]] || continue
@@ -407,17 +495,17 @@ for skill_dir in "$REPO_DIR/skills/"*/; do
   create_symlink "$skill_dir" "$CLAUDE_DIR/skills/$skill_name"
 done
 
-# --- Phase 5: Commands (Symlink auf gesamtes Verzeichnis) ---
+# --- Phase 6: Commands (einzeln verlinken) ---
 echo ""
-echo "-- Phase 5: Commands --"
-create_symlink "$REPO_DIR/commands" "$CLAUDE_DIR/commands"
+echo "-- Phase 6: Commands --"
+link_dir_contents "$REPO_DIR/commands" "$CLAUDE_DIR/commands"
 
-# --- Phase 6: Multi-Model (Wrapper verlinken) ---
+# --- Phase 7: Multi-Model (einzeln verlinken) ---
 echo ""
-echo "-- Phase 6: Multi-Model --"
-create_symlink "$REPO_DIR/multi-model" "$CLAUDE_DIR/multi-model"
+echo "-- Phase 7: Multi-Model --"
+link_dir_contents "$REPO_DIR/multi-model" "$CLAUDE_DIR/multi-model"
 
-# --- Phase 7: Codex CLI (optional) ---
+# --- Phase 8: Codex CLI (optional) ---
 if $WITH_CODEX; then
   echo ""
   echo "-- Phase 7: Codex CLI --"
