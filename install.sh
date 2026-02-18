@@ -473,6 +473,18 @@ for example_file in settings.json CLAUDE.md; do
   fi
 done
 
+# local-patterns.sh: Kopieren aus .example (nur wenn Ziel nicht existiert)
+if [[ ! -f "$CLAUDE_DIR/local-patterns.sh" ]]; then
+  if $DRY_RUN; then
+    log_dry "Wuerde local-patterns.sh aus .example erstellen"
+  else
+    cp "$REPO_DIR/user-config/local-patterns.sh.example" "$CLAUDE_DIR/local-patterns.sh"
+    log_ok "local-patterns.sh aus .example erstellt"
+  fi
+else
+  log_skip "local-patterns.sh existiert bereits"
+fi
+
 # Sync: Template-Defaults in bestehende User-Dateien mergen
 sync_settings_json
 sync_claude_md

@@ -29,6 +29,18 @@ block() {
   exit 0
 }
 
+# --- Dry-run aware block (PreToolUse) ---
+# Set CLAUDE_FORGE_DRY_RUN=1 to report violations without blocking.
+# Uses warn() in dry-run mode, block() in normal mode.
+block_or_warn() {
+  if [[ "${CLAUDE_FORGE_DRY_RUN:-0}" == "1" ]]; then
+    warn "[DRY-RUN] Would block: $1"
+    debug "DRY-RUN: $1"
+  else
+    block "$1"
+  fi
+}
+
 # --- JSON-safe warn function (PostToolUse) ---
 # Uses jq for proper JSON escaping to prevent injection
 # systemMessage: shown to user as warning (documented universal field)
@@ -80,6 +92,29 @@ SECRET_LABELS=(
   "Slack Token (xox...)"
   "Azure Storage Key (AccountKey=...)"
 )
+
+# --- Local Patterns (user overrides) ---
+# Load additional deny patterns from ~/.claude/local-patterns.sh if present.
+# The file must define LOCAL_DENY_PATTERNS=() and LOCAL_DENY_REASONS=() arrays.
+# Security: skip if world-writable or group-writable (potential tampering).
+LOCAL_DENY_PATTERNS=()
+LOCAL_DENY_REASONS=()
+_local_patterns_file="${HOME}/.claude/local-patterns.sh"
+if [[ -f "$_local_patterns_file" ]]; then
+  # Security: skip if writable by group or others (stat -c Linux, stat -f macOS)
+  _perms=$(stat -c '%a' "$_local_patterns_file" 2>/dev/null || stat -f '%Lp' "$_local_patterns_file" 2>/dev/null || echo "644")
+  _gw=$(((${_perms:-644} / 10 % 10) & 2))
+  _ow=$(((${_perms:-644} % 10) & 2))
+  if [[ $_gw -ne 0 || $_ow -ne 0 ]]; then
+    debug "local-patterns: SKIPPED — writable by group/others (mode $_perms)"
+  else
+    # shellcheck source=/dev/null
+    source "$_local_patterns_file" 2>/dev/null || true
+    debug "local-patterns: loaded ${#LOCAL_DENY_PATTERNS[@]} patterns"
+  fi
+  unset _perms _gw _ow
+fi
+unset _local_patterns_file
 
 # --- Constants ---
 readonly MAX_CONTENT_SIZE=1048576 # 1MB limit for secret scanning

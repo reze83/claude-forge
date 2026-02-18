@@ -10,7 +10,7 @@
 
 [![Version](https://img.shields.io/badge/version-0.3.0-blue?style=flat-square)](CHANGELOG.md)
 [![CI](https://img.shields.io/github/actions/workflow/status/reze83/claude-forge/test.yml?branch=main&style=flat-square&label=CI)](https://github.com/reze83/claude-forge/actions)
-[![Tests](https://img.shields.io/badge/tests-178%20passed-brightgreen?style=flat-square)](#)
+[![Tests](https://img.shields.io/badge/tests-193%20passed-brightgreen?style=flat-square)](#)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 
 <!-- Demo GIF — generate with: vhs docs/assets/demo.tape -->
@@ -252,7 +252,7 @@ claude-forge/
 ├── skills/                         → ~/.claude/skills/*/ (Dir-Symlinks)
 ├── commands/                       → ~/.claude/commands/* (Datei-Symlinks)
 ├── multi-model/                    → ~/.claude/multi-model/* (Datei-Symlinks)
-├── tests/                          Test-Suite (178 Tests)
+├── tests/                          Test-Suite (193 Tests)
 └── docs/                           Dokumentation
     ├── ARCHITECTURE.md              Architektur-Uebersicht
     ├── demo.tape                    VHS Tape-Datei (GIF-Recording)

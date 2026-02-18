@@ -9,6 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- hooks/lib.sh: `block_or_warn()` — dry-run aware block; respects `CLAUDE_FORGE_DRY_RUN=1` for user-defined patterns only
+- hooks/lib.sh: local-patterns loader — sources `~/.claude/local-patterns.sh` with permission check (skipped if group/world-writable)
+- hooks/bash-firewall.sh: apply local patterns via `block_or_warn()` with array-length guard and safe grep
+- user-config/local-patterns.sh.example: ERE template for user-defined deny patterns with annotated examples
+- install.sh: deploy `local-patterns.sh.example` to `~/.claude/local-patterns.sh` on first install
+- tests/test-hooks.sh: 15 new tests (144→159) — force-with-lease, editors, mkfs/dd, dry-run, local-patterns, security regression
+
+### Fixed
+
+- hooks/bash-firewall.sh: block `--force-with-lease` on all branches (was not covered)
+- hooks/bash-firewall.sh: block `--force/-f` on all branches (was only main/master)
+- hooks/bash-firewall.sh: add `vim`, `emacs` to blocked editor commands (alongside `nano`/`vi`)
+- hooks/bash-firewall.sh: add `mkfs` and `dd of=/dev/` as destructive command patterns
+- hooks/bash-firewall.sh: update all 26 `DENY_REASONS` with concrete alternative suggestions
+
+---
+
 - hooks/subagent-start.sh: new SubagentStart hook — logs subagent spawn (agent_type, agent_id, session_id)
 - hooks/subagent-stop.sh: new SubagentStop hook — logs subagent completion (agent_type, agent_id, stop_hook_active)
 - hooks/stop.sh: new Stop hook — logs Claude turn completion + desktop notification; skips when stop_hook_active=true to prevent recursion
