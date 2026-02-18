@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 88" width="380" height="88">
+  <defs>
+    <linearGradient id="forge-g-d" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="55%" stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#c2410c"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(12,8)">
+    <path fill="url(#forge-g-d)" d="M13 4h26q3 0 5 2l6 16q2 3 2 6t-2 6l-6 16q-2 2-5 2H13q-3 0-5-2L2 34q-2-3-2-6t2-6L8 6q2-2 5-2z"/>
+    <path fill="none" stroke="rgba(255,255,255,.12)" stroke-width="1.4" d="M16 10h20q2.5 0 4 1.8l4.5 10.2q1.5 2.5 1.5 6t-1.5 6L40 44.2q-1.5 1.8-4 1.8H16q-2.5 0-4-1.8L7.5 34Q6 31.5 6 28t1.5-6L12 11.8q1.5-1.8 4-1.8z"/>
+    <text x="26" y="28" font-family="Inter,system-ui,sans-serif" font-size="28" font-weight="800" fill="rgba(255,255,255,.85)" text-anchor="middle" dominant-baseline="central">CF</text>
+  </g>
+  <text x="76" y="48" font-family="Inter,system-ui,sans-serif" font-size="38" font-weight="800" fill="#e2e8f0" letter-spacing="-1">claude<tspan fill="#ea580c">-forge</tspan></text>
+  <text x="78" y="68" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="500" fill="#94a3b8" letter-spacing="1.5">MODULAR CONFIG FOR CLAUDE CODE</text>
+  <rect x="78" y="78" width="36" height="2" rx="1" fill="#ea580c" opacity=".7"/>
+</svg>

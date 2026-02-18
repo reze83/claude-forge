@@ -1,0 +1,23 @@
+{
+  "name": "claude-forge",
+  "version": "0.3.0",
+  "description": "Modular Claude Code configuration with security hooks, fullstack development tools, and multi-model support (Codex CLI)",
+  "author": {
+    "name": "reze83",
+    "url": "https://github.com/reze83"
+  },
+  "repository": "https://github.com/reze83/claude-forge",
+  "license": "MIT",
+  "keywords": [
+    "security",
+    "hooks",
+    "multi-model",
+    "codex",
+    "formatting",
+    "secret-scan"
+  ],
+  "commands": "./commands/",
+  "agents": "./agents/",
+  "skills": "./skills/",
+  "outputStyles": "./output-styles/"
+}
