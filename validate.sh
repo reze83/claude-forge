@@ -179,7 +179,8 @@ check_no_secret "Kein JWT Token" 'eyJ[a-zA-Z0-9_-]*\.eyJ[a-zA-Z0-9_-]*\.'
 echo ""
 echo "-- Hook-Konsistenz --"
 # Dynamically get all hook event types from hooks.json
-HOOK_EVENTS=$(jq -r '.hooks | keys[]' "$REPO_DIR/hooks/hooks.json" 2>/dev/null || echo "")
+# Setup is plugin-mode only — intentionally absent from settings.json.example
+HOOK_EVENTS=$(jq -r '.hooks | keys[] | select(. != "Setup")' "$REPO_DIR/hooks/hooks.json" 2>/dev/null || echo "")
 for event in $HOOK_EVENTS; do
   H_COUNT=$(jq -r ".hooks.${event} | length" "$REPO_DIR/hooks/hooks.json" 2>/dev/null || echo 0)
   for i in $(seq 0 $((H_COUNT - 1))); do

@@ -9,6 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- hooks/subagent-start.sh: new SubagentStart hook — logs subagent spawn (agent_type, agent_id, session_id)
+- hooks/subagent-stop.sh: new SubagentStop hook — logs subagent completion (agent_type, agent_id, stop_hook_active)
+- hooks/stop.sh: new Stop hook — logs Claude turn completion + desktop notification; skips when stop_hook_active=true to prevent recursion
+- hooks/hooks.json + settings.json.example: SubagentStart, SubagentStop, Stop events registered (timeout: 10s each)
+- tests/test-hooks.sh: 6 new tests for subagent-start (2), subagent-stop (2), stop (2) — 138 → 144 total
+- settings.json.example: `autoUpdatesChannel: latest`
+- settings.json.example: `sandbox.autoAllowBashIfSandboxed: true` — ensures Bash allow-list entries are respected inside sandbox
+- settings.json.example: `CLAUDE_CODE_DISABLE_AUTO_MEMORY=0` — opt users into auto memory regardless of gradual rollout
+
+### Changed
+
+- settings.json.example: removed non-official hook event `Setup` (not in official hooks reference; only in hooks.json for plugin mode)
+- settings.json.example: restored `TaskCompleted` and `TeammateIdle` hooks (both are officially documented events; previously removed in error)
+- settings.json.example: removed hardcoded `CLAUDE_CODE_TMPDIR` env var (sandbox sets `$TMPDIR` automatically with correct UID subpath)
+- settings.json.example: removed redundant Bash allows for dedicated-tool operations (`cat`, `head`, `tail`, `find`, `sed`, `awk`) — Claude uses Read/Grep/Glob/Edit instead
+- docs/ARCHITECTURE.md: corrected hook table — `TaskCompleted`/`TeammateIdle` are official (Symlink + Plugin), only `Setup` is plugin-only
+- CLAUDE.md: corrected official hook events list, added all 14 documented events
+
 - install.sh: sudo credential caching at install start (`sudo -v`) — prompts for password once, skipped in dry-run and when passwordless
 - install.sh: QA-Tools auto-installation (shellcheck, gitleaks, bats-core, markdownlint-cli2, actionlint) as optional dev tools
 - install.sh: `_install_github_binary()` helper — downloads latest release binaries from GitHub (used for gitleaks, actionlint)

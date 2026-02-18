@@ -1,11 +1,12 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "respectGitignore": true,
+  "autoUpdatesChannel": "latest",
   "env": {
     "BASH_DEFAULT_TIMEOUT_MS": "120000",
     "BASH_MAX_TIMEOUT_MS": "600000",
-    "CLAUDE_CODE_TMPDIR": "/tmp/claude-code",
     "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "85",
+    "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "0",
     "ENABLE_TOOL_SEARCH": "auto:5"
   },
   "attribution": {
@@ -19,15 +20,13 @@
       "Bash(git branch *)", "Bash(git checkout *)", "Bash(git add *)",
       "Bash(git commit *)", "Bash(git stash *)", "Bash(git fetch *)",
       "Bash(git pull *)",
-      "Bash(ls *)", "Bash(cat *)", "Bash(head *)", "Bash(tail *)",
-      "Bash(find *)", "Bash(wc *)", "Bash(sort *)", "Bash(uniq *)",
+      "Bash(ls *)", "Bash(wc *)", "Bash(sort *)", "Bash(uniq *)",
       "Bash(diff *)", "Bash(mkdir *)", "Bash(cp *)", "Bash(mv *)",
       "Bash(touch *)", "Bash(chmod *)", "Bash(echo *)", "Bash(pwd)",
       "Bash(which *)", "Bash(node *)", "Bash(npm run *)",
       "Bash(npm test *)", "Bash(npm install *)", "Bash(npx *)",
       "Bash(python *)", "Bash(pip *)", "Bash(cargo *)",
-      "Bash(make *)", "Bash(jq *)", "Bash(sed *)", "Bash(awk *)",
-      "Bash(tee *)",
+      "Bash(make *)", "Bash(jq *)", "Bash(tee *)",
       "WebSearch", "Read", "Write", "Edit"
     ],
     "deny": [
@@ -43,6 +42,7 @@
   },
   "sandbox": {
     "enabled": true,
+    "autoAllowBashIfSandboxed": true,
     "network": {
       "allowedDomains": [
         "api.anthropic.com", "github.com", "api.github.com",
@@ -102,17 +102,6 @@
         }]
       }
     ],
-    "Setup": [
-      {
-        "matcher": "",
-        "hooks": [{
-          "type": "command",
-          "command": "bash $HOME/.claude/hooks/setup.sh",
-          "timeout": 30,
-          "statusMessage": "Checking setup requirements..."
-        }]
-      }
-    ],
     "SessionStart": [
       {
         "matcher": "",
@@ -143,6 +132,38 @@
           "command": "bash $HOME/.claude/hooks/pre-compact.sh",
           "timeout": 10,
           "statusMessage": "Preparing compaction..."
+        }]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "matcher": "",
+        "hooks": [{
+          "type": "command",
+          "command": "bash $HOME/.claude/hooks/subagent-start.sh",
+          "timeout": 10,
+          "statusMessage": "Logging subagent start..."
+        }]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "matcher": "",
+        "hooks": [{
+          "type": "command",
+          "command": "bash $HOME/.claude/hooks/subagent-stop.sh",
+          "timeout": 10,
+          "statusMessage": "Logging subagent stop..."
+        }]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [{
+          "type": "command",
+          "command": "bash $HOME/.claude/hooks/stop.sh",
+          "timeout": 10,
+          "statusMessage": "Turn complete..."
         }]
       }
     ],

@@ -477,6 +477,41 @@ unset CLAUDE_FORGE_TEAMMATE_GATE
 
 echo ""
 
+# --- subagent-start.sh ---
+echo "-- subagent-start.sh --"
+SAS="$HOOKS_DIR/subagent-start.sh"
+
+assert_exit "Exit 0 with valid subagent start input" 0 "$SAS" \
+  '{"session_id":"s1","agent_id":"a1","agent_type":"Explore"}'
+
+assert_exit "Exit 0 with empty input" 0 "$SAS" '{}'
+
+echo ""
+
+# --- subagent-stop.sh ---
+echo "-- subagent-stop.sh --"
+SASP="$HOOKS_DIR/subagent-stop.sh"
+
+assert_exit "Exit 0 with valid subagent stop input" 0 "$SASP" \
+  '{"session_id":"s1","agent_id":"a1","agent_type":"Explore","stop_hook_active":false}'
+
+assert_exit "Exit 0 with stop_hook_active true" 0 "$SASP" \
+  '{"session_id":"s1","agent_id":"a1","agent_type":"Plan","stop_hook_active":true}'
+
+echo ""
+
+# --- stop.sh ---
+echo "-- stop.sh --"
+STOPH="$HOOKS_DIR/stop.sh"
+
+assert_exit "Exit 0 on normal stop" 0 "$STOPH" \
+  '{"stop_hook_active":false}'
+
+assert_exit "Exit 0 when stop_hook_active true (skip loop)" 0 "$STOPH" \
+  '{"stop_hook_active":true}'
+
+echo ""
+
 export HOME="$ORIG_HOME"
 
 # --- Ergebnis ---
