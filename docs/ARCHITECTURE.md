@@ -104,11 +104,11 @@ wiederhergestellt. validate.sh Fehler loesen keinen Rollback aus.
 | session-start.sh   | SessionStart       | \*                            | Symlink + Plugin | Session-Init: Version als additionalContext, Logging                                                                                                         |
 | post-failure.sh    | PostToolUseFailure | \*                            | Symlink + Plugin | Tool-Fehler Logging + additionalContext                                                                                                                      |
 | pre-compact.sh     | PreCompact         | \*                            | Symlink + Plugin | Context-Compaction Logging                                                                                                                                   |
-| task-gate.sh       | TaskCompleted ¹    | _(no matcher)_                | Plugin only      | Quality Gate: Hook-Tests vor Task-Abschluss (opt-in via CLAUDE_FORGE_TASK_GATE=1)                                                                            |
-| teammate-gate.sh   | TeammateIdle ¹     | _(no matcher)_                | Plugin only      | Uncommitted-Changes Check vor Teammate-Idle (opt-in via CLAUDE_FORGE_TEAMMATE_GATE=1)                                                                        |
+| task-gate.sh       | TaskCompleted      | _(kein matcher)_              | Symlink + Plugin | Quality Gate: Hook-Tests vor Task-Abschluss (opt-in via CLAUDE_FORGE_TASK_GATE=1)                                                                            |
+| teammate-gate.sh   | TeammateIdle       | _(kein matcher)_              | Symlink + Plugin | Uncommitted-Changes Check vor Teammate-Idle (opt-in via CLAUDE_FORGE_TEAMMATE_GATE=1)                                                                        |
 | session-logger.sh  | SessionEnd         | \*                            | Symlink + Plugin | Session-Ende Log + Desktop-Notification                                                                                                                      |
 
-¹ `Setup`, `TaskCompleted` und `TeammateIdle` sind **keine offiziellen Claude Code Hook-Events** (nicht in der offiziellen Dokumentation). Sie sind nur in `hooks.json` registriert und feuern ausschliesslich im Plugin-Modus, falls Claude Code sie intern unterstuetzt. Im Symlink-Modus (settings.json.example) sind sie nicht aktiv.
+¹ `Setup` ist **kein offizielles Claude Code Hook-Event** laut Hooks-Referenz und bleibt nur in `hooks.json` (Plugin-Modus). `TaskCompleted` und `TeammateIdle` sind offiziell dokumentiert und nun auch in `settings.json.example` aktiv.
 
 ### Shared Library: hooks/lib.sh
 

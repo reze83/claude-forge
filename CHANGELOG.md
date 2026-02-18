@@ -15,9 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- settings.json.example: removed non-official hook events `Setup`, `TaskCompleted`, `TeammateIdle` (not in official Claude Code docs; these only fire in plugin mode via hooks.json)
+- settings.json.example: removed non-official hook event `Setup` (not in official hooks reference; only in hooks.json for plugin mode)
+- settings.json.example: restored `TaskCompleted` and `TeammateIdle` hooks (both are officially documented events; previously removed in error)
 - settings.json.example: removed hardcoded `CLAUDE_CODE_TMPDIR` env var (sandbox sets `$TMPDIR` automatically with correct UID subpath)
 - settings.json.example: removed redundant Bash allows for dedicated-tool operations (`cat`, `head`, `tail`, `find`, `sed`, `awk`) — Claude uses Read/Grep/Glob/Edit instead
+- docs/ARCHITECTURE.md: corrected hook table — `TaskCompleted`/`TeammateIdle` are official (Symlink + Plugin), only `Setup` is plugin-only
+- CLAUDE.md: corrected official hook events list, added all 14 documented events
 
 - install.sh: sudo credential caching at install start (`sudo -v`) — prompts for password once, skipped in dry-run and when passwordless
 - install.sh: QA-Tools auto-installation (shellcheck, gitleaks, bats-core, markdownlint-cli2, actionlint) as optional dev tools

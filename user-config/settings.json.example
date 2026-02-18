@@ -135,6 +135,26 @@
         }]
       }
     ],
+    "TaskCompleted": [
+      {
+        "hooks": [{
+          "type": "command",
+          "command": "bash $HOME/.claude/hooks/task-gate.sh",
+          "timeout": 60,
+          "statusMessage": "Running task quality gate..."
+        }]
+      }
+    ],
+    "TeammateIdle": [
+      {
+        "hooks": [{
+          "type": "command",
+          "command": "bash $HOME/.claude/hooks/teammate-gate.sh",
+          "timeout": 10,
+          "statusMessage": "Checking teammate readiness..."
+        }]
+      }
+    ],
     "SessionEnd": [
       {
         "matcher": "",

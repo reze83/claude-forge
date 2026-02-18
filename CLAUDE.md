@@ -31,10 +31,11 @@ Bash-basiertes Security- & Productivity-Framework fuer Claude Code CLI.
 
 ### Offizielle Hook-Events
 
-Nur diese Events sind offiziell dokumentiert und in settings.json.example aktiv:
-`SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PermissionRequest`, `PostToolUse`, `PostToolUseFailure`, `Notification`, `PreCompact`, `SessionEnd`
+Alle offiziell dokumentierten Events (Hooks-Referenz):
+`SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PermissionRequest`, `PostToolUse`, `PostToolUseFailure`, `Notification`, `SubagentStart`, `SubagentStop`, `Stop`, `TeammateIdle`, `TaskCompleted`, `PreCompact`, `SessionEnd`
 
-`Setup`, `TaskCompleted`, `TeammateIdle` sind NICHT offiziell — nur in hooks.json (Plugin-Modus).
+`Setup` ist NICHT offiziell — nur in hooks.json (Plugin-Modus) registriert.
+`TeammateIdle` und `TaskCompleted` unterstuetzen keinen `matcher` — immer ohne Matcher-Feld definieren.
 
 ## Testen
 
