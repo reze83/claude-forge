@@ -116,7 +116,7 @@ bash update.sh --check  # Nur pruefen ob Updates verfuegbar
 | Agents   | 3      | research, test-runner, security-auditor                                                                                                                            |
 | Skills   | 4      | code-review, explain-code, deploy, project-init                                                                                                                    |
 | Commands | 7      | multi-model (5), forge-status, forge-update                                                                                                                        |
-| Rules    | 4      | git-workflow, security, token-optimierung, code-standards                                                                                                          |
+| Rules    | 5      | git-workflow, security, token-optimization, code-standards, docs                                                                                                   |
 
 ---
 

@@ -13,6 +13,6 @@
 ## Detailregeln (via @import)
 @.claude/rules/git-workflow.md
 @.claude/rules/security.md
-@.claude/rules/token-optimierung.md
+@.claude/rules/token-optimization.md
 @.claude/rules/code-standards.md
 @.claude/rules/docs.md
