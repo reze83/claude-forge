@@ -102,6 +102,17 @@
         }]
       }
     ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [{
+          "type": "command",
+          "command": "bash $HOME/.claude/hooks/smithery-context.sh",
+          "timeout": 10,
+          "statusMessage": "Loading available MCP tools..."
+        }]
+      }
+    ],
     "SessionStart": [
       {
         "matcher": "",

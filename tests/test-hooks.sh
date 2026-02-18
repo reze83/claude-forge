@@ -616,6 +616,35 @@ echo ""
 
 export HOME="$ORIG_HOME"
 
+# --- smithery-context.sh ---
+echo "-- smithery-context.sh --"
+SC="$HOOKS_DIR/smithery-context.sh"
+
+# smithery not installed → exit 0, no output
+assert_exit "Exit 0 when smithery not installed" 0 "$SC" '{}'
+
+# Valid UserPromptSubmit JSON input, no smithery in test ENV → exit 0
+assert_exit "Exit 0 on valid prompt input" 0 "$SC" '{"prompt":"Hello","session_id":"s1"}'
+
+# Mock smithery to verify additionalContext output format
+_SC_MOCK_DIR="$TMPDIR_TEST/smithery-mock"
+mkdir -p "$_SC_MOCK_DIR"
+printf '%s\n' '#!/usr/bin/env bash' \
+  'echo '"'"'{"total":1,"servers":[{"name":"my-server","id":"org/server","status":"connected"}]}'"'"'' \
+  >"$_SC_MOCK_DIR/smithery"
+chmod +x "$_SC_MOCK_DIR/smithery"
+SC_OUT=$(echo '{}' | PATH="$_SC_MOCK_DIR:$PATH" bash "$SC" 2>/dev/null || true)
+if [[ "$SC_OUT" == *"additionalContext"* && "$SC_OUT" == *"smithery_connected"* ]]; then
+  printf '  %b[PASS]%b smithery-context: additionalContext with smithery_connected\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b smithery-context: missing additionalContext: %s\n' "$RED" "$NC" "$SC_OUT"
+  FAIL=$((FAIL + 1))
+fi
+unset _SC_MOCK_DIR SC_OUT
+
+echo ""
+
 # --- Ergebnis ---
 echo "================================="
 printf 'Tests: %d | %b%d passed%b | %b%d failed%b\n' $((PASS + FAIL)) "$GREEN" "$PASS" "$NC" "$RED" "$FAIL" "$NC"
