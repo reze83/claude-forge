@@ -6,12 +6,15 @@
 - Funktionen max. 50 Zeilen — bei Ueberschreitung aufteilen
 - Keine Magic Numbers — Konstanten definieren
 - Error Handling: keine stillen Fehler, immer explizit
+- Shell/Bash: `shellcheck`-konform, `printf` statt `echo -e`, `set -euo pipefail`
+- Go: Standard-Fehlerbehandlung — `if err != nil { return fmt.Errorf("context: %w", err) }`
 
 ## Typisierung
 
-- TypeScript: `strict` Mode aktiviert
-- Python: Type Hints fuer alle Funktionssignaturen
+- TypeScript: `strict` Mode aktiviert, Return-Typen immer explizit
+- Python: Type Hints fuer alle Funktionssignaturen inkl. Return-Typ
 - Generics bevorzugen statt `any`/`object`
+- Keine `null`-Assertion (`!`) ohne vorherige Pruefung
 
 ## Testing
 

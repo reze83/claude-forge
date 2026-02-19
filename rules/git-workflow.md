@@ -7,8 +7,10 @@
 
 ## Commits
 
-- Conventional Commits: `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`
+- Conventional Commits: `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`, `perf:`, `ci:`, `revert:`
+- Optionaler Scope: `feat(auth): add login endpoint`
 - Commit-Messages auf Englisch, kurz und praegnant
+- Breaking Changes: `feat!:` oder Footer `BREAKING CHANGE: <beschreibung>`
 
 ## Geschuetzt (Hook-enforced)
 
@@ -18,8 +20,15 @@
 - `--amend` auf bereits gepushte Commits — geblockt
 - Refspec-Bypass (`git push origin HEAD:main`) — ebenfalls erkannt
 
+## PR-Strategie
+
+- Features: Squash-Merge (saubere History auf `main`)
+- Hotfixes: Merge-Commit (Zeitstempel erhalten)
+- PRs klein halten — ein Feature, ein PR
+
 ## CI/CD
 
 - Vor Commit: Tests + Linting lokal pruefen
 - Nach Push: CI-Status pruefen (`test.yml` muss durchlaufen)
 - Bei CI-Failure: sofort fixen, nicht ignorieren
+- `git stash` fuer WIP — nie unfertige Aenderungen commiten
