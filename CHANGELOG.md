@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- rules/smithery.md: replace passive triggers with sequential thinking as decision engine — 4-step evaluation flow that proactively provisions MCP servers before falling back to built-in tools
+- user-config/CLAUDE.md.example: remove vague principles (SOLID, DRY, YAGNI), add environment context, NEVER/ALWAYS hard rules, expanded post-compact reminders, and categorized imports (always active / code changes / dynamic)
+
 ## [0.5.1] - 2026-02-20
 
 ### Changed
