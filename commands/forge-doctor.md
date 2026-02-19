@@ -15,35 +15,51 @@ Diagnostiziere und repariere die claude-forge Installation.
 
 ```bash
 CLAUDE_DIR=~/.claude
-FORGE_DIR="$( (readlink -f "$CLAUDE_DIR/hooks/lib.sh" 2>/dev/null || readlink "$CLAUDE_DIR/hooks/lib.sh") | sed 's|/hooks/lib.sh$||')" && echo "Forge: $FORGE_DIR" || echo "Forge: NICHT GEFUNDEN"
+FORGE_DIR="$(cat "$CLAUDE_DIR/.forge-repo" 2>/dev/null)" || FORGE_DIR="$( (readlink -f "$CLAUDE_DIR/hooks/lib.sh" 2>/dev/null || readlink "$CLAUDE_DIR/hooks/lib.sh") | sed 's|/hooks/lib.sh$||')" && echo "Forge: $FORGE_DIR" || echo "Forge: NICHT GEFUNDEN"
 ```
 
-## Schritt 2: Symlink-Check
+## Schritt 2: Link-Check
 
-Pruefe ALLE Symlink-Verzeichnisse (hooks, rules, commands, agents, skills, multi-model).
-Fuer jede Datei: ist der Symlink intakt? Zeigt er auf eine existierende Datei im Repo?
+Pruefe ALLE Link-Verzeichnisse (hooks, rules, commands, agents, skills, multi-model).
+Fuer jede Datei: ist der Link (Hardlink oder Symlink) intakt?
 
 ```bash
 CLAUDE_DIR=~/.claude
+FORGE_DIR="$(cat "$CLAUDE_DIR/.forge-repo" 2>/dev/null)" || FORGE_DIR="$( (readlink -f "$CLAUDE_DIR/hooks/lib.sh" 2>/dev/null || readlink "$CLAUDE_DIR/hooks/lib.sh") | sed 's|/hooks/lib.sh$||')"
 broken=0
 for dir in hooks rules commands agents multi-model; do
   [ -d "$CLAUDE_DIR/$dir" ] || { echo "[MISSING] $dir/"; continue; }
   for f in "$CLAUDE_DIR/$dir"/*; do
-    [ -L "$f" ] || continue
-    dest="$(readlink -f "$f" 2>/dev/null || readlink "$f")"
-    [ -e "$dest" ] || { echo "[BROKEN] $dir/$(basename "$f") -> $dest"; broken=$((broken+1)); }
+    [ -e "$f" ] || [ -L "$f" ] || continue
+    if [ -L "$f" ]; then
+      dest="$(readlink -f "$f" 2>/dev/null || readlink "$f")"
+      [ -e "$dest" ] || { echo "[BROKEN] $dir/$(basename "$f") -> $dest"; broken=$((broken+1)); }
+    elif [ -f "$f" ]; then
+      repo_file="$FORGE_DIR/$dir/$(basename "$f")"
+      if [ -f "$repo_file" ] && [ "$(stat -c %i "$f")" = "$(stat -c %i "$repo_file")" ]; then
+        : # ok
+      else
+        echo "[UNLINKED] $dir/$(basename "$f")"
+      fi
+    fi
   done
 done
-# Skills: rekursiv pruefen (Datei-Symlinks in Unterverzeichnissen)
+# Skills: rekursiv pruefen (Datei-Links in Unterverzeichnissen)
 for skill in "$CLAUDE_DIR/skills"/*/; do
   [ -d "$skill" ] || continue
   skill_name="$(basename "$skill")"
-  find "$skill" -type l | while IFS= read -r f; do
-    dest="$(readlink -f "$f" 2>/dev/null || readlink "$f")"
-    [ -e "$dest" ] || { echo "[BROKEN] skills/$skill_name/$(basename "$f") -> $dest"; broken=$((broken+1)); }
+  find "$skill" \( -type l -o -type f \) | while IFS= read -r f; do
+    if [ -L "$f" ]; then
+      dest="$(readlink -f "$f" 2>/dev/null || readlink "$f")"
+      [ -e "$dest" ] || { echo "[BROKEN] skills/$skill_name/$(basename "$f") -> $dest"; broken=$((broken+1)); }
+    elif [ -f "$f" ]; then
+      rel="${f#"$CLAUDE_DIR"/}"
+      repo_file="$FORGE_DIR/$rel"
+      [ -f "$repo_file" ] && [ "$(stat -c %i "$f")" = "$(stat -c %i "$repo_file")" ] || echo "[UNLINKED] skills/$skill_name/$(basename "$f")"
+    fi
   done
 done
-echo "Broken symlinks: $broken"
+echo "Broken links: $broken"
 ```
 
 ## Schritt 3: Dependency-Check
@@ -88,7 +104,7 @@ Vergleiche Timeouts zwischen hooks.json und settings.json:
 
 ```bash
 CLAUDE_DIR=~/.claude
-FORGE_DIR="$( (readlink -f "$CLAUDE_DIR/hooks/lib.sh" 2>/dev/null || readlink "$CLAUDE_DIR/hooks/lib.sh") | sed 's|/hooks/lib.sh$||')"
+FORGE_DIR="$(cat "$CLAUDE_DIR/.forge-repo" 2>/dev/null)" || FORGE_DIR="$( (readlink -f "$CLAUDE_DIR/hooks/lib.sh" 2>/dev/null || readlink "$CLAUDE_DIR/hooks/lib.sh") | sed 's|/hooks/lib.sh$||')"
 if [ -f "$FORGE_DIR/validate.sh" ]; then
   bash "$FORGE_DIR/validate.sh" 2>&1 | tail -20
 fi
@@ -98,7 +114,7 @@ fi
 
 Falls Probleme gefunden:
 
-- **Broken Symlinks**: Frage den User ob `bash $FORGE_DIR/install.sh` ausgefuehrt werden soll
+- **Broken Links**: Frage den User ob `bash $FORGE_DIR/install.sh` ausgefuehrt werden soll
 - **Missing Deps**: Zeige Install-Befehle fuer fehlende Tools
 - **Invalid JSON**: Zeige die fehlerhafte Zeile und biete Korrektur an
 - **Timeout-Mismatch**: Zeige welche Werte abweichen

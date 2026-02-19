@@ -14,7 +14,7 @@
 
 [![Version](https://img.shields.io/badge/version-0.5.0-blue?style=for-the-badge)](CHANGELOG.md)
 [![CI](https://img.shields.io/github/actions/workflow/status/reze83/claude-forge/test.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/reze83/claude-forge/actions)
-[![Tests](https://img.shields.io/badge/tests-226%20passed-brightgreen?style=for-the-badge)](#)
+[![Tests](https://img.shields.io/badge/tests-229%20passed-brightgreen?style=for-the-badge)](#)
 [![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](LICENSE)
 [![Shell](https://img.shields.io/badge/bash-3.2%2B-4EAA25?style=for-the-badge&logo=gnubash&logoColor=white)](#)
 

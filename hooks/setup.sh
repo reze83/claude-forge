@@ -69,17 +69,15 @@ main() {
     dep_missing="${dep_missing:+${dep_missing}, }python3<3.10"
   fi
 
-  # --- Symlink health ---
-  local symlink_dirs=("hooks" "rules" "commands")
-  for dir in "${symlink_dirs[@]}"; do
+  # --- Link health (hardlinks + symlinks) ---
+  local link_dirs=("hooks" "rules" "commands")
+  for dir in "${link_dirs[@]}"; do
     local target="$HOME/.claude/$dir"
-    if [[ -L "$target" ]]; then
-      if [[ ! -d "$target" ]]; then
-        symlink_status="broken"
-        symlink_broken="${symlink_broken:+${symlink_broken}, }${dir}"
-      fi
-    elif [[ ! -e "$target" ]]; then
+    if [[ ! -d "$target" ]]; then
       symlink_status="missing"
+      symlink_broken="${symlink_broken:+${symlink_broken}, }${dir}"
+    elif [[ -z "$(ls -A "$target" 2>/dev/null)" ]]; then
+      symlink_status="broken"
       symlink_broken="${symlink_broken:+${symlink_broken}, }${dir}"
     fi
   done

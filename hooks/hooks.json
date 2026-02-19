@@ -14,7 +14,7 @@
         ]
       },
       {
-        "matcher": "Read|Write|Edit|Glob|Grep",
+        "matcher": "Read|Write|Edit",
         "hooks": [
           {
             "type": "command",
@@ -91,6 +91,7 @@
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/subagent-start.sh",
             "timeout": 10,
+            "async": true,
             "statusMessage": "Logging subagent start..."
           }
         ]
@@ -104,6 +105,7 @@
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/subagent-stop.sh",
             "timeout": 10,
+            "async": true,
             "statusMessage": "Logging subagent stop..."
           }
         ]
@@ -116,6 +118,7 @@
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/stop.sh",
             "timeout": 10,
+            "async": true,
             "statusMessage": "Turn complete..."
           }
         ]
@@ -168,6 +171,7 @@
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/post-failure.sh",
             "timeout": 10,
+            "async": true,
             "statusMessage": "Logging tool failure..."
           }
         ]
@@ -218,6 +222,7 @@
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/session-logger.sh",
             "timeout": 15,
+            "async": true,
             "statusMessage": "Logging session..."
           }
         ]

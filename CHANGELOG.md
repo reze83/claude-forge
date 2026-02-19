@@ -14,7 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - install.sh: skills now use recursive file symlinks instead of directory symlinks (`link_dir_recursive()`), enabling per-file overrides; old directory symlinks are auto-removed during install
 - uninstall.sh: skills cleanup now removes file symlinks recursively and cleans up empty directories
 - commands/forge-doctor.md, commands/forge-status.md: skill checks updated for recursive file symlinks
-- Test counts: 21 install tests (+5), 226 total (+5)
+- install.sh: switch from symlinks to hardlinks (`create_link()`), with symlink fallback for cross-filesystem; writes `.forge-repo` marker file for repo discovery
+- uninstall.sh: detect hardlinks via inode comparison (`remove_if_linked_to_repo()`), backwards-compatible with old symlinks
+- validate.sh: detect hardlinks via inode comparison (`check_dir_with_links()`), backwards-compatible with old symlinks
+- hooks/setup.sh: link health check now detects hardlinks (dir exists + not empty)
+- commands/forge-status.md, forge-doctor.md, forge-update.md: repo discovery via `.forge-repo` marker with readlink fallback
+- Test counts: 24 install tests (+8), 229 total (+8)
 - rules/smithery.md: add explicit trigger conditions for auto-discovery (specialized languages, frameworks, decision rule)
 - rules/multi-model.md: add proactive Codex delegation with condition-action pairs
 - rules/performance.md: split into active checks (applied on every edit) vs passive reference (on request only)
