@@ -18,3 +18,5 @@
 @.claude/rules/docs.md
 @.claude/rules/multi-model.md
 @.claude/rules/smithery.md
+@.claude/rules/performance.md
+@.claude/rules/api-design.md

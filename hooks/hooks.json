@@ -34,6 +34,28 @@
             "statusMessage": "Scanning for secrets..."
           }
         ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/pre-write-backup.sh",
+            "timeout": 10,
+            "statusMessage": "Creating backup..."
+          }
+        ]
+      },
+      {
+        "matcher": "WebFetch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/url-allowlist.sh",
+            "timeout": 10,
+            "statusMessage": "Checking URL safety..."
+          }
+        ]
       }
     ],
     "PostToolUse": [

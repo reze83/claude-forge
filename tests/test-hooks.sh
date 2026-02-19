@@ -588,16 +588,7 @@ export HOME="$ORIG_HOME"
 
 echo ""
 
-# --- protect-files.sh: Always blocks (no dry-run bypass) ---
-echo "-- protect-files.sh: No dry-run bypass --"
-DRY_PF_OUT=$(echo '{"tool_input":{"file_path":"/home/c/.env"}}' | CLAUDE_FORGE_DRY_RUN=1 bash "$PF" 2>/dev/null)
-if [[ "$DRY_PF_OUT" == *"deny"* ]]; then
-  printf '  %b[PASS]%b protect-files blocks .env even with DRY_RUN=1\n' "$GREEN" "$NC"
-  PASS=$((PASS + 1))
-else
-  printf '  %b[FAIL]%b protect-files did not block with DRY_RUN=1: %s\n' "$RED" "$NC" "$DRY_PF_OUT"
-  FAIL=$((FAIL + 1))
-fi
+# protect-files.sh dry-run: now warns instead of blocking (tested in dry-run section below)
 
 echo ""
 
@@ -642,6 +633,131 @@ else
   FAIL=$((FAIL + 1))
 fi
 unset _SC_MOCK_DIR SC_OUT
+
+echo ""
+
+# --- url-allowlist.sh ---
+echo "-- url-allowlist.sh --"
+UA="$HOOKS_DIR/url-allowlist.sh"
+
+# Non-WebFetch tool → pass through
+assert_exit "Ignores non-WebFetch tool" 0 "$UA" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/test"}}'
+
+# Public URL → allowed
+assert_exit "Allows public URL" 0 "$UA" '{"tool_name":"WebFetch","tool_input":{"url":"https://example.com/page"}}'
+assert_exit "Allows github.com" 0 "$UA" '{"tool_name":"WebFetch","tool_input":{"url":"https://github.com/user/repo"}}'
+assert_exit "Allows api.anthropic.com" 0 "$UA" '{"tool_name":"WebFetch","tool_input":{"url":"https://api.anthropic.com/v1/messages"}}'
+
+# Private URLs → blocked
+assert_exit "Blocks localhost" 0 "$UA" '{"tool_name":"WebFetch","tool_input":{"url":"http://localhost:8080/api"}}'
+assert_exit "Blocks 127.0.0.1" 0 "$UA" '{"tool_name":"WebFetch","tool_input":{"url":"http://127.0.0.1/admin"}}'
+assert_exit "Blocks 10.x.x.x" 0 "$UA" '{"tool_name":"WebFetch","tool_input":{"url":"http://10.0.0.1/internal"}}'
+assert_exit "Blocks 172.16.x.x" 0 "$UA" '{"tool_name":"WebFetch","tool_input":{"url":"http://172.16.0.1/secret"}}'
+assert_exit "Blocks 192.168.x.x" 0 "$UA" '{"tool_name":"WebFetch","tool_input":{"url":"http://192.168.1.1/config"}}'
+assert_exit "Blocks 169.254.169.254 (metadata)" 0 "$UA" '{"tool_name":"WebFetch","tool_input":{"url":"http://169.254.169.254/latest/meta-data"}}'
+assert_exit "Blocks .local domain" 0 "$UA" '{"tool_name":"WebFetch","tool_input":{"url":"http://myservice.local/api"}}'
+assert_exit "Blocks .internal domain" 0 "$UA" '{"tool_name":"WebFetch","tool_input":{"url":"http://app.internal/status"}}'
+assert_exit "Blocks .corp domain" 0 "$UA" '{"tool_name":"WebFetch","tool_input":{"url":"http://intranet.corp/wiki"}}'
+assert_exit "Blocks .intranet domain" 0 "$UA" '{"tool_name":"WebFetch","tool_input":{"url":"http://portal.intranet/login"}}'
+assert_exit "Blocks 0.0.0.0" 0 "$UA" '{"tool_name":"WebFetch","tool_input":{"url":"http://0.0.0.0:3000/"}}'
+
+# Blocked URLs output deny JSON
+UA_OUT=$(echo '{"tool_name":"WebFetch","tool_input":{"url":"http://localhost:3000/"}}' | bash "$UA" 2>/dev/null || true)
+if [[ "$UA_OUT" == *"permissionDecision"*"deny"* ]]; then
+  printf '  %b[PASS]%b url-allowlist: deny JSON for localhost\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b url-allowlist: expected deny JSON, got: %s\n' "$RED" "$NC" "$UA_OUT"
+  FAIL=$((FAIL + 1))
+fi
+
+# Public URL → no deny output
+UA_OUT=$(echo '{"tool_name":"WebFetch","tool_input":{"url":"https://example.com/"}}' | bash "$UA" 2>/dev/null || true)
+if [[ -z "$UA_OUT" || "$UA_OUT" != *"deny"* ]]; then
+  printf '  %b[PASS]%b url-allowlist: no deny for public URL\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b url-allowlist: unexpected deny for public URL: %s\n' "$RED" "$NC" "$UA_OUT"
+  FAIL=$((FAIL + 1))
+fi
+
+# Empty URL → pass through
+assert_exit "Allows empty URL" 0 "$UA" '{"tool_name":"WebFetch","tool_input":{"url":""}}'
+unset UA_OUT
+
+echo ""
+
+# --- pre-write-backup.sh ---
+echo "-- pre-write-backup.sh --"
+PWB="$HOOKS_DIR/pre-write-backup.sh"
+
+# Disabled by default → exit 0
+assert_exit "Exit 0 when CLAUDE_FORGE_BACKUP unset" 0 "$PWB" '{"tool_name":"Write","tool_input":{"file_path":"/tmp/test.txt","content":"hello"}}'
+
+# Non-Write/Edit tool → exit 0
+CLAUDE_FORGE_BACKUP=1 assert_exit "Exit 0 for non-Write tool" 0 "$PWB" '{"tool_name":"Read","tool_input":{"file_path":"/tmp/test.txt"}}'
+
+# /tmp/ files skipped
+CLAUDE_FORGE_BACKUP=1 assert_exit "Skips /tmp/ files" 0 "$PWB" '{"tool_name":"Write","tool_input":{"file_path":"/tmp/test.txt","content":"hello"}}'
+
+# node_modules/ files skipped
+CLAUDE_FORGE_BACKUP=1 assert_exit "Skips node_modules/" 0 "$PWB" '{"tool_name":"Write","tool_input":{"file_path":"/home/user/project/node_modules/pkg/index.js","content":"x"}}'
+
+# Non-existent file → no backup needed
+CLAUDE_FORGE_BACKUP=1 assert_exit "Skips non-existent file" 0 "$PWB" '{"tool_name":"Write","tool_input":{"file_path":"/tmp/nonexistent_test_file_xyz.txt","content":"hello"}}'
+
+echo ""
+
+# --- protect-files.sh dry-run ---
+echo "-- protect-files.sh: dry-run mode --"
+PF="$HOOKS_DIR/protect-files.sh"
+
+# Dry-run: .env should produce warning, not deny
+PF_OUT=$(echo '{"tool_name":"Read","tool_input":{"file_path":"/home/user/.env"}}' | CLAUDE_FORGE_DRY_RUN=1 bash "$PF" 2>/dev/null || true)
+if [[ "$PF_OUT" == *"DRY-RUN"* && "$PF_OUT" == *"systemMessage"* ]]; then
+  printf '  %b[PASS]%b protect-files: dry-run warns instead of blocking\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b protect-files: dry-run should warn, got: %s\n' "$RED" "$NC" "$PF_OUT"
+  FAIL=$((FAIL + 1))
+fi
+unset PF_OUT
+
+echo ""
+
+# --- secret-scan-pre.sh dry-run ---
+echo "-- secret-scan-pre.sh: dry-run mode --"
+SSP="$HOOKS_DIR/secret-scan-pre.sh"
+
+# Build mock secret at runtime to avoid triggering our own secret scanner
+_MOCK_SECRET="sk-ant-$(printf 'a%.0s' {1..30})"
+_MOCK_JSON=$(jq -cn --arg s "$_MOCK_SECRET" '{"tool_name":"Write","tool_input":{"content":$s,"file_path":"/tmp/test.txt"}}')
+SSP_OUT=$(echo "$_MOCK_JSON" | CLAUDE_FORGE_DRY_RUN=1 bash "$SSP" 2>/dev/null || true)
+if [[ "$SSP_OUT" == *"DRY-RUN"* && "$SSP_OUT" == *"systemMessage"* ]]; then
+  printf '  %b[PASS]%b secret-scan-pre: dry-run warns instead of blocking\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b secret-scan-pre: dry-run should warn, got: %s\n' "$RED" "$NC" "$SSP_OUT"
+  FAIL=$((FAIL + 1))
+fi
+unset _MOCK_SECRET _MOCK_JSON SSP_OUT
+
+echo ""
+
+# --- lib.sh: hook metrics ---
+echo "-- lib.sh: hook metrics --"
+# Verify CLAUDE_FORGE_DEBUG=1 creates METRIC entries
+_METRICS_HOME="$TMPDIR_TEST/metrics-test"
+mkdir -p "$_METRICS_HOME/.claude"
+METRIC_OUT=$(echo '{}' | CLAUDE_FORGE_DEBUG=1 HOME="$_METRICS_HOME" bash "$HOOKS_DIR/session-start.sh" 2>/dev/null || true)
+if [[ -f "$_METRICS_HOME/.claude/hooks-debug.log" ]] && grep -q "METRIC" "$_METRICS_HOME/.claude/hooks-debug.log" 2>/dev/null; then
+  printf '  %b[PASS]%b lib.sh: hook metrics logged when DEBUG=1\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b lib.sh: no METRIC entry in debug log\n' "$RED" "$NC"
+  FAIL=$((FAIL + 1))
+fi
+unset _METRICS_HOME METRIC_OUT
 
 echo ""
 

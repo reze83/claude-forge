@@ -79,6 +79,24 @@
           "timeout": 10,
           "statusMessage": "Scanning for secrets..."
         }]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [{
+          "type": "command",
+          "command": "bash $HOME/.claude/hooks/pre-write-backup.sh",
+          "timeout": 10,
+          "statusMessage": "Creating backup..."
+        }]
+      },
+      {
+        "matcher": "WebFetch",
+        "hooks": [{
+          "type": "command",
+          "command": "bash $HOME/.claude/hooks/url-allowlist.sh",
+          "timeout": 10,
+          "statusMessage": "Checking URL safety..."
+        }]
       }
     ],
     "PostToolUse": [
