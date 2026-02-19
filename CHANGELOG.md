@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - install.sh: skills now use recursive file symlinks instead of directory symlinks (`link_dir_recursive()`), enabling per-file overrides; old directory symlinks are auto-removed during install
 - uninstall.sh: skills cleanup now removes file symlinks recursively and cleans up empty directories
 - commands/forge-doctor.md, commands/forge-status.md: skill checks updated for recursive file symlinks
+- install.sh: multi-model now uses `link_dir_recursive()` instead of `link_dir_contents()`, ensuring prompts/ files get individual hardlinks instead of a directory symlink
 - install.sh: switch from symlinks to hardlinks (`create_link()`), with symlink fallback for cross-filesystem; writes `.forge-repo` marker file for repo discovery
 - uninstall.sh: detect hardlinks via inode comparison (`remove_if_linked_to_repo()`), backwards-compatible with old symlinks
 - validate.sh: detect hardlinks via inode comparison (`check_dir_with_links()`), backwards-compatible with old symlinks
