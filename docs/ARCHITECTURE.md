@@ -104,13 +104,15 @@ wiederhergestellt. validate.sh Fehler loesen keinen Rollback aus.
 
 ## Hook-Architektur
 
-### 16 Hooks, 13 Event-Typen
+### 18 Hooks, 13 Event-Typen
 
 | Hook                | Event              | Matcher                       | Modus            | Zweck                                                                                                                                                        |
 | ------------------- | ------------------ | ----------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | bash-firewall.sh    | PreToolUse         | Bash                          | Symlink + Plugin | Gefaehrliche Befehle blocken — Input-Normalisierung (abs. Pfade, command/exec/env Prefix), 25 Deny-Patterns (inkl. Subshell/Pipe/Backtick/Herestring-Schutz) |
-| protect-files.sh    | PreToolUse         | Read\|Write\|Edit\|Glob\|Grep | Symlink + Plugin | Sensible Dateien schuetzen + Hook-Tampering-Schutz                                                                                                           |
-| secret-scan-pre.sh  | PreToolUse         | Write\|Edit                   | Symlink + Plugin | Secret-Erkennung in Content VOR dem Schreiben (deny)                                                                                                         |
+| protect-files.sh    | PreToolUse         | Read\|Write\|Edit\|Glob\|Grep | Symlink + Plugin | Sensible Dateien schuetzen + Hook-Tampering-Schutz (dry-run via CLAUDE_FORGE_DRY_RUN)                                                                        |
+| secret-scan-pre.sh  | PreToolUse         | Write\|Edit                   | Symlink + Plugin | Secret-Erkennung in Content VOR dem Schreiben (deny, dry-run via CLAUDE_FORGE_DRY_RUN)                                                                       |
+| pre-write-backup.sh | PreToolUse         | Write\|Edit                   | Symlink + Plugin | .bak-Backup vor Write/Edit (opt-in via CLAUDE_FORGE_BACKUP=1)                                                                                                |
+| url-allowlist.sh    | PreToolUse         | WebFetch                      | Symlink + Plugin | Private/interne URLs blocken (localhost, RFC1918, Metadata, .local/.internal/.corp)                                                                          |
 | auto-format.sh      | PostToolUse        | Edit\|Write                   | Symlink + Plugin | Auto-Formatting (Polyglot, async)                                                                                                                            |
 | secret-scan.sh      | PostToolUse        | Edit\|Write                   | Symlink + Plugin | Secret-Erkennung in geschriebenen Dateien (warn)                                                                                                             |
 | setup.sh            | Setup ¹            | \*                            | Plugin only      | Dependency-Check (git, jq, node >=20, python3 >=3.10), Symlink-Health, additionalContext                                                                     |
@@ -131,15 +133,17 @@ wiederhergestellt. validate.sh Fehler loesen keinen Rollback aus.
 
 All hooks source a shared library that provides:
 
-| Function            | Purpose                                                                                            |
-| ------------------- | -------------------------------------------------------------------------------------------------- |
-| `block(reason)`     | JSON-safe deny output using `jq -Rs` escaping. Prevents JSON injection from user-controlled paths. |
-| `warn(message)`     | JSON-safe systemMessage output for PostToolUse hooks.                                              |
-| `context(k1,v1,…)`  | Builds additionalContext JSON from key-value pairs using `jq -cn '$ARGS.named'`.                   |
-| `debug(message)`    | Optional logging to `~/.claude/hooks-debug.log` (enable with `CLAUDE_FORGE_DEBUG=1`).              |
-| `SECRET_PATTERNS[]` | 11 ERE patterns shared between secret-scan-pre.sh and secret-scan.sh (DRY).                        |
-| `SECRET_LABELS[]`   | Human-readable labels for each pattern.                                                            |
-| `MAX_CONTENT_SIZE`  | 1MB limit constant for content scanning.                                                           |
+| Function             | Purpose                                                                                            |
+| -------------------- | -------------------------------------------------------------------------------------------------- |
+| `block(reason)`      | JSON-safe deny output using `jq -Rs` escaping. Prevents JSON injection from user-controlled paths. |
+| `block_or_warn(msg)` | Dry-run aware: uses `warn()` when `CLAUDE_FORGE_DRY_RUN=1`, else `block()`.                        |
+| `warn(message)`      | JSON-safe systemMessage output for PostToolUse hooks.                                              |
+| `context(k1,v1,…)`   | Builds additionalContext JSON from key-value pairs using `jq -cn '$ARGS.named'`.                   |
+| `debug(message)`     | Optional logging to `~/.claude/hooks-debug.log` (enable with `CLAUDE_FORGE_DEBUG=1`).              |
+| `SECRET_PATTERNS[]`  | 11 ERE patterns shared between secret-scan-pre.sh and secret-scan.sh (DRY).                        |
+| `SECRET_LABELS[]`    | Human-readable labels for each pattern.                                                            |
+| `MAX_CONTENT_SIZE`   | 1MB limit constant for content scanning.                                                           |
+| Hook Metrics (trap)  | EXIT trap logs execution time per hook to `hooks-debug.log` (only when `CLAUDE_FORGE_DEBUG=1`).    |
 
 The library is loaded via `source "$(cd "$(dirname "$0")" && pwd)/lib.sh"`, which resolves correctly for both symlink and plugin modes.
 
@@ -237,12 +241,14 @@ Delegieren Aufgaben an Codex CLI via `codex-wrapper.sh`:
 - `/multi-backend` — Backend/Algo Tasks an Codex (read-only)
 - `/multi-frontend` — Frontend von Claude, Codex reviewt
 
-### Forge Commands (2)
+### Forge Commands (4)
 
 Self-Management direkt aus Claude Code:
 
 - `/forge-status` — Version, Symlinks, Hooks, Updates
 - `/forge-update` — Triggert update.sh
+- `/forge-doctor` — Diagnostik + Auto-Repair (Symlinks, Deps, JSON, Timeouts)
+- `/changelog` — CHANGELOG-Eintraege aus Git-History generieren (Conventional Commits)
 
 ### codex-wrapper.sh: Error Handling & Robustness
 
@@ -340,13 +346,13 @@ and `hookSpecificOutput.reason`.
 
 ## Test-Architektur
 
-| Test-Suite       | Tests | Prueft                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| ---------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| test-hooks.sh    | 159   | bash-firewall (63: basic+bypass+subshell/pipe/backtick/herestring+force-with-lease+editors+mkfs/dd+dry-run+local-patterns), protect-files (29: basic+case-insensitive+allowlist+tampering+non-ASCII), secret-scan (16: pre+post+pragma), auto-format (2), session-logger (3: basic+log-rotation), session-start (2), setup (3: basic+additionalContext+forgeVersion), post-failure (2), pre-compact (2), task-gate (2), teammate-gate (2), subagent-start (2), subagent-stop (2), stop (2), negative/error (22: corrupt JSON+empty stdin+missing fields+oversized) |
-| test-update.sh   | 6     | --help, VERSION, Nicht-Git-Repo, --check                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| test-install.sh  | 16    | Install/Uninstall Lifecycle (Datei-Symlinks), QA-Tools Section, Settings-Merge Edge Cases (corrupt JSON, empty settings, dry-run)                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| test-codex.sh    | 11    | Codex Wrapper (error handling, timeout validation incl. non-numeric, live)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| test-validate.sh | 1     | Validierungs-Durchlauf                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Test-Suite       | Tests | Prueft                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ---------------- | ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| test-hooks.sh    | 187   | bash-firewall (63: basic+bypass+subshell/pipe/backtick/herestring+force-with-lease+editors+mkfs/dd+dry-run+local-patterns), protect-files (29: basic+case-insensitive+allowlist+tampering+non-ASCII+dry-run), secret-scan (16: pre+post+pragma+dry-run), auto-format (2), url-allowlist (18: public+private+deny-json+empty), pre-write-backup (5: opt-in+skip-tmp+skip-node_modules), session-logger (3: basic+log-rotation), session-start (2), setup (3: basic+additionalContext+forgeVersion), post-failure (2), pre-compact (2), task-gate (2), teammate-gate (2), subagent-start (2), subagent-stop (2), stop (2), hook-metrics (1), negative/error (22: corrupt JSON+empty stdin+missing fields+oversized) |
+| test-update.sh   | 6     | --help, VERSION, Nicht-Git-Repo, --check                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| test-install.sh  | 16    | Install/Uninstall Lifecycle (Datei-Symlinks), QA-Tools Section, Settings-Merge Edge Cases (corrupt JSON, empty settings, dry-run)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| test-codex.sh    | 11    | Codex Wrapper (error handling, timeout validation incl. non-numeric, live)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| test-validate.sh | 1     | Validierungs-Durchlauf                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 
 CI (`test.yml`) fuehrt alle Tests auf ubuntu-22.04 aus (ausser test-codex.sh und test-validate.sh). ShellCheck, markdownlint, shfmt, gitleaks und actionlint laufen als zusaetzliche statische Analyse-Steps.
-Total: 193 tests (159 hooks + 16 install + 6 update + 11 codex + 1 validate).
+Total: 221 tests (187 hooks + 16 install + 6 update + 11 codex + 1 validate).

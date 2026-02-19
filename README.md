@@ -14,7 +14,7 @@
 
 [![Version](https://img.shields.io/badge/version-0.4.0-blue?style=for-the-badge)](CHANGELOG.md)
 [![CI](https://img.shields.io/github/actions/workflow/status/reze83/claude-forge/test.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/reze83/claude-forge/actions)
-[![Tests](https://img.shields.io/badge/tests-196%20passed-brightgreen?style=for-the-badge)](#)
+[![Tests](https://img.shields.io/badge/tests-221%20passed-brightgreen?style=for-the-badge)](#)
 [![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](LICENSE)
 [![Shell](https://img.shields.io/badge/bash-3.2%2B-4EAA25?style=for-the-badge&logo=gnubash&logoColor=white)](#)
 
@@ -48,11 +48,11 @@ claude-forge schuetzt Claude Code vor destruktiven Befehlen, Secret-Leaks und un
 
 ### Was es mitbringt
 
-- **16 Hooks** — Security, Productivity, Logging
-- **7 Rules** — Git, Security, Code-Standards, Docs, Multi-Model
-- **3 Agents** — Research, Test-Runner, Security-Auditor
-- **4 Skills** — Code-Review, Explain, Deploy, Project-Init
-- **7 Commands** — Multi-Model Workflows + Self-Management
+- **18 Hooks** — Security, Productivity, Logging
+- **9 Rules** — Git, Security, Code-Standards, Performance, API-Design, ...
+- **5 Agents** — Research, Test-Runner, Security-Auditor, Dep-Auditor, Profiler
+- **6 Skills** — Code-Review, Explain, Deploy, Project-Init, Test-Gen, Refactor
+- **9 Commands** — Multi-Model Workflows + Self-Management
 
 </td>
 </tr>
@@ -153,7 +153,7 @@ LOCAL_DENY_REASONS=(
 )
 ```
 
-Testen ohne zu blocken: `CLAUDE_FORGE_DRY_RUN=1`
+Testen ohne zu blocken: `CLAUDE_FORGE_DRY_RUN=1` (gilt fuer bash-firewall, protect-files, secret-scan-pre, url-allowlist)
 
 </details>
 
@@ -177,6 +177,8 @@ Testen ohne zu blocken: `CLAUDE_FORGE_DRY_RUN=1`
 <tr><td><code>stop</code></td><td>Stop</td><td>Turn-Completion + Desktop-Notification</td></tr>
 <tr><td><code>task-gate</code></td><td>TaskCompleted</td><td>Quality Gate vor Task-Abschluss (opt-in)</td></tr>
 <tr><td><code>teammate-gate</code></td><td>TeammateIdle</td><td>Uncommitted-Changes Check (opt-in)</td></tr>
+<tr><td><code>url-allowlist</code></td><td>PreToolUse</td><td>Private/interne URLs bei WebFetch blocken</td></tr>
+<tr><td><code>pre-write-backup</code></td><td>PreToolUse</td><td>.bak-Backup vor Write/Edit (opt-in)</td></tr>
 <tr><td><code>session-logger</code></td><td>SessionEnd</td><td>Session-Ende Notification + Log-Rotation</td></tr>
 <tr><td><code>setup</code></td><td>Setup</td><td>Dependency-Check + Symlink-Health (Plugin-Modus)</td></tr>
 </table>
@@ -214,6 +216,8 @@ bash multi-model/codex-setup.sh
 ```
 /forge-status    Version, Symlink-Health, Hooks, verfuegbare Updates
 /forge-update    One-Command Update direkt aus Claude Code
+/forge-doctor    Diagnostik + Auto-Repair
+/changelog       CHANGELOG aus Git-History generieren
 ```
 
 ```bash
@@ -289,7 +293,7 @@ claude-forge/
 │   ├── settings.json.example       Hauptkonfiguration (kopiert bei Install)
 │   ├── CLAUDE.md.example           Globale Instruktionen (kopiert bei Install)
 │   └── local-patterns.sh.example   Eigene Bash-Firewall Deny-Patterns
-├── hooks/                          → ~/.claude/hooks/ (16 Scripts + lib.sh)
+├── hooks/                          → ~/.claude/hooks/ (18 Scripts + lib.sh)
 │   ├── lib.sh                      Shared library (block/warn/context/debug/patterns)
 │   ├── bash-firewall.sh            Destruktive Befehle + Injection blocken
 │   ├── protect-files.sh            Sensible Dateien schuetzen
@@ -305,13 +309,15 @@ claude-forge/
 │   ├── stop.sh                     Turn-Completion + Notification
 │   ├── task-gate.sh                Quality Gate (TaskCompleted)
 │   ├── teammate-gate.sh            Uncommitted-Changes Gate
+│   ├── url-allowlist.sh            Private/interne URLs blocken
+│   ├── pre-write-backup.sh         .bak-Backup (opt-in)
 │   └── session-logger.sh           Session-Ende Log-Rotation
-├── rules/                          → ~/.claude/rules/ (7 Regeln)
-├── agents/                         → ~/.claude/agents/ (3 Agenten)
-├── skills/                         → ~/.claude/skills/ (4 Skills)
-├── commands/                       → ~/.claude/commands/ (7 Commands)
+├── rules/                          → ~/.claude/rules/ (9 Regeln)
+├── agents/                         → ~/.claude/agents/ (5 Agenten)
+├── skills/                         → ~/.claude/skills/ (6 Skills)
+├── commands/                       → ~/.claude/commands/ (9 Commands)
 ├── multi-model/                    → ~/.claude/multi-model/ (Codex CLI Wrapper)
-├── tests/                          Test-Suite (196 Tests)
+├── tests/                          Test-Suite (221 Tests)
 └── docs/                           Architektur + Assets
 ```
 

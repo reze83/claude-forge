@@ -38,7 +38,7 @@ while IFS= read -r line; do
   # Check each secret pattern
   for i in "${!SECRET_PATTERNS[@]}"; do
     if printf '%s' "$line" | grep -qE "${SECRET_PATTERNS[$i]}"; then
-      block "SECRET BLOCKED: ${SECRET_LABELS[$i]} detected in content"
+      block_or_warn "SECRET BLOCKED: ${SECRET_LABELS[$i]} detected in content"
     fi
   done
 done <<<"$CONTENT"

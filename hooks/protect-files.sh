@@ -32,23 +32,23 @@ done
 HOOK_PROTECTED=("hooks.json" "hooks/" "settings.json" "settings.local.json")
 if [[ "$TOOL_NAME" == "Write" || "$TOOL_NAME" == "Edit" ]]; then
   for hp in "${HOOK_PROTECTED[@]}"; do
-    [[ "$FILE_PATH_LOWER" == *".claude/$hp"* ]] && block "'$FILE_PATH' is protected (hook configuration)"
+    [[ "$FILE_PATH_LOWER" == *".claude/$hp"* ]] && block_or_warn "'$FILE_PATH' is protected (hook configuration)"
   done
 fi
 
 # package-lock.json: Only block Write/Edit, allow Read/Glob/Grep
 if [[ "$FILE_PATH_LOWER" == *"package-lock.json"* ]]; then
   if [[ "$TOOL_NAME" == "Write" || "$TOOL_NAME" == "Edit" ]]; then
-    block "'$FILE_PATH' is protected (package-lock.json: read-only)"
+    block_or_warn "'$FILE_PATH' is protected (package-lock.json: read-only)"
   fi
 fi
 
 for p in "${PATTERNS[@]}"; do
-  [[ "$FILE_PATH_LOWER" == *"$p"* ]] && block "'$FILE_PATH' is protected (pattern: '$p')"
+  [[ "$FILE_PATH_LOWER" == *"$p"* ]] && block_or_warn "'$FILE_PATH' is protected (pattern: '$p')"
 done
 
 for e in "${EXTENSIONS[@]}"; do
-  [[ "$FILE_PATH_LOWER" == *"$e" ]] && block "'$FILE_PATH' is protected (extension: '$e')"
+  [[ "$FILE_PATH_LOWER" == *"$e" ]] && block_or_warn "'$FILE_PATH' is protected (extension: '$e')"
 done
 
 exit 0
