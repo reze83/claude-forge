@@ -1,6 +1,6 @@
 # Smithery MCP Auto-Discovery
 
-**Aktivierung:** Diese Regeln gelten wenn `smithery_connected` im additionalContext vorhanden ist oder spezialisierte Sprachen/Frameworks/Analyse-Tasks erkannt werden.
+**Aktivierung:** Diese Regeln gelten wenn `smithery_connected` im additionalContext vorhanden ist oder eine Aufgabe spezialisierte Faehigkeiten erfordert, die ueber die eingebauten Tools hinausgehen (siehe "Wann aktiv suchen").
 
 ## Verfügbare Tools nutzen
 
@@ -33,23 +33,47 @@ Wenn du für eine Aufgabe ein externes Tool brauchst und es noch nicht verbunden
 
 ## Wann aktiv suchen
 
-Suche IMMER via `smithery mcp search`, wenn eine dieser Bedingungen zutrifft:
+Suche via `smithery mcp search`, wenn eine Aufgabe in diese Kategorien faellt und kein passendes MCP-Tool bereits verbunden ist:
 
 **Spezialisierte Sprachen/Dateitypen:**
 
 - PowerShell (`.ps1`), Terraform (`.tf`), Ansible, Kotlin, Swift, Ruby, Lua, R
 - Jeder Dateityp, der nicht zu den Standard-Sprachen (JS/TS, Python, Rust, Go, Shell, Java) gehoert
 
-**Frameworks und Tools:**
+**Frameworks und Infrastruktur:**
 
-- Docker/Kubernetes Konfigurationen → `smithery mcp search "docker"`
+- Docker/Kubernetes → `smithery mcp search "docker"`
 - IaC (Terraform, Pulumi, CloudFormation) → `smithery mcp search "infrastructure"`
-- CI/CD Pipelines (Jenkins, GitLab CI) → `smithery mcp search "<tool-name>"`
+- CI/CD (Jenkins, GitLab CI, GitHub Actions) → `smithery mcp search "<tool-name>"`
 
-**Analyse-Aufgaben:**
+**Web und Recherche:**
+
+- Spezialisierte Websuche / Scraping → `smithery mcp search "web search"`
+- News / Echtzeit-Daten → `smithery mcp search "news"`
+- Dokumentation externer Projekte → `smithery mcp search "documentation"`
+
+**Datenquellen und APIs:**
+
+- Datenbankzugriff (SQL, NoSQL, Graph) → `smithery mcp search "database"`
+- Externe APIs / SaaS-Services → `smithery mcp search "<service-name>"`
+- Datenkonvertierung (PDF, CSV, XML) → `smithery mcp search "<format> convert"`
+
+**Analyse und Qualitaet:**
 
 - Code-Analyse / Security-Audit → `smithery mcp search "code analysis"`
-- Datenbankzugriff → `smithery mcp search "database"`
-- Externe APIs / Services → `smithery mcp search "<service-name>"`
+- Performance-Profiling → `smithery mcp search "profiling"`
+- Accessibility / SEO-Pruefung → `smithery mcp search "accessibility"`
 
-**Entscheidungsregel:** Wenn du Dateien analysieren sollst und kein spezialisiertes MCP-Tool verbunden ist, fuehre die Suche durch BEVOR du mit eingebautem Wissen allein arbeitest. Ein spezialisiertes Tool liefert oft bessere Ergebnisse als generische Analyse.
+**Kommunikation und Projektmanagement:**
+
+- Slack, Discord, Teams → `smithery mcp search "<platform>"`
+- Jira, Linear, Notion, Trello → `smithery mcp search "<tool-name>"`
+- E-Mail-Versand/-Empfang → `smithery mcp search "email"`
+
+**Cloud und Monitoring:**
+
+- AWS/GCP/Azure-spezifische Operationen → `smithery mcp search "<cloud-provider>"`
+- Logs, Metriken, Alerting → `smithery mcp search "monitoring"`
+- DNS, CDN, Domain-Verwaltung → `smithery mcp search "<service>"`
+
+**Entscheidungsregel:** Wenn die eingebauten Tools (Bash, Read, Grep, WebFetch, WebSearch) fuer eine Aufgabe nicht ausreichen oder ein spezialisiertes Tool bessere Ergebnisse liefern wuerde, fuehre die Suche durch BEVOR du mit Workarounds arbeitest.
