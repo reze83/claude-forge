@@ -32,4 +32,3 @@ Inline-Kommentare: **Warum** erklaeren, nicht **Was** — der Code ist das "Was"
 - Hooks geaendert → `docs/ARCHITECTURE.md` (Hook-Tabelle aktualisieren)
 - Neuer Hook/Skill/Command → `docs/ARCHITECTURE.md` (Dateipfade-Tabelle)
 - Test-Anzahl geaendert → `CONTRIBUTING.md`, `README.md` (Badge), `docs/ARCHITECTURE.md`
-- Siehe Doc-Sync Abschnitt im Projekt-`CLAUDE.md` (Repo-Root) fuer vollstaendige Regeln
