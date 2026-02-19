@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-02-19
+
+### Added
+
+- hooks/url-allowlist.sh: new PreToolUse hook — blocks WebFetch to private/internal URLs (localhost, RFC1918, link-local, metadata endpoint, .local/.internal/.corp/.intranet domains); supports `URL_ALLOWLIST` env var for exceptions
+- hooks/pre-write-backup.sh: new PreToolUse hook (opt-in) — creates .bak backup before Write/Edit operations; enabled via `CLAUDE_FORGE_BACKUP=1`, skips /tmp/ and node_modules/
+- hooks/lib.sh: hook metrics EXIT trap — logs execution time per hook to `hooks-debug.log` when `CLAUDE_FORGE_DEBUG=1`
+- hooks/protect-files.sh: dry-run support via `block_or_warn()` — respects `CLAUDE_FORGE_DRY_RUN=1`
+- hooks/secret-scan-pre.sh: dry-run support via `block_or_warn()` — respects `CLAUDE_FORGE_DRY_RUN=1`
+- rules/performance.md: new rule — database query optimization, frontend bundle analysis, backend profiling, general performance patterns
+- rules/api-design.md: new rule — REST conventions, versioning, error responses, pagination, rate limiting, security headers
+- skills/test-gen/SKILL.md: new skill — structured test generation with Analyze → Strategy → Generate → Verify workflow
+- skills/refactor/SKILL.md: new skill — structured refactoring with safety net (characterization tests), supports Extract/Inline/Rename/Simplify patterns
+- commands/forge-doctor.md: new command — 6-step diagnostics: forge path, symlink check, dependency check, JSON validation, timeout consistency, auto-repair
+- commands/changelog.md: new command — generates CHANGELOG entries from git log using Conventional Commits, Keep a Changelog format
+- agents/dependency-auditor.md: new agent — dependency audit (npm/pip/cargo audit, outdated packages, licenses, unused deps, version pinning)
+- agents/perf-profiler.md: new agent — performance profiling (static analysis, bundle analysis, profiler integration, database query analysis)
+- tests/test-hooks.sh: 28 new tests — url-allowlist (18), pre-write-backup (5), dry-run for protect-files (1) and secret-scan-pre (1), hook metrics (1), updated protect-files test (2)
+
+### Changed
+
+- Component counts: 18 hooks (+2), 9 rules (+2), 6 skills (+2), 9 commands (+2), 5 agents (+2)
+- Test counts: 187 hook tests (+28), 221 total (+28)
+- rules/security.md: added URL-Allowlist and Pre-Write Backup sections, updated Dry-Run section
+- user-config/CLAUDE.md.example: added @import for performance.md and api-design.md
+
 ## [0.4.0] - 2026-02-19
 
 ### Added
