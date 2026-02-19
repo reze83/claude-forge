@@ -67,7 +67,7 @@ fi
 echo ""
 
 # Alle Datei-Symlinks in Verzeichnissen entfernen (neues Layout)
-for dir in rules hooks commands multi-model agents; do
+for dir in rules hooks commands agents; do
   if [[ -d "$CLAUDE_DIR/$dir" ]]; then
     for item in "$CLAUDE_DIR/$dir"/*; do
       [[ -e "$item" || -L "$item" ]] || continue
@@ -78,19 +78,32 @@ for dir in rules hooks commands multi-model agents; do
   remove_if_linked_to_repo "$CLAUDE_DIR/$dir"
 done
 
-# Skills (rekursiv — Datei-Links in Unterverzeichnissen)
-for skill_dir in "$REPO_DIR/skills/"*/; do
-  [[ -d "$skill_dir" ]] || continue
-  skill_name="$(basename "$skill_dir")"
-  target_skill="$CLAUDE_DIR/skills/$skill_name"
-  # Fallback: alte Directory-Symlinks (vor v0.6) ebenfalls entfernen
-  remove_if_linked_to_repo "$target_skill"
-  if [[ -d "$target_skill" ]]; then
-    find "$target_skill" \( -type l -o -type f \) | while IFS= read -r link; do
-      remove_if_linked_to_repo "$link"
+# Rekursiv verlinkte Verzeichnisse (Datei-Links in Unterverzeichnissen)
+for dir in skills multi-model; do
+  repo_base="$REPO_DIR/$dir"
+  target_base="$CLAUDE_DIR/$dir"
+  # Fallback: alte Directory-Symlinks ebenfalls entfernen
+  remove_if_linked_to_repo "$target_base"
+  if [[ -d "$target_base" ]]; then
+    # Unterverzeichnisse aus Repo durchgehen
+    while IFS= read -r sub_dir; do
+      [[ -d "$sub_dir" ]] || continue
+      sub_name="$(basename "$sub_dir")"
+      target_sub="$target_base/$sub_name"
+      remove_if_linked_to_repo "$target_sub"
+      if [[ -d "$target_sub" ]]; then
+        find "$target_sub" \( -type l -o -type f \) | while IFS= read -r link; do
+          remove_if_linked_to_repo "$link"
+        done
+        find "$target_sub" -type d -empty -delete 2>/dev/null || true
+      fi
+    done < <(find "$repo_base" -mindepth 1 -maxdepth 1 -type d)
+    # Top-level Dateien im Verzeichnis
+    for item in "$target_base"/*; do
+      [[ -e "$item" || -L "$item" ]] || continue
+      [[ -d "$item" ]] && continue
+      remove_if_linked_to_repo "$item"
     done
-    # Leere Verzeichnisse aufraeumen (bottom-up)
-    find "$target_skill" -type d -empty -delete 2>/dev/null || true
   fi
 done
 

@@ -27,7 +27,7 @@ Fuer jede Datei: ist der Link (Hardlink oder Symlink) intakt?
 CLAUDE_DIR=~/.claude
 FORGE_DIR="$(cat "$CLAUDE_DIR/.forge-repo" 2>/dev/null)" || FORGE_DIR="$( (readlink -f "$CLAUDE_DIR/hooks/lib.sh" 2>/dev/null || readlink "$CLAUDE_DIR/hooks/lib.sh") | sed 's|/hooks/lib.sh$||')"
 broken=0
-for dir in hooks rules commands agents multi-model; do
+for dir in hooks rules commands agents; do
   [ -d "$CLAUDE_DIR/$dir" ] || { echo "[MISSING] $dir/"; continue; }
   for f in "$CLAUDE_DIR/$dir"/*; do
     [ -e "$f" ] || [ -L "$f" ] || continue
@@ -44,18 +44,17 @@ for dir in hooks rules commands agents multi-model; do
     fi
   done
 done
-# Skills: rekursiv pruefen (Datei-Links in Unterverzeichnissen)
-for skill in "$CLAUDE_DIR/skills"/*/; do
-  [ -d "$skill" ] || continue
-  skill_name="$(basename "$skill")"
-  find "$skill" \( -type l -o -type f \) | while IFS= read -r f; do
+# Rekursiv verlinkte Verzeichnisse (skills, multi-model)
+for dir in skills multi-model; do
+  [ -d "$CLAUDE_DIR/$dir" ] || { echo "[MISSING] $dir/"; continue; }
+  find "$CLAUDE_DIR/$dir" \( -type l -o -type f \) | while IFS= read -r f; do
     if [ -L "$f" ]; then
       dest="$(readlink -f "$f" 2>/dev/null || readlink "$f")"
-      [ -e "$dest" ] || { echo "[BROKEN] skills/$skill_name/$(basename "$f") -> $dest"; broken=$((broken+1)); }
+      [ -e "$dest" ] || { echo "[BROKEN] ${f#"$CLAUDE_DIR"/} -> $dest"; broken=$((broken+1)); }
     elif [ -f "$f" ]; then
       rel="${f#"$CLAUDE_DIR"/}"
       repo_file="$FORGE_DIR/$rel"
-      [ -f "$repo_file" ] && [ "$(stat -c %i "$f")" = "$(stat -c %i "$repo_file")" ] || echo "[UNLINKED] skills/$skill_name/$(basename "$f")"
+      [ -f "$repo_file" ] && [ "$(stat -c %i "$f")" = "$(stat -c %i "$repo_file")" ] || echo "[UNLINKED] $rel"
     fi
   done
 done
