@@ -1,22 +1,42 @@
 # Globale Claude Code Regeln
 
-## Architektur
-- SOLID, Separation of Concerns, DRY, YAGNI
-- Prefer Composition over Inheritance
+## Umgebung
+- WSL2 (kein sudo), Shell: bash
+- `gh` CLI fuer GitHub, `smithery` CLI fuer MCP
+- Hooks aktiv: bash-firewall, protect-files, secret-scan, auto-format
+
+## Harte Regeln
+- ALWAYS sequential thinking bei nicht-trivialen Tasks (>=3 Schritte, unklarer Kontext, mehrere Loesungswege)
+- Sequential thinking entscheidet ob zusaetzliche MCP-Server via smithery aktiviert werden
+- NEVER commit ohne gruene Tests
+- NEVER `any` in TypeScript — `unknown` nutzen
+- ALWAYS Conventional Commits (englisch): feat:, fix:, docs:, refactor:
+- ALWAYS Type Hints mit Return-Typ (Python + TypeScript strict)
+- ALWAYS Feature-Branch + PR — nie direkt auf main
 
 ## Skills
 - Referenzmaterial in ~/.claude/skills/ auslagern (empfohlen bei >500 Zeilen)
 
 ## Post-Compact Erinnerung
-- Conventional Commits. Tests vor Commit.
+- Conventional Commits (englisch). Tests vor Commit.
+- GitHub Flow: Feature-Branch, nie auf main arbeiten.
+- Hooks: kein push main, kein --force, kein reset --hard.
+- Token: sonnet fuer Standard-Tasks, haiku fuer triviale.
+- Sequential thinking ist Pflicht bei nicht-trivialen Tasks — prueft MCP-Server-Bedarf.
 
 ## Detailregeln (via @import)
-@.claude/rules/git-workflow.md
+
+### Immer aktiv
 @.claude/rules/security.md
 @.claude/rules/token-optimization.md
+
+### Bei Code-Aenderungen
 @.claude/rules/code-standards.md
-@.claude/rules/docs.md
-@.claude/rules/multi-model.md
-@.claude/rules/smithery.md
+@.claude/rules/git-workflow.md
 @.claude/rules/performance.md
+@.claude/rules/docs.md
+
+### Dynamisch (via sequential thinking gesteuert)
+@.claude/rules/smithery.md
+@.claude/rules/multi-model.md
 @.claude/rules/api-design.md

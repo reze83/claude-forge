@@ -1,79 +1,50 @@
-# Smithery MCP Auto-Discovery
+# Smithery MCP — Sequential Thinking als Entscheidungs-Engine
 
-**Aktivierung:** Diese Regeln gelten wenn `smithery_connected` im additionalContext vorhanden ist oder eine Aufgabe spezialisierte Faehigkeiten erfordert, die ueber die eingebauten Tools hinausgehen (siehe "Wann aktiv suchen").
+**Aktivierung:** Bei JEDEM nicht-trivialen Task. Sequential thinking evaluiert den Kontext und entscheidet, ob MCP-Server aktiviert werden muessen — BEVOR mit eingebauten Tools gearbeitet wird.
 
-## Verfügbare Tools nutzen
+## Entscheidungs-Flow (in sequential thinking ausfuehren)
 
-Wenn `smithery_connected` im additionalContext vorhanden ist, sind Smithery MCP Tools verfügbar.
-Prüfe die verbundenen Server und nutze sie proaktiv für passende Aufgaben:
+1. **Task analysieren:** Was ist das Ziel? Welche Faehigkeiten braucht es?
+2. **Verbundene Server pruefen:** Deckt ein bereits verbundener Server den Bedarf?
+   - Server-IDs: im Context unter `smithery_ids`
+   - Tools auflisten: `smithery tool list <id>`
+3. **Luecke erkannt?** → `smithery mcp search "<capability>"` ausfuehren
+   - Server mit hohem `useCount` bevorzugen (bewaehrt, stabil)
+   - Verbinden: `smithery mcp add "<connectionUrl>"`
+   - User kurz informieren welcher Server aktiviert wurde
+4. **Task ausfuehren** mit allen verfuegbaren Tools (eingebaut + MCP)
 
-- Tools eines Servers auflisten: `smithery tool list <id>`
+## Entscheidungsmatrix — Wann MCP-Server suchen
+
+| Task-Kontext                                                                 | Suchbegriff                |
+| ---------------------------------------------------------------------------- | -------------------------- |
+| Spezialisierte Sprachen (PowerShell, Terraform, Kotlin, Swift, Ruby, Lua, R) | `"<sprache>"`              |
+| Container / Orchestrierung                                                   | `"docker"`, `"kubernetes"` |
+| IaC (Terraform, Pulumi, CloudFormation)                                      | `"infrastructure"`         |
+| CI/CD (Jenkins, GitLab CI, GitHub Actions)                                   | `"<tool-name>"`            |
+| Datenbank-Operationen (SQL, NoSQL, Graph)                                    | `"database"`               |
+| Externe APIs / SaaS-Services                                                 | `"<service-name>"`         |
+| Datenkonvertierung (PDF, CSV, XML)                                           | `"<format> convert"`       |
+| Code-Analyse / Security-Audit                                                | `"code analysis"`          |
+| Performance-Profiling                                                        | `"profiling"`              |
+| Kommunikation (Slack, Discord, Teams)                                        | `"<platform>"`             |
+| Projektmanagement (Jira, Linear, Notion)                                     | `"<tool-name>"`            |
+| Cloud-spezifisch (AWS, GCP, Azure)                                           | `"<cloud-provider>"`       |
+| Monitoring / Logs / Alerting                                                 | `"monitoring"`             |
+
+**Faustregel:** Wenn ein spezialisiertes Tool bessere Ergebnisse liefern wuerde als Bash + WebSearch, ZUERST smithery durchsuchen.
+
+## Verbundene Server nutzen
+
 - Tool aufrufen: `smithery tool call <id> <tool-name> '<json-args>'`
-- Server-IDs: im Context unter `smithery_ids`
+- Bereits verbunden pruefen: `smithery mcp list`
 
-## Eigenständige Entdeckung
+## Aufraeumen
 
-Wenn du für eine Aufgabe ein externes Tool brauchst und es noch nicht verbunden ist:
-
-1. Suche mit `smithery mcp search "<aufgabe>"` nach einem geeigneten Server
-2. Bevorzuge Server mit hohem `useCount` (bewährt, stabil)
-3. Verbinde mit `smithery mcp add "<connectionUrl>"`
-4. Informiere den User kurz darüber, welchen Server du hinzugefügt hast
-5. Nutze das Tool direkt
-
-## Aufräumen
-
-- Temporär hinzugefügte Server nach dem Test wieder entfernen: `smithery mcp remove <id>`
-- Frage den User, ob er den Server dauerhaft behalten möchte — entferne ihn sonst
+- Temporaere Server nach Task entfernen: `smithery mcp remove <id>`
+- User fragen ob Server dauerhaft bleiben soll — sonst entfernen
 
 ## Fehlerbehandlung
 
-- Schlägt `smithery tool call` fehl: Fehlermeldung an User weitergeben, nicht still ignorieren
-- Server nicht erreichbar: `smithery mcp list` prüfen, ob Status `connected` ist
-
-## Wann aktiv suchen
-
-Suche via `smithery mcp search`, wenn eine Aufgabe in diese Kategorien faellt und kein passendes MCP-Tool bereits verbunden ist:
-
-**Spezialisierte Sprachen/Dateitypen:**
-
-- PowerShell (`.ps1`), Terraform (`.tf`), Ansible, Kotlin, Swift, Ruby, Lua, R
-- Jeder Dateityp, der nicht zu den Standard-Sprachen (JS/TS, Python, Rust, Go, Shell, Java) gehoert
-
-**Frameworks und Infrastruktur:**
-
-- Docker/Kubernetes → `smithery mcp search "docker"`
-- IaC (Terraform, Pulumi, CloudFormation) → `smithery mcp search "infrastructure"`
-- CI/CD (Jenkins, GitLab CI, GitHub Actions) → `smithery mcp search "<tool-name>"`
-
-**Web und Recherche:**
-
-- Spezialisierte Websuche / Scraping → `smithery mcp search "web search"`
-- News / Echtzeit-Daten → `smithery mcp search "news"`
-- Dokumentation externer Projekte → `smithery mcp search "documentation"`
-
-**Datenquellen und APIs:**
-
-- Datenbankzugriff (SQL, NoSQL, Graph) → `smithery mcp search "database"`
-- Externe APIs / SaaS-Services → `smithery mcp search "<service-name>"`
-- Datenkonvertierung (PDF, CSV, XML) → `smithery mcp search "<format> convert"`
-
-**Analyse und Qualitaet:**
-
-- Code-Analyse / Security-Audit → `smithery mcp search "code analysis"`
-- Performance-Profiling → `smithery mcp search "profiling"`
-- Accessibility / SEO-Pruefung → `smithery mcp search "accessibility"`
-
-**Kommunikation und Projektmanagement:**
-
-- Slack, Discord, Teams → `smithery mcp search "<platform>"`
-- Jira, Linear, Notion, Trello → `smithery mcp search "<tool-name>"`
-- E-Mail-Versand/-Empfang → `smithery mcp search "email"`
-
-**Cloud und Monitoring:**
-
-- AWS/GCP/Azure-spezifische Operationen → `smithery mcp search "<cloud-provider>"`
-- Logs, Metriken, Alerting → `smithery mcp search "monitoring"`
-- DNS, CDN, Domain-Verwaltung → `smithery mcp search "<service>"`
-
-**Entscheidungsregel:** Wenn die eingebauten Tools (Bash, Read, Grep, WebFetch, WebSearch) fuer eine Aufgabe nicht ausreichen oder ein spezialisiertes Tool bessere Ergebnisse liefern wuerde, fuehre die Suche durch BEVOR du mit Workarounds arbeitest.
+- `smithery tool call` fehlgeschlagen → Fehlermeldung an User, nicht still ignorieren
+- Server nicht erreichbar → `smithery mcp list` pruefen ob Status `connected`
