@@ -24,6 +24,12 @@
 - Jedes neue Feature braucht Tests
 - Tests vor Commit ausfuehren
 
+## Gekoppelte Scripts
+
+- Lifecycle-Scripts (install, uninstall, update, validate, migrate) sind gekoppelt
+- Aenderung an einem erfordert Pruefung aller anderen auf Konsistenz
+- Typische Kopplungen: Linking-Logik, Verzeichnisstruktur, Cleanup, Validierung
+
 ## Auto-Formatierung (Hook-gestuetzt)
 
 - `auto-format.sh` formatiert nach jedem Edit automatisch (async)
