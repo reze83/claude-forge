@@ -74,10 +74,38 @@ check_dir_with_links() {
   fi
 }
 
+check_dir_with_links_recursive() {
+  local name="$1"
+  local target="$CLAUDE_DIR/$name"
+  if [[ ! -d "$target" ]]; then
+    fail "$name Verzeichnis fehlt"
+    return
+  fi
+  local link_count=0
+  while IFS= read -r item; do
+    [[ -e "$item" || -L "$item" ]] || continue
+    if [[ -L "$item" ]]; then
+      link_count=$((link_count + 1))
+      continue
+    fi
+    local rel="${item#"$CLAUDE_DIR"/}"
+    local repo_file="$FORGE_REPO_DIR/$rel"
+    if [[ -f "$item" && -f "$repo_file" ]] &&
+      [[ "$(stat -c %i "$item")" == "$(stat -c %i "$repo_file")" ]]; then
+      link_count=$((link_count + 1))
+    fi
+  done < <(find "$target" \( -type l -o -type f \))
+  if [[ $link_count -gt 0 ]]; then
+    pass "$name/ ($link_count Datei-Links)"
+  else
+    fail "$name/ hat keine Datei-Links"
+  fi
+}
+
 check_dir_with_links "rules"
 check_dir_with_links "hooks"
 check_dir_with_links "commands"
-check_dir_with_links "multi-model"
+check_dir_with_links_recursive "multi-model"
 
 # --- JSON-Validitaet ---
 echo ""
