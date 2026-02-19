@@ -1,5 +1,7 @@
 # Performance
 
+**Aktivierung:** Diese Regeln gelten beim Schreiben und Editieren von Code. Aktive Pruefung bei jedem Code-Edit, passive Referenz nur bei expliziter Anfrage.
+
 ## Aktive Pruefung (bei jedem Code-Edit anwenden)
 
 Weise unaufgefordert auf diese Probleme hin, wenn sie im geschriebenen oder editierten Code auftreten:

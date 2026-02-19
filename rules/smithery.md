@@ -1,5 +1,7 @@
 # Smithery MCP Auto-Discovery
 
+**Aktivierung:** Diese Regeln gelten wenn `smithery_connected` im additionalContext vorhanden ist oder spezialisierte Sprachen/Frameworks/Analyse-Tasks erkannt werden.
+
 ## Verfügbare Tools nutzen
 
 Wenn `smithery_connected` im additionalContext vorhanden ist, sind Smithery MCP Tools verfügbar.

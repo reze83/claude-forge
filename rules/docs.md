@@ -1,5 +1,7 @@
 # Dokumentationspflege
 
+**Aktivierung:** Diese Regeln gelten bei Code-Aenderungen in Projekten mit Dokumentationsdateien (CHANGELOG, README, ARCHITECTURE, docs/).
+
 ## Wann aktualisieren
 
 Docs aktualisieren wenn MINDESTENS EINES zutrifft:
