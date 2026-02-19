@@ -749,7 +749,7 @@ echo "-- lib.sh: hook metrics --"
 # Verify CLAUDE_FORGE_DEBUG=1 creates METRIC entries
 _METRICS_HOME="$TMPDIR_TEST/metrics-test"
 mkdir -p "$_METRICS_HOME/.claude"
-METRIC_OUT=$(echo '{}' | CLAUDE_FORGE_DEBUG=1 HOME="$_METRICS_HOME" bash "$HOOKS_DIR/session-start.sh" 2>/dev/null || true)
+echo '{}' | CLAUDE_FORGE_DEBUG=1 HOME="$_METRICS_HOME" bash "$HOOKS_DIR/session-start.sh" >/dev/null 2>/dev/null || true
 if [[ -f "$_METRICS_HOME/.claude/hooks-debug.log" ]] && grep -q "METRIC" "$_METRICS_HOME/.claude/hooks-debug.log" 2>/dev/null; then
   printf '  %b[PASS]%b lib.sh: hook metrics logged when DEBUG=1\n' "$GREEN" "$NC"
   PASS=$((PASS + 1))
