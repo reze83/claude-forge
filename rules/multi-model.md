@@ -1,5 +1,7 @@
 # Multi-Model (Claude + Codex)
 
+**Aktivierung:** Diese Regeln gelten wenn `codex` CLI installiert ist (`command -v codex`) und die Aufgabe klar abgegrenzten Input/Output hat.
+
 ## Rollenverteilung
 
 - **Claude** (Orchestrator): Planung, Frontend, Review, Refactoring, komplexe Logik

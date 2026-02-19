@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- rules: add top-level `**Aktivierung:**` conditions to 6 context-dependent rules (git-workflow, code-standards, docs, performance, multi-model, smithery), following the pattern established by api-design.md
+- rules/smithery.md: expand trigger categories from 3 to 7 (add web/research, data sources/APIs, communication/PM, cloud/monitoring)
 - install.sh: skills now use recursive file symlinks instead of directory symlinks (`link_dir_recursive()`), enabling per-file overrides; old directory symlinks are auto-removed during install
 - uninstall.sh: skills cleanup now removes file symlinks recursively and cleans up empty directories
 - commands/forge-doctor.md, commands/forge-status.md: skill checks updated for recursive file symlinks

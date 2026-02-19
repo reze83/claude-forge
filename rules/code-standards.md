@@ -1,5 +1,7 @@
 # Code-Standards
 
+**Aktivierung:** Diese Standards gelten beim Schreiben und Editieren von Code-Dateien (JS/TS, Python, Rust, Go, Shell, Java, etc.).
+
 ## Syntax & Stil
 
 - Moderne Syntax: ES2024+, Python 3.12+, aktuelle Rust Edition

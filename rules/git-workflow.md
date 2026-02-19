@@ -1,5 +1,7 @@
 # Git-Workflow
 
+**Aktivierung:** Diese Regeln gelten in Git-Repositories. Ausserhalb von Repos (kein `.git/`-Verzeichnis) sind nur die Hook-enforced Abschnitte aktiv.
+
 ## Branch-Strategie
 
 - GitHub Flow: `feature/`, `fix/`, `docs/`, `chore/` → `main`
