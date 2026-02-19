@@ -31,7 +31,23 @@ Wenn du für eine Aufgabe ein externes Tool brauchst und es noch nicht verbunden
 
 ## Wann aktiv suchen
 
+Suche IMMER via `smithery mcp search`, wenn eine dieser Bedingungen zutrifft:
+
+**Spezialisierte Sprachen/Dateitypen:**
+
+- PowerShell (`.ps1`), Terraform (`.tf`), Ansible, Kotlin, Swift, Ruby, Lua, R
+- Jeder Dateityp, der nicht zu den Standard-Sprachen (JS/TS, Python, Rust, Go, Shell, Java) gehoert
+
+**Frameworks und Tools:**
+
+- Docker/Kubernetes Konfigurationen → `smithery mcp search "docker"`
+- IaC (Terraform, Pulumi, CloudFormation) → `smithery mcp search "infrastructure"`
+- CI/CD Pipelines (Jenkins, GitLab CI) → `smithery mcp search "<tool-name>"`
+
+**Analyse-Aufgaben:**
+
 - Code-Analyse / Security-Audit → `smithery mcp search "code analysis"`
 - Datenbankzugriff → `smithery mcp search "database"`
 - Externe APIs / Services → `smithery mcp search "<service-name>"`
-- Wenn der User ein Tool benötigt, das nicht in `smithery_connected` ist
+
+**Entscheidungsregel:** Wenn du Dateien analysieren sollst und kein spezialisiertes MCP-Tool verbunden ist, fuehre die Suche durch BEVOR du mit eingebautem Wissen allein arbeitest. Ein spezialisiertes Tool liefert oft bessere Ergebnisse als generische Analyse.

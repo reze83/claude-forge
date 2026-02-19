@@ -2,9 +2,20 @@
 
 ## Wann aktualisieren
 
-- Nach nicht-trivialen Code-Aenderungen (neue Features, API-Aenderungen, Architektur-Entscheidungen)
-- Nicht bei reinen Refactorings ohne externe Auswirkung
-- Inline-Kommentare: **Warum** erklaeren, nicht **Was** — der Code ist das "Was"
+Docs aktualisieren wenn MINDESTENS EINES zutrifft:
+
+- Public API-Surface geaendert (neue/entfernte/umbenannte Endpoints, Funktionen, CLI-Flags)
+- Neue Abhaengigkeit hinzugefuegt oder entfernt
+- Neues User-sichtbares Verhalten (Feature, Hook, Skill, Command)
+- Architektur-Entscheidung getroffen (neues Pattern, neue Komponente)
+
+NICHT aktualisieren bei:
+
+- Reines Refactoring ohne externe Auswirkung
+- Bugfixes die kein Verhalten aendern
+- Interne Umbenennung ohne API-Effekt
+
+Inline-Kommentare: **Warum** erklaeren, nicht **Was** — der Code ist das "Was"
 
 ## Was aktualisieren
 
@@ -19,4 +30,4 @@
 - Hooks geaendert → `docs/ARCHITECTURE.md` (Hook-Tabelle aktualisieren)
 - Neuer Hook/Skill/Command → `docs/ARCHITECTURE.md` (Dateipfade-Tabelle)
 - Test-Anzahl geaendert → `CONTRIBUTING.md`, `README.md` (Badge), `docs/ARCHITECTURE.md`
-- Siehe Doc-Sync Abschnitt in `CLAUDE.md` fuer vollstaendige Regeln
+- Siehe Doc-Sync Abschnitt im Projekt-`CLAUDE.md` (Repo-Root) fuer vollstaendige Regeln
