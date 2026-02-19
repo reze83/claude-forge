@@ -25,7 +25,7 @@ Pruefe ob alle erwarteten Datei-Symlinks in den Verzeichnissen existieren und au
 
 ```bash
 CLAUDE_DIR=~/.claude
-for dir in rules hooks commands multi-model agents skills; do
+for dir in rules hooks commands multi-model agents; do
   target="$CLAUDE_DIR/$dir"
   if [ ! -d "$target" ]; then
     echo "[MISSING] $dir/ existiert nicht"
@@ -51,6 +51,22 @@ for dir in rules hooks commands multi-model agents skills; do
     echo "[WARN] $dir/ ist leer"
   fi
 done
+# Skills separat (rekursive Datei-Symlinks)
+if [ -d "$CLAUDE_DIR/skills" ]; then
+  total=0; ok=0; broken=0
+  while IFS= read -r f; do
+    total=$((total + 1))
+    dest="$(readlink -f "$f" 2>/dev/null || readlink "$f")"
+    if [ -e "$dest" ]; then ok=$((ok + 1)); else broken=$((broken + 1)); echo "[BROKEN] skills/... -> $dest"; fi
+  done < <(find "$CLAUDE_DIR/skills" -type l)
+  if [ "$broken" -eq 0 ] && [ "$ok" -gt 0 ]; then
+    echo "[OK] skills/ ($ok Datei-Symlinks)"
+  elif [ "$total" -eq 0 ]; then
+    echo "[WARN] skills/ ist leer"
+  fi
+else
+  echo "[MISSING] skills/ existiert nicht"
+fi
 ```
 
 ## Schritt 3: Aktive Hooks

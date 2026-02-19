@@ -52,6 +52,10 @@ assert "hooks/ enthaelt Datei-Symlinks" "[[ -L '$FAKE_HOME/.claude/hooks/bash-fi
 assert "rules/ ist Verzeichnis" "[[ -d '$FAKE_HOME/.claude/rules' && ! -L '$FAKE_HOME/.claude/rules' ]]"
 assert "rules/ enthaelt Datei-Symlinks" "[[ -L '$FAKE_HOME/.claude/rules/git-workflow.md' ]]"
 assert "commands/ ist Verzeichnis" "[[ -d '$FAKE_HOME/.claude/commands' && ! -L '$FAKE_HOME/.claude/commands' ]]"
+assert "skills/ ist Verzeichnis" "[[ -d '$FAKE_HOME/.claude/skills' && ! -L '$FAKE_HOME/.claude/skills' ]]"
+assert "skills/code-review/ ist Verzeichnis (kein Symlink)" "[[ -d '$FAKE_HOME/.claude/skills/code-review' && ! -L '$FAKE_HOME/.claude/skills/code-review' ]]"
+assert "skills/ enthaelt Datei-Symlinks" "[[ -L '$FAKE_HOME/.claude/skills/code-review/SKILL.md' ]]"
+assert "skills/ Unterverzeichnisse rekursiv verlinkt" "[[ -L '$FAKE_HOME/.claude/skills/project-init/templates/node-ts.md' ]]"
 
 # --- Idempotenz ---
 echo ""
@@ -104,6 +108,7 @@ echo ""
 echo "-- Deinstallation --"
 HOME="$FAKE_HOME" bash "$SCRIPT_DIR/uninstall.sh" >/dev/null 2>&1
 assert "hooks/ Datei-Symlinks entfernt" "[[ ! -L '$FAKE_HOME/.claude/hooks/bash-firewall.sh' ]]"
+assert "skills/ Datei-Symlinks entfernt" "[[ ! -L '$FAKE_HOME/.claude/skills/code-review/SKILL.md' ]]"
 assert "settings.json bleibt (Kopie)" "[[ -f '$FAKE_HOME/.claude/settings.json' ]]"
 
 echo ""
