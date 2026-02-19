@@ -31,13 +31,20 @@ warning() {
 echo "=== claude-forge validation ==="
 echo ""
 
-# --- Dateien & Symlinks ---
-echo "-- Dateien & Symlinks --"
+# --- Dateien & Links ---
+echo "-- Dateien & Links --"
 [[ -f "$REPO_DIR/VERSION" ]] && pass "VERSION vorhanden" || fail "VERSION vorhanden"
 [[ -f "$CLAUDE_DIR/settings.json" ]] && pass "settings.json vorhanden" || fail "settings.json vorhanden"
 [[ -f "$CLAUDE_DIR/CLAUDE.md" ]] && pass "CLAUDE.md vorhanden" || fail "CLAUDE.md vorhanden"
 
-check_dir_with_symlinks() {
+# Repo-Pfad aus Marker oder Fallback
+FORGE_REPO_DIR=""
+if [[ -f "$CLAUDE_DIR/.forge-repo" ]]; then
+  FORGE_REPO_DIR="$(cat "$CLAUDE_DIR/.forge-repo")"
+fi
+[[ -z "$FORGE_REPO_DIR" ]] && FORGE_REPO_DIR="$REPO_DIR"
+
+check_dir_with_links() {
   local name="$1"
   local target="$CLAUDE_DIR/$name"
   if [[ ! -d "$target" ]]; then
@@ -46,19 +53,30 @@ check_dir_with_symlinks() {
   fi
   local link_count=0
   for item in "$target"/*; do
-    [[ -L "$item" ]] && link_count=$((link_count + 1))
+    [[ -e "$item" || -L "$item" ]] || continue
+    # Symlink zum Repo (alte Installation)
+    if [[ -L "$item" ]]; then
+      link_count=$((link_count + 1))
+      continue
+    fi
+    # Hardlink: Inode-Vergleich mit Repo-Datei
+    local repo_file="$FORGE_REPO_DIR/$name/$(basename "$item")"
+    if [[ -f "$item" && -f "$repo_file" ]] &&
+      [[ "$(stat -c %i "$item")" == "$(stat -c %i "$repo_file")" ]]; then
+      link_count=$((link_count + 1))
+    fi
   done
   if [[ $link_count -gt 0 ]]; then
-    pass "$name/ ($link_count Datei-Symlinks)"
+    pass "$name/ ($link_count Datei-Links)"
   else
-    fail "$name/ hat keine Datei-Symlinks"
+    fail "$name/ hat keine Datei-Links"
   fi
 }
 
-check_dir_with_symlinks "rules"
-check_dir_with_symlinks "hooks"
-check_dir_with_symlinks "commands"
-check_dir_with_symlinks "multi-model"
+check_dir_with_links "rules"
+check_dir_with_links "hooks"
+check_dir_with_links "commands"
+check_dir_with_links "multi-model"
 
 # --- JSON-Validitaet ---
 echo ""

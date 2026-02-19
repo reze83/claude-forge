@@ -15,7 +15,7 @@ Finde den tatsaechlichen Pfad von claude-forge ueber einen Datei-Symlink in hook
 
 ```bash
 CLAUDE_DIR=~/.claude
-FORGE_DIR="$( (readlink -f "$CLAUDE_DIR/hooks/lib.sh" 2>/dev/null || readlink "$CLAUDE_DIR/hooks/lib.sh") | sed 's|/hooks/lib.sh$||')" && bash "$FORGE_DIR/update.sh"
+FORGE_DIR="$(cat "$CLAUDE_DIR/.forge-repo" 2>/dev/null)" || FORGE_DIR="$( (readlink -f "$CLAUDE_DIR/hooks/lib.sh" 2>/dev/null || readlink "$CLAUDE_DIR/hooks/lib.sh") | sed 's|/hooks/lib.sh$||')" && bash "$FORGE_DIR/update.sh"
 ```
 
 ## Schritt 2: Ergebnis

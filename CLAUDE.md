@@ -11,7 +11,7 @@ Bash-basiertes Security- & Productivity-Framework fuer Claude Code CLI.
 ```bash
 # Tests
 bash tests/test-hooks.sh        # Hook unit tests (187 tests)
-bash tests/test-install.sh      # Install/Uninstall lifecycle (21 tests)
+bash tests/test-install.sh      # Install/Uninstall lifecycle (24 tests)
 bash tests/test-update.sh       # Update script (6 tests)
 bash tests/test-codex.sh        # Codex wrapper (11 tests)
 bash tests/test-validate.sh     # Validation run (1 test)
@@ -19,13 +19,13 @@ bash tests/test-validate.sh     # Validation run (1 test)
 # Einzelnen Hook testen (assert_exit pattern)
 echo '{"tool_name":"Bash","tool_input":{"command":"rm -rf /"}}' | bash hooks/bash-firewall.sh
 
-# Installation (Datei-Symlink-Modus)
+# Installation (Hardlink-Modus)
 bash install.sh                 # Standard
 bash install.sh --dry-run       # Vorschau ohne Aenderungen
 bash install.sh --with-codex    # Mit Codex CLI
 
 # Validierung
-bash validate.sh                # Prueft Verzeichnisse, Datei-Symlinks, JSON, Scripts
+bash validate.sh                # Prueft Verzeichnisse, Datei-Links, JSON, Scripts
 
 # Deinstallation
 bash uninstall.sh --dry-run
@@ -36,9 +36,9 @@ bash uninstall.sh
 
 ### Duales Deployment-Modell
 
-Das Repo ist gleichzeitig ein **Claude Code Plugin** (`plugin.json`) und ein **Symlink-basiertes Config-Repo**:
+Das Repo ist gleichzeitig ein **Claude Code Plugin** (`plugin.json`) und ein **Hardlink-basiertes Config-Repo**:
 
-- **Symlink-Modus** (`bash install.sh`): Permanente Installation. Hooks laufen via `~/.claude/settings.json` → `$HOME/.claude/hooks/*.sh`
+- **Install-Modus** (`bash install.sh`): Permanente Installation. Hooks laufen via `~/.claude/settings.json` → `$HOME/.claude/hooks/*.sh`
 - **Plugin-Modus** (`claude --plugin-dir <repo>`): Temporaer. Hooks laufen via `hooks/hooks.json` → `${CLAUDE_PLUGIN_ROOT}/hooks/*.sh`
 - **Niemals beide gleichzeitig** — install.sh erkennt laufende Plugin-Instanzen und bricht ab
 
@@ -48,16 +48,16 @@ Das Repo ist gleichzeitig ein **Claude Code Plugin** (`plugin.json`) und ein **S
 | --------------------------------- | ------------------------ | ------------------------------ |
 | user-config/settings.json.example | ~/.claude/settings.json  | Kopie (einmalig) + Deep-Merge  |
 | user-config/CLAUDE.md.example     | ~/.claude/CLAUDE.md      | Kopie (einmalig) + Import-Sync |
-| rules/, hooks/, commands/         | ~/.claude/\*/\*          | Datei-Symlinks (einzeln)       |
-| agents/\*.md                      | ~/.claude/agents/\*.md   | Datei-Symlinks (einzeln)       |
-| skills/\*/                        | ~/.claude/skills/\*/     | Datei-Symlinks (rekursiv)      |
-| multi-model/                      | ~/.claude/multi-model/\* | Datei-Symlinks (einzeln)       |
+| rules/, hooks/, commands/         | ~/.claude/\*/\*          | Hardlinks (Symlink-Fallback)   |
+| agents/\*.md                      | ~/.claude/agents/\*.md   | Hardlinks (Symlink-Fallback)   |
+| skills/\*/                        | ~/.claude/skills/\*/     | Hardlinks rekursiv (Fallback)  |
+| multi-model/                      | ~/.claude/multi-model/\* | Hardlinks (Symlink-Fallback)   |
 
 **settings.json**: Wird einmalig aus Template kopiert. Bei Updates werden alle Template-Bloecke via `jq` deep-merged (Template als Basis, User-Werte gewinnen bei Konflikten). Der `hooks`-Block wird immer komplett aus dem Template uebernommen.
 
 **CLAUDE.md**: Wird einmalig aus Template kopiert. Bei Updates werden fehlende `@import`-Zeilen am Ende angehaengt. Bestehende User-Inhalte werden nie geaendert.
 
-**Verzeichnisse**: Alle Verzeichnisse (hooks/, rules/, commands/, agents/, skills/, multi-model/) sind echte Verzeichnisse in `~/.claude/`. Die Dateien darin sind einzelne Symlinks zum Repo. So kann der User eigene Dateien hinzufuegen und bekommt trotzdem Updates via `git pull`.
+**Verzeichnisse**: Alle Verzeichnisse (hooks/, rules/, commands/, agents/, skills/, multi-model/) sind echte Verzeichnisse in `~/.claude/`. Die Dateien darin sind Hardlinks zum Repo (Fallback: Symlinks bei Cross-Filesystem). Eine Marker-Datei `~/.claude/.forge-repo` speichert den Repo-Pfad. So kann der User eigene Dateien hinzufuegen und bekommt trotzdem Updates via `git pull`.
 
 ### Hook-System
 

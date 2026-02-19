@@ -3,7 +3,8 @@ set -euo pipefail
 
 # ============================================================
 # claude-forge installer
-# Erstellt Symlinks von claude-forge/ → ~/.claude/
+# Erstellt Hardlinks von claude-forge/ → ~/.claude/
+# Fallback auf Symlinks bei Cross-Filesystem.
 # Idempotent: Kann beliebig oft ausgefuehrt werden.
 # ============================================================
 
@@ -44,14 +45,14 @@ log_err() {
 }
 log_dry() { echo -e "  ${YELLOW}[DRY]${NC} $1"; }
 
-INSTALLED_SYMLINKS=()
+INSTALLED_LINKS=()
 
 cleanup_on_error() {
   echo ""
   echo -e "${RED}Fehler aufgetreten — Rollback...${NC}"
   local backup_file
-  for link in "${INSTALLED_SYMLINKS[@]}"; do
-    if [[ -L "$link" ]]; then
+  for link in "${INSTALLED_LINKS[@]}"; do
+    if [[ -L "$link" || -f "$link" ]]; then
       rm -f "$link"
       echo -e "  ${YELLOW}[ROLLBACK]${NC} Entfernt: $link"
     fi
@@ -80,7 +81,7 @@ backup_if_exists() {
   fi
 }
 
-create_symlink() {
+create_link() {
   local source="$1"
   local target="$2"
 
@@ -89,18 +90,31 @@ create_symlink() {
     return
   fi
 
-  # Skip if symlink already points to correct target
-  if [[ -L "$target" ]] && [[ "$(readlink "$target")" == "$source" ]]; then
+  # Idempotenz: gleicher Inode = bereits korrekt (Hardlink)
+  if [[ -f "$target" && ! -L "$target" ]] &&
+    [[ "$(stat -c %i "$target")" == "$(stat -c %i "$source")" ]]; then
     log_skip "$target bereits korrekt verlinkt"
+    return
+  fi
+
+  # Migration: alte Symlinks auch als korrekt erkennen
+  if [[ -L "$target" ]] && [[ "$(readlink "$target")" == "$source" ]]; then
+    log_skip "$target bereits korrekt verlinkt (symlink, wird bei naechstem Update migriert)"
     return
   fi
 
   backup_if_exists "$target"
   mkdir -p "$(dirname "$target")"
   rm -f "$target"
-  ln -sn "$source" "$target"
-  INSTALLED_SYMLINKS+=("$target")
-  log_ok "Verlinkt: $target → $source"
+  if ln -f "$source" "$target" 2>/dev/null; then
+    INSTALLED_LINKS+=("$target")
+    log_ok "Verlinkt: $target"
+  else
+    # Fallback: Symlink bei Cross-Filesystem
+    ln -sn "$source" "$target"
+    INSTALLED_LINKS+=("$target")
+    log_ok "Verlinkt (symlink-fallback): $target → $source"
+  fi
 }
 
 # Verlinkt alle Dateien eines Verzeichnisses einzeln (Verzeichnis wird als echtes Dir angelegt)
@@ -113,7 +127,7 @@ link_dir_contents() {
   local count=0
   for item in "$source_dir"/$pattern; do
     [[ -e "$item" ]] || continue
-    create_symlink "$item" "$target_dir/$(basename "$item")"
+    create_link "$item" "$target_dir/$(basename "$item")"
     count=$((count + 1))
   done
   if [[ $count -eq 0 ]]; then
@@ -133,7 +147,7 @@ link_dir_recursive() {
     if [[ -d "$item" ]]; then
       link_dir_recursive "$item" "$target_dir/$name"
     else
-      create_symlink "$item" "$target_dir/$name"
+      create_link "$item" "$target_dir/$name"
     fi
   done
 }
@@ -562,13 +576,21 @@ if $WITH_CODEX; then
   fi
 fi
 
+# --- Repo-Marker ---
+if ! $DRY_RUN; then
+  printf '%s\n' "$REPO_DIR" >"$CLAUDE_DIR/.forge-repo"
+  log_ok "Repo-Marker geschrieben: $CLAUDE_DIR/.forge-repo"
+else
+  log_dry "Wuerde Repo-Marker schreiben: $CLAUDE_DIR/.forge-repo"
+fi
+
 # --- Validierung ---
 echo ""
 if ! $DRY_RUN; then
   echo "-- Validierung --"
   trap - ERR
   bash "$REPO_DIR/validate.sh" || {
-    echo -e "${YELLOW}[WARN]${NC} Validierung hat Fehler gemeldet (Symlinks sind trotzdem installiert)."
+    echo -e "${YELLOW}[WARN]${NC} Validierung hat Fehler gemeldet (Links sind trotzdem installiert)."
   }
 fi
 

@@ -33,6 +33,15 @@ assert() {
 # Setup: Fake .claude Verzeichnis
 mkdir -p "$FAKE_HOME/.claude/"{agents,skills,plugins}
 
+# Helper: Prueft ob Datei existiert und gleichen Inode wie Repo-Datei hat
+is_linked_to_repo() {
+  local target="$1"
+  local repo_relative="$2"
+  local repo_file="$SCRIPT_DIR/$repo_relative"
+  [[ -f "$target" && ! -L "$target" ]] &&
+    [[ "$(stat -c %i "$target")" == "$(stat -c %i "$repo_file")" ]]
+}
+
 echo "=== Install-Tests ==="
 echo ""
 
@@ -48,14 +57,16 @@ HOME="$FAKE_HOME" bash "$SCRIPT_DIR/install.sh" >/dev/null 2>&1
 assert "settings.json vorhanden (Kopie)" "[[ -f '$FAKE_HOME/.claude/settings.json' && ! -L '$FAKE_HOME/.claude/settings.json' ]]"
 assert "CLAUDE.md vorhanden (Kopie)" "[[ -f '$FAKE_HOME/.claude/CLAUDE.md' && ! -L '$FAKE_HOME/.claude/CLAUDE.md' ]]"
 assert "hooks/ ist Verzeichnis" "[[ -d '$FAKE_HOME/.claude/hooks' && ! -L '$FAKE_HOME/.claude/hooks' ]]"
-assert "hooks/ enthaelt Datei-Symlinks" "[[ -L '$FAKE_HOME/.claude/hooks/bash-firewall.sh' ]]"
+assert "hooks/ enthaelt Datei-Links" "is_linked_to_repo '$FAKE_HOME/.claude/hooks/bash-firewall.sh' 'hooks/bash-firewall.sh'"
 assert "rules/ ist Verzeichnis" "[[ -d '$FAKE_HOME/.claude/rules' && ! -L '$FAKE_HOME/.claude/rules' ]]"
-assert "rules/ enthaelt Datei-Symlinks" "[[ -L '$FAKE_HOME/.claude/rules/git-workflow.md' ]]"
+assert "rules/ enthaelt Datei-Links" "is_linked_to_repo '$FAKE_HOME/.claude/rules/git-workflow.md' 'rules/git-workflow.md'"
 assert "commands/ ist Verzeichnis" "[[ -d '$FAKE_HOME/.claude/commands' && ! -L '$FAKE_HOME/.claude/commands' ]]"
 assert "skills/ ist Verzeichnis" "[[ -d '$FAKE_HOME/.claude/skills' && ! -L '$FAKE_HOME/.claude/skills' ]]"
 assert "skills/code-review/ ist Verzeichnis (kein Symlink)" "[[ -d '$FAKE_HOME/.claude/skills/code-review' && ! -L '$FAKE_HOME/.claude/skills/code-review' ]]"
-assert "skills/ enthaelt Datei-Symlinks" "[[ -L '$FAKE_HOME/.claude/skills/code-review/SKILL.md' ]]"
-assert "skills/ Unterverzeichnisse rekursiv verlinkt" "[[ -L '$FAKE_HOME/.claude/skills/project-init/templates/node-ts.md' ]]"
+assert "skills/ enthaelt Datei-Links" "is_linked_to_repo '$FAKE_HOME/.claude/skills/code-review/SKILL.md' 'skills/code-review/SKILL.md'"
+assert "skills/ Unterverzeichnisse rekursiv verlinkt" "is_linked_to_repo '$FAKE_HOME/.claude/skills/project-init/templates/node-ts.md' 'skills/project-init/templates/node-ts.md'"
+assert "Repo-Marker vorhanden" "[[ -f '$FAKE_HOME/.claude/.forge-repo' ]]"
+assert "Repo-Marker enthaelt korrekten Pfad" "grep -q '$SCRIPT_DIR' '$FAKE_HOME/.claude/.forge-repo'"
 
 # --- Idempotenz ---
 echo ""
@@ -107,9 +118,10 @@ rm -rf "$SYNC_HOME"
 echo ""
 echo "-- Deinstallation --"
 HOME="$FAKE_HOME" bash "$SCRIPT_DIR/uninstall.sh" >/dev/null 2>&1
-assert "hooks/ Datei-Symlinks entfernt" "[[ ! -L '$FAKE_HOME/.claude/hooks/bash-firewall.sh' ]]"
-assert "skills/ Datei-Symlinks entfernt" "[[ ! -L '$FAKE_HOME/.claude/skills/code-review/SKILL.md' ]]"
+assert "hooks/ Datei-Links entfernt" "[[ ! -f '$FAKE_HOME/.claude/hooks/bash-firewall.sh' ]]"
+assert "skills/ Datei-Links entfernt" "[[ ! -f '$FAKE_HOME/.claude/skills/code-review/SKILL.md' ]]"
 assert "settings.json bleibt (Kopie)" "[[ -f '$FAKE_HOME/.claude/settings.json' ]]"
+assert "Repo-Marker entfernt" "[[ ! -f '$FAKE_HOME/.claude/.forge-repo' ]]"
 
 echo ""
 echo "================================="

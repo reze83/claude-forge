@@ -14,14 +14,14 @@ Loesung: Das Repo ist beides — ein Plugin UND ein Symlink-basiertes Config-Rep
 | --------------------------------- | ------------------------ | ------------------------------ | --------------------- |
 | user-config/settings.json.example | ~/.claude/settings.json  | Kopie (einmalig) + Deep-Merge  | Hauptkonfiguration    |
 | user-config/CLAUDE.md.example     | ~/.claude/CLAUDE.md      | Kopie (einmalig) + Import-Sync | Globale Instruktionen |
-| rules/\*.md                       | ~/.claude/rules/\*.md    | Datei-Symlinks (einzeln)       | Constraint-Regeln     |
-| hooks/\*                          | ~/.claude/hooks/\*       | Datei-Symlinks (einzeln)       | Hook-Scripts          |
-| commands/\*                       | ~/.claude/commands/\*    | Datei-Symlinks (einzeln)       | Slash-Commands        |
-| agents/\*.md                      | ~/.claude/agents/\*.md   | Datei-Symlinks (einzeln)       | Subagenten            |
-| skills/\*/                        | ~/.claude/skills/\*/     | Datei-Symlinks (rekursiv)      | Skills                |
-| multi-model/\*                    | ~/.claude/multi-model/\* | Datei-Symlinks (einzeln)       | Codex CLI Wrapper     |
+| rules/\*.md                       | ~/.claude/rules/\*.md    | Hardlinks (Symlink-Fallback)   | Constraint-Regeln     |
+| hooks/\*                          | ~/.claude/hooks/\*       | Hardlinks (Symlink-Fallback)   | Hook-Scripts          |
+| commands/\*                       | ~/.claude/commands/\*    | Hardlinks (Symlink-Fallback)   | Slash-Commands        |
+| agents/\*.md                      | ~/.claude/agents/\*.md   | Hardlinks (Symlink-Fallback)   | Subagenten            |
+| skills/\*/                        | ~/.claude/skills/\*/     | Hardlinks rekursiv (Fallback)  | Skills                |
+| multi-model/\*                    | ~/.claude/multi-model/\* | Hardlinks (Symlink-Fallback)   | Codex CLI Wrapper     |
 
-### Kopie + Merge vs. Datei-Symlinks
+### Kopie + Merge vs. Hardlinks
 
 - **settings.json**: Wird einmalig aus `.example` kopiert. Bei jedem Update/Install
   werden alle Template-Bloecke via `jq` deep-merged (`sync_settings_json()`).
@@ -30,18 +30,20 @@ Loesung: Das Repo ist beides — ein Plugin UND ein Symlink-basiertes Config-Rep
 - **CLAUDE.md**: Wird einmalig aus `.example` kopiert. Bei Updates werden fehlende
   `@import`-Zeilen am Ende angehaengt (`sync_claude_md()`). Bestehende
   User-Inhalte werden nie geaendert.
-- **Datei-Symlinks**: Alle Verzeichnisse (hooks/, rules/, commands/, agents/,
+- **Hardlinks**: Alle Verzeichnisse (hooks/, rules/, commands/, agents/,
   skills/, multi-model/) sind echte Verzeichnisse in `~/.claude/`. Die Dateien
-  darin sind einzelne Symlinks zum Repo. So kann der User eigene Dateien
-  hinzufuegen und bekommt trotzdem Updates via `git pull`. Neue Repo-Dateien
-  werden beim naechsten `install.sh` oder `/forge-update` automatisch verlinkt.
+  darin sind Hardlinks zum Repo (Fallback: Symlinks bei Cross-Filesystem).
+  So kann der User eigene Dateien hinzufuegen und bekommt trotzdem Updates
+  via `git pull`. Neue Repo-Dateien werden beim naechsten `install.sh` oder
+  `/forge-update` automatisch verlinkt. Eine Marker-Datei `~/.claude/.forge-repo`
+  speichert den Repo-Pfad (ersetzt `readlink`-basierte Discovery).
 
 ## WICHTIG: Installationsmodus
 
-**Symlink-Modus** (`bash install.sh`) und **Plugin-Modus** (`claude --plugin-dir`)
+**Install-Modus** (`bash install.sh`) und **Plugin-Modus** (`claude --plugin-dir`)
 duerfen NICHT gleichzeitig aktiv sein. Sonst werden Hooks doppelt geladen.
 
-- Symlink-Modus: Empfohlen fuer permanente Installation
+- Install-Modus: Empfohlen fuer permanente Installation (Hardlinks, Symlink-Fallback)
 - Plugin-Modus: Fuer temporaeres Testen oder Projekt-Level
 - install.sh erkennt laufende Plugin-Instanzen und bricht ab
 
@@ -64,13 +66,13 @@ install.sh                         uninstall.sh
     │   ├── Kopie (wenn nicht exist.)      ├── git fetch + Changelog
     │   ├── sync_settings_json()           ├── Lokale Aenderungen stashen
     │   │   (Deep-Merge, User gewinnt)     ├── git pull --ff-only
-    │   └── sync_claude_md()               ├── install.sh (Symlinks + Deps)
+    │   └── sync_claude_md()               ├── install.sh (Hardlinks + Deps)
     │       (fehlende @imports)            ├── Stash wiederherstellen
-    ├── Datei-Symlinks erstellen           └── VERSION Vergleich
+    ├── Hardlinks erstellen                └── VERSION Vergleich
     │   ├── link_dir_contents()
-    │   │   (echte Dirs + Datei-Symlinks)
+    │   │   (echte Dirs + Hardlinks)
     │   └── link_dir_recursive()
-    │       (Skills: rekursive Datei-Symlinks)
+    │       (Skills: rekursive Hardlinks)
     ├── validate.sh (abgefangen)
     ├── PATH-Check + Empfehlung
     ├── Codex-Hinweis (optional)
@@ -174,10 +176,10 @@ PostToolUse Hooks koennen Warnungen zurueckgeben (via `warn()` from lib.sh):
 
 ### Hook-Pfade: Zwei Systeme
 
-1. **settings.json** nutzt `$HOME/.claude/hooks/` → funktioniert via Symlink
+1. **settings.json** nutzt `$HOME/.claude/hooks/` → funktioniert via Hardlink/Symlink
 2. **hooks.json** nutzt `${CLAUDE_PLUGIN_ROOT}/hooks/` → funktioniert als Plugin
    - `${CLAUDE_PLUGIN_ROOT}` wird von Claude Code automatisch gesetzt wenn das Repo als Plugin geladen wird (`claude --plugin-dir`)
-   - Im Symlink-Modus wird hooks.json NICHT genutzt; stattdessen gelten die Hook-Definitionen in settings.json
+   - Im Install-Modus wird hooks.json NICHT genutzt; stattdessen gelten die Hook-Definitionen in settings.json
 
 Timeouts muessen in beiden Dateien identisch sein — `validate.sh` prueft das.
 
@@ -352,9 +354,9 @@ and `hookSpecificOutput.reason`.
 | ---------------- | ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | test-hooks.sh    | 187   | bash-firewall (63: basic+bypass+subshell/pipe/backtick/herestring+force-with-lease+editors+mkfs/dd+dry-run+local-patterns), protect-files (29: basic+case-insensitive+allowlist+tampering+non-ASCII+dry-run), secret-scan (16: pre+post+pragma+dry-run), auto-format (2), url-allowlist (18: public+private+deny-json+empty), pre-write-backup (5: opt-in+skip-tmp+skip-node_modules), session-logger (3: basic+log-rotation), session-start (2), setup (3: basic+additionalContext+forgeVersion), post-failure (2), pre-compact (2), task-gate (2), teammate-gate (2), subagent-start (2), subagent-stop (2), stop (2), hook-metrics (1), negative/error (22: corrupt JSON+empty stdin+missing fields+oversized) |
 | test-update.sh   | 6     | --help, VERSION, Nicht-Git-Repo, --check                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| test-install.sh  | 21    | Install/Uninstall Lifecycle (Datei-Symlinks, rekursive Skills), QA-Tools Section, Settings-Merge Edge Cases (corrupt JSON, empty settings, dry-run)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| test-install.sh  | 24    | Install/Uninstall Lifecycle (Hardlinks, rekursive Skills, Repo-Marker), QA-Tools Section, Settings-Merge Edge Cases (corrupt JSON, empty settings, dry-run)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | test-codex.sh    | 11    | Codex Wrapper (error handling, timeout validation incl. non-numeric, live)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | test-validate.sh | 1     | Validierungs-Durchlauf                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 
 CI (`test.yml`) fuehrt alle Tests auf ubuntu-22.04 aus (ausser test-codex.sh und test-validate.sh). ShellCheck, markdownlint, shfmt, gitleaks und actionlint laufen als zusaetzliche statische Analyse-Steps.
-Total: 226 tests (187 hooks + 21 install + 6 update + 11 codex + 1 validate).
+Total: 229 tests (187 hooks + 24 install + 6 update + 11 codex + 1 validate).
