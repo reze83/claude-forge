@@ -16,3 +16,4 @@
 @.claude/rules/token-optimization.md
 @.claude/rules/code-standards.md
 @.claude/rules/docs.md
+@.claude/rules/multi-model.md
