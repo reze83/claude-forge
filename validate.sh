@@ -60,7 +60,8 @@ check_dir_with_links() {
       continue
     fi
     # Hardlink: Inode-Vergleich mit Repo-Datei
-    local repo_file="$FORGE_REPO_DIR/$name/$(basename "$item")"
+    local repo_file
+    repo_file="$FORGE_REPO_DIR/$name/$(basename "$item")"
     if [[ -f "$item" && -f "$repo_file" ]] &&
       [[ "$(stat -c %i "$item")" == "$(stat -c %i "$repo_file")" ]]; then
       link_count=$((link_count + 1))
