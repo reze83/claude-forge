@@ -23,8 +23,7 @@
       "Bash(rm *)",
       "Bash(sudo *)",
       "Bash(docker *)",
-      "Bash(docker-compose *)",
-      "WebFetch"
+      "Bash(docker-compose *)"
     ],
     "defaultMode": "bypassPermissions"
   },
