@@ -27,8 +27,8 @@ Inline-Kommentare: **Warum** erklaeren, nicht **Was** — der Code ist das "Was"
 - `CONTRIBUTING.md` → Konventionen, Test-Befehle, Checklisten
 - `docs/` → weiterfuehrende Dokumentation
 
-## Projektspezifisch (claude-forge)
+## Projektspezifische Mappings
 
-- Hooks geaendert → `docs/ARCHITECTURE.md` (Hook-Tabelle aktualisieren)
-- Neuer Hook/Skill/Command → `docs/ARCHITECTURE.md` (Dateipfade-Tabelle)
-- Test-Anzahl geaendert → `CONTRIBUTING.md`, `README.md` (Badge), `docs/ARCHITECTURE.md`
+- Projekt-CLAUDE.md definiert welche Docs bei welchen Aenderungen zu aktualisieren sind
+- CLAUDE.md selbst aktualisieren wenn sich Projektstruktur, Befehle oder Konventionen aendern
+- Bei fehlender Zuordnung: CHANGELOG immer, README/ARCHITECTURE wenn User-sichtbar
