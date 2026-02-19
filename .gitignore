@@ -1,3 +1,6 @@
+# Projekt-CLAUDE.md (nur lokal fuer Entwicklung, User bekommen eigene via install.sh)
+CLAUDE.md
+
 # Lokale Overrides (nie committen)
 CLAUDE.local.md
 *.local.json
