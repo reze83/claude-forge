@@ -12,28 +12,43 @@ Zeige den aktuellen Status der claude-forge Installation.
 
 ## Schritt 1: Version
 
-Ermittle den tatsaechlichen Pfad von claude-forge ueber den hooks-Symlink:
+Ermittle den tatsaechlichen Pfad von claude-forge ueber einen Datei-Symlink in hooks/:
 
 ```bash
-FORGE_DIR="$( (readlink -f "$HOME/.claude/hooks" 2>/dev/null || readlink "$HOME/.claude/hooks") | sed 's|/hooks$||')" && cat "$FORGE_DIR/VERSION" 2>/dev/null || echo "unbekannt"
+CLAUDE_DIR=~/.claude
+FORGE_DIR="$( (readlink -f "$CLAUDE_DIR/hooks/lib.sh" 2>/dev/null || readlink "$CLAUDE_DIR/hooks/lib.sh") | sed 's|/hooks/lib.sh$||')" && cat "$FORGE_DIR/VERSION" 2>/dev/null || echo "unbekannt"
 ```
 
 ## Schritt 2: Symlink-Health
 
-Pruefe ob alle erwarteten Symlinks existieren und auf gueltige Ziele zeigen:
+Pruefe ob alle erwarteten Datei-Symlinks in den Verzeichnissen existieren und auf gueltige Ziele zeigen:
 
 ```bash
-for link in rules hooks commands multi-model; do
-  target="$HOME/.claude/$link"
-  if [ -L "$target" ]; then
-    dest="$(readlink -f "$target" 2>/dev/null || readlink "$target")"
-    if [ -e "$dest" ]; then
-      echo "[OK] $link -> $dest"
-    else
-      echo "[BROKEN] $link -> $dest (Ziel existiert nicht)"
+CLAUDE_DIR=~/.claude
+for dir in rules hooks commands multi-model; do
+  target="$CLAUDE_DIR/$dir"
+  if [ ! -d "$target" ]; then
+    echo "[MISSING] $dir/ existiert nicht"
+    continue
+  fi
+  total=0; ok=0; broken=0
+  for f in "$target"/*; do
+    [ -e "$f" ] || continue
+    total=$((total + 1))
+    if [ -L "$f" ]; then
+      dest="$(readlink -f "$f" 2>/dev/null || readlink "$f")"
+      if [ -e "$dest" ]; then
+        ok=$((ok + 1))
+      else
+        broken=$((broken + 1))
+        echo "[BROKEN] $dir/$(basename "$f") -> $dest"
+      fi
     fi
-  else
-    echo "[MISSING] $link ist kein Symlink"
+  done
+  if [ "$broken" -eq 0 ] && [ "$ok" -gt 0 ]; then
+    echo "[OK] $dir/ ($ok Datei-Symlinks)"
+  elif [ "$total" -eq 0 ]; then
+    echo "[WARN] $dir/ ist leer"
   fi
 done
 ```
@@ -41,13 +56,15 @@ done
 ## Schritt 3: Aktive Hooks
 
 ```bash
-jq -r '.hooks | to_entries[] | "\(.key): \(.value | length) hooks"' "$HOME/.claude/hooks/hooks.json" 2>/dev/null || echo "hooks.json nicht gefunden"
+CLAUDE_DIR=~/.claude
+jq -r '.hooks | to_entries[] | "\(.key): \(.value | length) hooks"' "$CLAUDE_DIR/hooks/hooks.json" 2>/dev/null || echo "hooks.json nicht gefunden"
 ```
 
 ## Schritt 4: Verfuegbare Updates
 
 ```bash
-FORGE_DIR="$( (readlink -f "$HOME/.claude/hooks" 2>/dev/null || readlink "$HOME/.claude/hooks") | sed 's|/hooks$||')" && bash "$FORGE_DIR/update.sh" --check 2>/dev/null || echo "Update-Check fehlgeschlagen"
+CLAUDE_DIR=~/.claude
+FORGE_DIR="$( (readlink -f "$CLAUDE_DIR/hooks/lib.sh" 2>/dev/null || readlink "$CLAUDE_DIR/hooks/lib.sh") | sed 's|/hooks/lib.sh$||')" && bash "$FORGE_DIR/update.sh" --check 2>/dev/null || echo "Update-Check fehlgeschlagen"
 ```
 
 ## Schritt 5: Zusammenfassung
