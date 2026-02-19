@@ -51,7 +51,7 @@ Das Repo ist gleichzeitig ein **Claude Code Plugin** (`plugin.json`) und ein **H
 | rules/, hooks/, commands/         | ~/.claude/\*/\*          | Hardlinks (Symlink-Fallback)   |
 | agents/\*.md                      | ~/.claude/agents/\*.md   | Hardlinks (Symlink-Fallback)   |
 | skills/\*/                        | ~/.claude/skills/\*/     | Hardlinks rekursiv (Fallback)  |
-| multi-model/                      | ~/.claude/multi-model/\* | Hardlinks (Symlink-Fallback)   |
+| multi-model/                      | ~/.claude/multi-model/\* | Hardlinks rekursiv (Fallback)  |
 
 **settings.json**: Wird einmalig aus Template kopiert. Bei Updates werden alle Template-Bloecke via `jq` deep-merged (Template als Basis, User-Werte gewinnen bei Konflikten). Der `hooks`-Block wird immer komplett aus dem Template uebernommen.
 

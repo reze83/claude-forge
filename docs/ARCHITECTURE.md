@@ -19,7 +19,7 @@ Loesung: Das Repo ist beides — ein Plugin UND ein Symlink-basiertes Config-Rep
 | commands/\*                       | ~/.claude/commands/\*    | Hardlinks (Symlink-Fallback)   | Slash-Commands        |
 | agents/\*.md                      | ~/.claude/agents/\*.md   | Hardlinks (Symlink-Fallback)   | Subagenten            |
 | skills/\*/                        | ~/.claude/skills/\*/     | Hardlinks rekursiv (Fallback)  | Skills                |
-| multi-model/\*                    | ~/.claude/multi-model/\* | Hardlinks (Symlink-Fallback)   | Codex CLI Wrapper     |
+| multi-model/\*/                   | ~/.claude/multi-model/\* | Hardlinks rekursiv (Fallback)  | Codex CLI Wrapper     |
 
 ### Kopie + Merge vs. Hardlinks
 

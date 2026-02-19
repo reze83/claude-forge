@@ -563,7 +563,7 @@ link_dir_contents "$REPO_DIR/commands" "$CLAUDE_DIR/commands"
 # --- Phase 7: Multi-Model (einzeln verlinken) ---
 echo ""
 echo "-- Phase 7: Multi-Model --"
-link_dir_contents "$REPO_DIR/multi-model" "$CLAUDE_DIR/multi-model"
+link_dir_recursive "$REPO_DIR/multi-model" "$CLAUDE_DIR/multi-model"
 
 # --- Phase 8: Codex CLI (optional) ---
 if $WITH_CODEX; then
