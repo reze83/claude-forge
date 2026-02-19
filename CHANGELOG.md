@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-02-20
+
 ### Changed
 
 - rules: add top-level `**Aktivierung:**` conditions to 6 context-dependent rules (git-workflow, code-standards, docs, performance, multi-model, smithery), following the pattern established by api-design.md
@@ -28,9 +30,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - rules/multi-model.md: add proactive Codex delegation with condition-action pairs
 - rules/performance.md: split into active checks (applied on every edit) vs passive reference (on request only)
 - rules/docs.md: replace vague "nicht-trivial" with 4 concrete trigger conditions and 3 exclusions
+- rules/docs.md: replace forge-specific section with generic "Projektspezifische Mappings" (globally applicable)
 - rules/token-optimization.md: replace hardcoded model IDs with generic names, add exploration threshold
 - rules/api-design.md: add activation condition for HTTP endpoints, default camelCase for JSON
 - rules/git-workflow.md: add explicit branch-creation instruction when on main
+- rules/code-standards.md: add "Gekoppelte Scripts" section — lifecycle scripts must be checked together
+- CLAUDE.md: gitignored (local dev-only file, users get their own via install.sh template)
 
 ## [0.5.0] - 2026-02-19
 
