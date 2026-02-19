@@ -8,10 +8,18 @@
 
 ## Wann Codex delegieren
 
+Schlage dem User proaktiv Codex-Delegation vor, wenn ALLE Bedingungen zutreffen:
+
+1. `codex` CLI ist installiert (`command -v codex`)
+2. Die Aufgabe hat klar abgegrenzten Input/Output (1 Datei, 1 Funktion)
+3. Die Aufgabe faellt in eine dieser Kategorien:
+
 - Backend-Logik und Algorithmen mit klarem Input/Output
 - Code-Reviews und Security-Audits (Sandbox `read`)
 - Parallele Planung: zwei Perspektiven, dann vergleichen (`/multi-plan`)
 - Boilerplate-Generierung und repetitive Patterns
+
+**Formulierung:** "Diese Aufgabe eignet sich fuer Codex-Delegation (`/multi-backend`). Soll ich das delegieren?"
 
 ## Wann NICHT delegieren
 

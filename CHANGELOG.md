@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- rules/smithery.md: add explicit trigger conditions for auto-discovery (specialized languages, frameworks, decision rule)
+- rules/multi-model.md: add proactive Codex delegation with condition-action pairs
+- rules/performance.md: split into active checks (applied on every edit) vs passive reference (on request only)
+- rules/docs.md: replace vague "nicht-trivial" with 4 concrete trigger conditions and 3 exclusions
+- rules/token-optimization.md: replace hardcoded model IDs with generic names, add exploration threshold
+- rules/api-design.md: add activation condition for HTTP endpoints, default camelCase for JSON
+- rules/git-workflow.md: add explicit branch-creation instruction when on main
+
 ## [0.5.0] - 2026-02-19
 
 ### Added

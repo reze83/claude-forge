@@ -1,5 +1,7 @@
 # API-Design
 
+**Aktivierung:** Diese Standards gelten wenn HTTP-Endpoints geschrieben werden (Express, FastAPI, Gin, Spring, etc.). Pruefe aktiv dagegen bei Code-Reviews von API-Code.
+
 ## REST-Konventionen
 
 - Ressourcen als Nomen (Plural): `/users`, `/orders/{id}/items`
@@ -30,7 +32,7 @@
 
 ## Request/Response
 
-- Konsistente Namensgebung: camelCase (JSON) oder snake_case — nie mischen
+- Konsistente Namensgebung: camelCase bevorzugt (JSON-Standard), snake_case wenn Projekt es bereits nutzt — nie mischen
 - Keine Envelope-Wrapper ohne Grund (kein `{ "data": { "data": ... } }`)
 - Partial Updates via PATCH mit nur geaenderten Feldern
 - Filter, Sortierung, Felder via Query-Parameter: `?sort=-created_at&fields=id,name`

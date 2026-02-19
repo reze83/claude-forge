@@ -4,6 +4,7 @@
 
 - GitHub Flow: `feature/`, `fix/`, `docs/`, `chore/` → `main`
 - Immer Feature-Branch + PR — nie direkt auf `main` arbeiten
+- Wenn auf `main` und Code-Aenderungen anstehen: Branch erstellen BEVOR der erste Edit passiert. Vorschlag: `git checkout -b <prefix>/<kurzbeschreibung>`
 
 ## Commits
 
