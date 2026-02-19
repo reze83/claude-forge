@@ -121,6 +121,23 @@ link_dir_contents() {
   fi
 }
 
+# Verlinkt alle Dateien eines Verzeichnisses rekursiv (Unterverzeichnisse werden als echte Dirs angelegt)
+link_dir_recursive() {
+  local source_dir="$1"
+  local target_dir="$2"
+  mkdir -p "$target_dir"
+  for item in "$source_dir"/*; do
+    [[ -e "$item" ]] || continue
+    local name
+    name="$(basename "$item")"
+    if [[ -d "$item" ]]; then
+      link_dir_recursive "$item" "$target_dir/$name"
+    else
+      create_symlink "$item" "$target_dir/$name"
+    fi
+  done
+}
+
 # --- Sync-Funktionen ---
 sync_settings_json() {
   local example_settings="$REPO_DIR/user-config/settings.json.example"
@@ -504,14 +521,24 @@ echo ""
 echo "-- Phase 4: Agents --"
 link_dir_contents "$REPO_DIR/agents" "$CLAUDE_DIR/agents" "*.md"
 
-# --- Phase 5: Skills (einzeln verlinken) ---
+# --- Phase 5: Skills (rekursiv verlinken) ---
 echo ""
 echo "-- Phase 5: Skills --"
 mkdir -p "$CLAUDE_DIR/skills"
 for skill_dir in "$REPO_DIR/skills/"*/; do
   [[ -d "$skill_dir" ]] || continue
   skill_name="$(basename "$skill_dir")"
-  create_symlink "$skill_dir" "$CLAUDE_DIR/skills/$skill_name"
+  target="$CLAUDE_DIR/skills/$skill_name"
+  # Alte Verzeichnis-Symlinks (vor v0.6) entfernen bevor echtes Dir angelegt wird
+  if [[ -L "$target" ]]; then
+    if $DRY_RUN; then
+      log_dry "Wuerde alten Verzeichnis-Symlink entfernen: $target"
+    else
+      rm -f "$target"
+      log_ok "Alten Verzeichnis-Symlink entfernt: $target"
+    fi
+  fi
+  link_dir_recursive "$skill_dir" "$target"
 done
 
 # --- Phase 6: Commands (einzeln verlinken) ---

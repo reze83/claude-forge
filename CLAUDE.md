@@ -11,7 +11,7 @@ Bash-basiertes Security- & Productivity-Framework fuer Claude Code CLI.
 ```bash
 # Tests
 bash tests/test-hooks.sh        # Hook unit tests (187 tests)
-bash tests/test-install.sh      # Install/Uninstall lifecycle (16 tests)
+bash tests/test-install.sh      # Install/Uninstall lifecycle (21 tests)
 bash tests/test-update.sh       # Update script (6 tests)
 bash tests/test-codex.sh        # Codex wrapper (11 tests)
 bash tests/test-validate.sh     # Validation run (1 test)
@@ -50,7 +50,7 @@ Das Repo ist gleichzeitig ein **Claude Code Plugin** (`plugin.json`) und ein **S
 | user-config/CLAUDE.md.example     | ~/.claude/CLAUDE.md      | Kopie (einmalig) + Import-Sync |
 | rules/, hooks/, commands/         | ~/.claude/\*/\*          | Datei-Symlinks (einzeln)       |
 | agents/\*.md                      | ~/.claude/agents/\*.md   | Datei-Symlinks (einzeln)       |
-| skills/\*/                        | ~/.claude/skills/\*/     | Verzeichnis-Symlinks (einzeln) |
+| skills/\*/                        | ~/.claude/skills/\*/     | Datei-Symlinks (rekursiv)      |
 | multi-model/                      | ~/.claude/multi-model/\* | Datei-Symlinks (einzeln)       |
 
 **settings.json**: Wird einmalig aus Template kopiert. Bei Updates werden alle Template-Bloecke via `jq` deep-merged (Template als Basis, User-Werte gewinnen bei Konflikten). Der `hooks`-Block wird immer komplett aus dem Template uebernommen.

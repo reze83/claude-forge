@@ -63,10 +63,20 @@ for dir in rules hooks commands multi-model agents; do
   remove_if_symlink_to_repo "$CLAUDE_DIR/$dir"
 done
 
-# Skills (einzeln — Unterverzeichnisse)
+# Skills (rekursiv — Datei-Symlinks in Unterverzeichnissen)
 for skill_dir in "$REPO_DIR/skills/"*/; do
   [[ -d "$skill_dir" ]] || continue
-  remove_if_symlink_to_repo "$CLAUDE_DIR/skills/$(basename "$skill_dir")"
+  skill_name="$(basename "$skill_dir")"
+  target_skill="$CLAUDE_DIR/skills/$skill_name"
+  # Fallback: alte Directory-Symlinks (vor v0.6) ebenfalls entfernen
+  remove_if_symlink_to_repo "$target_skill"
+  if [[ -d "$target_skill" ]]; then
+    find "$target_skill" -type l | while IFS= read -r link; do
+      remove_if_symlink_to_repo "$link"
+    done
+    # Leere Verzeichnisse aufraeumen (bottom-up)
+    find "$target_skill" -type d -empty -delete 2>/dev/null || true
+  fi
 done
 
 # Letztes Backup finden und anbieten

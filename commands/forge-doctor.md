@@ -34,10 +34,14 @@ for dir in hooks rules commands agents multi-model; do
     [ -e "$dest" ] || { echo "[BROKEN] $dir/$(basename "$f") -> $dest"; broken=$((broken+1)); }
   done
 done
+# Skills: rekursiv pruefen (Datei-Symlinks in Unterverzeichnissen)
 for skill in "$CLAUDE_DIR/skills"/*/; do
-  [ -L "${skill%/}" ] || continue
-  dest="$(readlink -f "${skill%/}" 2>/dev/null || readlink "${skill%/}")"
-  [ -d "$dest" ] || { echo "[BROKEN] skills/$(basename "$skill") -> $dest"; broken=$((broken+1)); }
+  [ -d "$skill" ] || continue
+  skill_name="$(basename "$skill")"
+  find "$skill" -type l | while IFS= read -r f; do
+    dest="$(readlink -f "$f" 2>/dev/null || readlink "$f")"
+    [ -e "$dest" ] || { echo "[BROKEN] skills/$skill_name/$(basename "$f") -> $dest"; broken=$((broken+1)); }
+  done
 done
 echo "Broken symlinks: $broken"
 ```
