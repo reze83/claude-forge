@@ -25,7 +25,7 @@ Pruefe ob alle erwarteten Datei-Symlinks in den Verzeichnissen existieren und au
 
 ```bash
 CLAUDE_DIR=~/.claude
-for dir in rules hooks commands multi-model; do
+for dir in rules hooks commands multi-model agents skills; do
   target="$CLAUDE_DIR/$dir"
   if [ ! -d "$target" ]; then
     echo "[MISSING] $dir/ existiert nicht"
