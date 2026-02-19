@@ -14,9 +14,20 @@ Prüfe die verbundenen Server und nutze sie proaktiv für passende Aufgaben:
 Wenn du für eine Aufgabe ein externes Tool brauchst und es noch nicht verbunden ist:
 
 1. Suche mit `smithery mcp search "<aufgabe>"` nach einem geeigneten Server
-2. Verbinde mit `smithery mcp add "<url-oder-slug>"`
-3. Informiere den User kurz darüber, welchen Server du hinzugefügt hast
-4. Nutze das Tool direkt
+2. Bevorzuge Server mit hohem `useCount` (bewährt, stabil)
+3. Verbinde mit `smithery mcp add "<connectionUrl>"`
+4. Informiere den User kurz darüber, welchen Server du hinzugefügt hast
+5. Nutze das Tool direkt
+
+## Aufräumen
+
+- Temporär hinzugefügte Server nach dem Test wieder entfernen: `smithery mcp remove <id>`
+- Frage den User, ob er den Server dauerhaft behalten möchte — entferne ihn sonst
+
+## Fehlerbehandlung
+
+- Schlägt `smithery tool call` fehl: Fehlermeldung an User weitergeben, nicht still ignorieren
+- Server nicht erreichbar: `smithery mcp list` prüfen, ob Status `connected` ist
 
 ## Wann aktiv suchen
 

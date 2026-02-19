@@ -26,6 +26,18 @@
 - `.claude/hooks.json`, `.claude/hooks/`, `.claude/settings.json` — Write/Edit geblockt
 - Keine Aenderungen an Hook-Konfiguration oder Hook-Scripten
 
+## Supply-Chain
+
+- Vor `npm install` / `pip install`: `npm audit` bzw. `pip audit` ausfuehren
+- Neue Abhaengigkeiten begrenzen — nur was wirklich gebraucht wird
+- Versionen in `package.json` / `requirements.txt` pinnen (kein `*` oder `latest`)
+
+## Dry-Run
+
+- Bash-Firewall ohne Blockierung testen: `CLAUDE_FORGE_DRY_RUN=1 bash hooks/bash-firewall.sh`
+- Eigene Block-Patterns definieren: `~/.claude/local-patterns.sh` (Vorlage: `user-config/local-patterns.sh.example`)
+
 ## WebFetch
 
 - `WebFetch` erfordert User-Bestaetigung (Sandbox-Restriction)
+- Keine internen/privaten URLs ohne explizite User-Freigabe fetchen

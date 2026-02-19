@@ -4,6 +4,7 @@
 
 - Nach nicht-trivialen Code-Aenderungen (neue Features, API-Aenderungen, Architektur-Entscheidungen)
 - Nicht bei reinen Refactorings ohne externe Auswirkung
+- Inline-Kommentare: **Warum** erklaeren, nicht **Was** — der Code ist das "Was"
 
 ## Was aktualisieren
 
