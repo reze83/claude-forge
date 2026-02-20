@@ -258,6 +258,51 @@ sync_claude_md() {
   log_ok "$missing_count @import-Zeile(n) in CLAUDE.md synchronisiert"
 }
 
+sync_mcp_json() {
+  local src="$REPO_DIR/.mcp.json"
+  local server_name="sequential-thinking"
+
+  [[ -f "$src" ]] || return 0
+
+  # Read server config from .mcp.json
+  local cmd args
+  cmd=$(jq -r ".[\"$server_name\"].command // empty" "$src" 2>/dev/null) || return 0
+  args=$(jq -r ".[\"$server_name\"].args // [] | join(\" \")" "$src" 2>/dev/null) || return 0
+
+  if [[ -z "$cmd" ]]; then
+    log_skip ".mcp.json: kein command fuer $server_name"
+    return 0
+  fi
+
+  if $DRY_RUN; then
+    log_dry "Wuerde MCP-Server '$server_name' registrieren (user scope, stdio)"
+    return 0
+  fi
+
+  # Check if claude CLI is available
+  if ! command -v claude >/dev/null 2>&1; then
+    log_skip "claude CLI nicht gefunden (MCP-Registrierung uebersprungen)"
+    return 0
+  fi
+
+  # Check if already registered at user scope
+  local existing
+  existing=$(claude mcp get "$server_name" 2>/dev/null || true)
+  if [[ -n "$existing" && "$existing" != *"not found"* && "$existing" != *"No server"* ]]; then
+    log_skip "MCP-Server '$server_name' bereits registriert"
+    return 0
+  fi
+
+  # Register via claude mcp add (user scope, stdio transport)
+  # shellcheck disable=SC2086
+  if claude mcp add --transport stdio --scope user "$server_name" -- $cmd $args 2>/dev/null; then
+    log_ok "MCP-Server '$server_name' registriert (user scope)"
+  else
+    log_err "MCP-Server '$server_name' konnte nicht registriert werden"
+    return 1
+  fi
+}
+
 # --- Auto-Install fehlender Dependencies ---
 auto_install() {
   local pkg="$1"
@@ -538,6 +583,7 @@ fi
 # Sync: Template-Defaults in bestehende User-Dateien mergen
 sync_settings_json
 sync_claude_md
+sync_mcp_json
 
 # --- Phase 2: Rules (einzeln verlinken) ---
 echo ""

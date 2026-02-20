@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- .mcp.json: register Sequential Thinking as native Claude Code MCP server (stdio via @modelcontextprotocol/server-sequential-thinking)
+- install.sh: `sync_mcp_json()` registers MCP server at user scope via `claude mcp add`
+
+### Changed
+
+- smithery.md: rewrite rule with interleaving flow (Sequential Thinking + tool calls between thoughts)
+- smithery-context.sh: inject `sequential_thinking_mcp` availability flag into additionalContext
+- CLAUDE.md.example: move smithery.md from "Dynamisch" to "Immer aktiv" (eliminates circular dependency)
+
 ## [0.5.5] - 2026-02-20
 
 ### Added

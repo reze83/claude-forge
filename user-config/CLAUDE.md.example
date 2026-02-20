@@ -29,6 +29,7 @@
 ### Immer aktiv
 @.claude/rules/security.md
 @.claude/rules/token-optimization.md
+@.claude/rules/smithery.md
 
 ### Bei Code-Aenderungen
 @.claude/rules/code-standards.md
@@ -37,6 +38,5 @@
 @.claude/rules/docs.md
 
 ### Dynamisch (via sequential thinking gesteuert)
-@.claude/rules/smithery.md
 @.claude/rules/multi-model.md
 @.claude/rules/api-design.md

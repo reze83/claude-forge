@@ -146,6 +146,7 @@ echo '{"custom":true}' >"$SYNC_HOME/.claude/settings.json"
 SYNC_OUT=$(HOME="$SYNC_HOME" bash "$SCRIPT_DIR/install.sh" --dry-run 2>&1 || true)
 assert "Dry-run -> sync only logs" "echo '$SYNC_OUT' | grep -q 'Wuerde settings.json mit Template mergen'"
 assert "Dry-run -> settings.json unchanged" "! jq -e '.hooks' '$SYNC_HOME/.claude/settings.json' >/dev/null 2>&1"
+assert "Dry-run -> MCP sync logs" "echo '$SYNC_OUT' | grep -q 'MCP-Server'"
 rm -rf "$SYNC_HOME"
 
 # --- Deinstallation ---
