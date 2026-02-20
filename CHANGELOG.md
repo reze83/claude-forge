@@ -7,34 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-02-20
+
 ### Added
 
-- hooks/lib.sh: new shared functions `notify()`, `log_event()` — reduces duplication across stop.sh, session-logger.sh, session-start.sh, subagent-start.sh, subagent-stop.sh
+- hooks/bash-firewall.sh: 4 interpreter injection deny patterns (python -c, node -e, perl -e, ruby -e)
+- hooks/protect-files.sh: matcher extended to `Read|Write|Edit|Glob|Grep` — closes gap where Glob/Grep could scan sensitive paths
+- hooks/lib.sh: new shared functions `notify()`, `log_event()` — reduces duplication across 5 hooks
 - validate.sh: agents/ and skills/ hardlink validation, hook↔hooks.json cross-reference check
-- tests: teammate-gate dirty-tree exit-2 (+2), pre-write-backup .bak creation (+2), url-allowlist IPv6 (+4) — 240 total (+8)
+- update.sh: ERR trap restores git stash on install failure, explicit stash conflict error message
+- tests: +20 tests (interpreter injection, Glob/Grep protection, teammate-gate dirty-tree, pre-write-backup .bak creation, url-allowlist IPv6) — 240 total
 - skills: `allowed-tools` for code-review (Read/Glob/Grep), explain-code (Read/Glob/Grep), deploy (Read/Glob/Grep/Bash)
 - skills/performance-reference/: new passive skill — extracted DB/Frontend/Backend optimization tips from performance rule (loaded on demand, not on every session)
+- CI: shfmt now mandatory with `tests/*.sh` included; Go setup for shfmt install
 
 ### Changed
 
+- hooks/bash-firewall.sh: grep alternation optimization — 2 grep calls for allowed commands instead of 60 (per-pattern loop replaced with combined `pat1|pat2|...` quick-check)
 - hooks: stop.sh, session-logger.sh, session-start.sh, subagent-start.sh, subagent-stop.sh refactored to use shared `notify()` and `log_event()` from lib.sh
+- rules/smithery.md: replace passive triggers with sequential thinking as decision engine — 5-step evaluation flow with 30-category decision matrix that proactively provisions MCP servers before falling back to built-in tools
+- rules: all 9 rules optimized for global use (-43 net lines) — security, git-workflow, token-optimization, code-standards, docs, multi-model, performance, api-design, smithery
+- user-config/CLAUDE.md.example: remove vague principles (SOLID, DRY, YAGNI), add environment context, NEVER/ALWAYS hard rules, expanded post-compact reminders, and categorized imports
 
 ### Fixed
 
 - install.sh: `link_dir_recursive` now detects and replaces legacy directory symlinks before `mkdir -p`, fixing migration of e.g. `multi-model/prompts` from symlink to real dir with file-level hardlinks (#70)
-
-### Changed
-
-- rules/smithery.md: replace passive triggers with sequential thinking as decision engine — 5-step evaluation flow with 30-category decision matrix that proactively provisions MCP servers before falling back to built-in tools
-- rules/security.md: consolidate 5 hook-enforced sections into compact list (58→17 lines)
-- rules/git-workflow.md: generic CI reference, compress hook section (37→27 lines)
-- rules/token-optimization.md: add activation line, add memory trigger (27→22 lines)
-- rules/code-standards.md: remove forge-specific "Gekoppelte Scripts" section (38→28 lines)
-- rules/docs.md: replace forge-specific terms with generic equivalents (35→30 lines)
-- rules/multi-model.md: remove duplicate codex CLI check from conditions (62→53 lines)
-- rules/performance.md: extract passive reference to skill, keep active checks only (42→15 lines)
-- rules/api-design.md: remove obvious REST knowledge (46→38 lines)
-- user-config/CLAUDE.md.example: remove vague principles (SOLID, DRY, YAGNI), add environment context, NEVER/ALWAYS hard rules, expanded post-compact reminders, and categorized imports (always active / code changes / dynamic)
 
 ## [0.5.1] - 2026-02-20
 
