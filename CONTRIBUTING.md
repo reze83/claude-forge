@@ -57,13 +57,13 @@ bash tests/test-hooks.sh      # Hook unit tests (222 tests)
 bash tests/test-plugin.sh     # Plugin-mode tests (9 tests)
 bash tests/test-update.sh     # Update script tests (6 tests)
 bash tests/test-install.sh    # Install/uninstall tests (35 tests)
-bash tests/test-codex.sh      # Codex wrapper tests (22 tests)
+bash tests/test-codex.sh      # Codex wrapper tests (30 tests)
 bash tests/test-validate.sh   # Validation tests (1 test)
 bash tests/bench-hooks.sh     # Hook benchmark (avg/min/max ms)
 bash validate.sh              # Full validation suite
 ```
 
-Total: 295 tests
+Total: 303 tests
 
 ### Adding Tests
 

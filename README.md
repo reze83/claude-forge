@@ -14,7 +14,7 @@
 
 [![Version](https://img.shields.io/badge/version-0.7.0-blue?style=for-the-badge)](CHANGELOG.md)
 [![CI](https://img.shields.io/github/actions/workflow/status/reze83/claude-forge/test.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/reze83/claude-forge/actions)
-[![Tests](https://img.shields.io/badge/tests-295%20passed-brightgreen?style=for-the-badge)](#)
+[![Tests](https://img.shields.io/badge/tests-303%20passed-brightgreen?style=for-the-badge)](#)
 [![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](LICENSE)
 [![Shell](https://img.shields.io/badge/bash-3.2%2B-4EAA25?style=for-the-badge&logo=gnubash&logoColor=white)](#)
 
@@ -51,7 +51,7 @@ claude-forge schuetzt Claude Code vor destruktiven Befehlen, Secret-Leaks und un
 - **18 Hooks** — Security, Productivity, Logging
 - **9 Rules** — Git, Security, Code-Standards, Performance, API-Design, ...
 - **5 Agents** — Research, Test-Runner, Security-Auditor, Dep-Auditor, Profiler
-- **7 Skills** — Code-Review, Explain, Deploy, Project-Init, Test-Gen, Refactor, Performance-Ref
+- **8 Skills** — Code-Review, Explain, Deploy, Project-Init, Test-Gen, Refactor, Performance-Ref, Multi-Model-Ref
 - **9 Commands** — Multi-Model Workflows + Self-Management
 
 </td>
@@ -314,7 +314,7 @@ claude-forge/
 │   └── session-logger.sh           Session-Ende Log-Rotation
 ├── rules/                          → ~/.claude/rules/ (9 Regeln)
 ├── agents/                         → ~/.claude/agents/ (5 Agenten)
-├── skills/                         → ~/.claude/skills/ (7 Skills)
+├── skills/                         → ~/.claude/skills/ (8 Skills)
 ├── commands/                       → ~/.claude/commands/ (9 Commands)
 ├── multi-model/                    → ~/.claude/multi-model/ (Codex CLI Wrapper)
 ├── tests/                          Test-Suite (277 Tests)

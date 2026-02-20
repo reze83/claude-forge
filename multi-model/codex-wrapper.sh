@@ -11,6 +11,7 @@ set -euo pipefail
 #   --model:        OpenAI-Modell (default: gpt-5.3-codex)
 #   --context-file: Datei-Inhalt an Prompt prependen (wiederholbar)
 #   --template:     Template-Datei rendern statt --prompt (key=value args)
+#   --no-retry:     Kein automatischer Retry bei transienten Fehlern
 #
 # Output: JSON auf stdout
 #   { "status": "success|error", "output": "...", "model": "<model>" }
@@ -24,8 +25,10 @@ TIMEOUT=240
 WORKDIR="$(pwd)"
 CONTEXT_FILES=()
 TEMPLATE=""
+NO_RETRY=0
 
 readonly MAX_CONTEXT_BYTES=50000
+readonly RETRY_DELAY=5
 readonly MIN_TIMEOUT=30
 readonly MAX_TIMEOUT=600
 
@@ -43,6 +46,10 @@ fi
 # --- Argumente ---
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --no-retry)
+      NO_RETRY=1
+      shift
+      ;;
     --sandbox | --prompt | --workdir | --timeout | --model | --context-file | --template)
       if [[ $# -lt 2 ]]; then
         echo "{\"status\":\"error\",\"output\":\"Missing value for $1\",\"model\":\"$MODEL\"}"
@@ -190,32 +197,58 @@ if ! command -v timeout >/dev/null 2>&1; then
   exit 0
 fi
 
-# --- Codex ausfuehren (non-interactive via exec) ---
+# --- Codex ausfuehren (mit optionalem Retry) ---
 cd "$WORKDIR"
-# shellcheck disable=SC2086
-timeout "$TIMEOUT" codex exec \
-  -m "$MODEL" \
-  -c "model_reasoning_effort=\"$REASONING\"" \
-  --sandbox "$SANDBOX_FLAG" \
-  $SKIP_GIT_FLAG \
-  -o "$OUTFILE" \
-  "$PROMPT" >/dev/null 2>"$ERRFILE" || {
-  EXIT_CODE=$?
-  STDERR_MSG=""
-  [[ -s "$ERRFILE" ]] && STDERR_MSG="$(cat "$ERRFILE")"
-  OUTPUT_MSG=""
-  [[ -s "$OUTFILE" ]] && OUTPUT_MSG="$(cat "$OUTFILE")"
 
-  if [[ $EXIT_CODE -eq 124 ]]; then
-    echo "{\"status\":\"error\",\"output\":\"Codex timeout after ${TIMEOUT}s. Try a smaller task.\",\"model\":\"$MODEL\"}"
-  else
-    COMBINED="${OUTPUT_MSG:+$OUTPUT_MSG\n}${STDERR_MSG}"
-    echo "{\"status\":\"error\",\"output\":$(printf '%s' "$COMBINED" | jq -Rs .),\"model\":\"$MODEL\"}"
-  fi
-  exit 0
+run_codex() {
+  # Reset output files
+  : >"$OUTFILE"
+  : >"$ERRFILE"
+  # shellcheck disable=SC2086
+  timeout "$TIMEOUT" codex exec \
+    -m "$MODEL" \
+    -c "model_reasoning_effort=\"$REASONING\"" \
+    --sandbox "$SANDBOX_FLAG" \
+    $SKIP_GIT_FLAG \
+    -o "$OUTFILE" \
+    "$PROMPT" >/dev/null 2>"$ERRFILE"
 }
 
-# --- Erfolg ---
-OUTPUT=""
-[[ -s "$OUTFILE" ]] && OUTPUT="$(cat "$OUTFILE")"
-echo "{\"status\":\"success\",\"output\":$(printf '%s' "$OUTPUT" | jq -Rs .),\"model\":\"$MODEL\"}"
+emit_error() {
+  local exit_code="$1"
+  local stderr_msg="" output_msg=""
+  [[ -s "$ERRFILE" ]] && stderr_msg="$(cat "$ERRFILE")"
+  [[ -s "$OUTFILE" ]] && output_msg="$(cat "$OUTFILE")"
+
+  if [[ $exit_code -eq 124 ]]; then
+    echo "{\"status\":\"error\",\"output\":\"Codex timeout after ${TIMEOUT}s. Try a smaller task.\",\"model\":\"$MODEL\"}"
+  else
+    local combined="${output_msg:+$output_msg\n}${stderr_msg}"
+    echo "{\"status\":\"error\",\"output\":$(printf '%s' "$combined" | jq -Rs .),\"model\":\"$MODEL\"}"
+  fi
+}
+
+if run_codex; then
+  OUTPUT=""
+  [[ -s "$OUTFILE" ]] && OUTPUT="$(cat "$OUTFILE")"
+  echo "{\"status\":\"success\",\"output\":$(printf '%s' "$OUTPUT" | jq -Rs .),\"model\":\"$MODEL\"}"
+  exit 0
+fi
+
+FIRST_EXIT=$?
+FIRST_STDERR=""
+[[ -s "$ERRFILE" ]] && FIRST_STDERR="$(cat "$ERRFILE")"
+
+# --- Retry bei transienten Fehlern (1x, nicht bei --no-retry oder --sandbox full) ---
+if [[ "$NO_RETRY" -eq 0 && "$SANDBOX" != "full" ]] && is_transient_error "$FIRST_STDERR" "$FIRST_EXIT" "$TIMEOUT"; then
+  printf 'codex-wrapper: transient error (exit %s), retrying in %ss...\n' "$FIRST_EXIT" "$RETRY_DELAY" >&2
+  sleep "$RETRY_DELAY"
+  if run_codex; then
+    OUTPUT=""
+    [[ -s "$OUTFILE" ]] && OUTPUT="$(cat "$OUTFILE")"
+    echo "{\"status\":\"success\",\"output\":$(printf '%s' "$OUTPUT" | jq -Rs .),\"model\":\"$MODEL\"}"
+    exit 0
+  fi
+fi
+
+emit_error "$FIRST_EXIT"

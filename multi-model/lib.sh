@@ -55,3 +55,33 @@ render_template() {
 
   printf '%s\n' "$rendered"
 }
+
+# is_transient_error <stderr_output> <exit_code> [timeout_value]
+# Returns 0 if the error is transient and worth retrying, 1 otherwise.
+# Transient: connection errors, DNS failures, HTTP 502/503/504, short timeouts.
+# NOT transient: auth failures, rate limits, invalid prompts.
+is_transient_error() {
+  local stderr="${1-}"
+  local exit_code="${2-}"
+  local timeout_value="${3-}"
+
+  # Never retry auth/rate-limit errors
+  if printf '%s\n' "$stderr" | grep -qiE '(auth(entication)? (failed|failure)|unauthorized|forbidden|access denied|invalid (api key|token|credentials|prompt)|rate[ -]?limit|too many requests|(^|[^0-9])429([^0-9]|$))'; then
+    return 1
+  fi
+
+  # Timeout: only retry if timeout was short (< 60s)
+  if [[ "$exit_code" == "124" ]]; then
+    if [[ "$timeout_value" =~ ^[0-9]+$ ]] && ((timeout_value < 60)); then
+      return 0
+    fi
+    return 1
+  fi
+
+  # Connection/DNS/HTTP 5xx errors
+  if printf '%s\n' "$stderr" | grep -qiE '(connection refused|connection reset|dns resolution failure|temporary failure in name resolution|name or service not known|could not resolve host|http[^0-9]*(502|503|504)|(^|[^0-9])(502|503|504)([^0-9]|$))'; then
+    return 0
+  fi
+
+  return 1
+}
