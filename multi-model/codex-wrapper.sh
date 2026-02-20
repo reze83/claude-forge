@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ============================================================
-# Codex CLI Wrapper fuer Claude Code (v0.101+)
+# Codex CLI Wrapper fuer Claude Code (v0.104+)
 # Aufgerufen von multi-* Commands via Bash.
 #
 # Usage: codex-wrapper.sh --sandbox <mode> --prompt "<prompt>" [--model <model>]
@@ -96,7 +96,7 @@ if ! command -v codex >/dev/null 2>&1; then
   exit 0
 fi
 
-# --- Sandbox-Modus mappen (Codex CLI v0.101+) ---
+# --- Sandbox-Modus mappen (Codex CLI v0.104+) ---
 case "$SANDBOX" in
   read) SANDBOX_FLAG="read-only" ;;
   write) SANDBOX_FLAG="workspace-write" ;;
