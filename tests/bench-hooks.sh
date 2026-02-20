@@ -22,10 +22,12 @@ bench() {
   local total=0 min=999999 max=0
 
   for ((i = 0; i < ITERATIONS; i++)); do
-    start=$(date +%s%N)
+    start=$(date +%s%3N)
     printf '%s' "$input" | bash "$script" >/dev/null 2>&1 || true
-    end=$(date +%s%N)
-    elapsed=$(((end - start) / 1000000))
+    end=$(date +%s%3N)
+    elapsed=$((end - start))
+    # Guard against clock wrap (negative elapsed)
+    ((elapsed < 0)) && elapsed=0
     total=$((total + elapsed))
     ((elapsed < min)) && min=$elapsed
     ((elapsed > max)) && max=$elapsed
