@@ -1,7 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "respectGitignore": true,
-  "autoUpdatesChannel": "latest",
   "env": {
     "BASH_DEFAULT_TIMEOUT_MS": "120000",
     "BASH_MAX_TIMEOUT_MS": "600000",
@@ -23,7 +22,9 @@
       "Bash(rm *)",
       "Bash(sudo *)",
       "Bash(docker *)",
-      "Bash(docker-compose *)"
+      "Bash(docker-compose *)",
+      "Bash(npm install *)",
+      "Bash(pip install *)"
     ],
     "defaultMode": "bypassPermissions"
   },
@@ -36,7 +37,8 @@
         "github.com",
         "api.github.com",
         "registry.npmjs.org",
-        "pypi.org"
+        "pypi.org",
+        "server.smithery.ai"
       ]
     }
   },
@@ -127,7 +129,6 @@
     ],
     "UserPromptSubmit": [
       {
-        "matcher": "",
         "hooks": [
           {
             "type": "command",
