@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-02-20
+
 ### Added
 
 - .mcp.json: register Sequential Thinking as native Claude Code MCP server (stdio via @modelcontextprotocol/server-sequential-thinking)
