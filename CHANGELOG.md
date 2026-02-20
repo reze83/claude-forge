@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- multi-model: `/multi-test` command — dual-model test generation with Claude review (#117)
+- multi-model: `/multi-refactor` command — Claude plans, Codex transforms per-file (#118)
+- multi-model: `/multi-docs` command — Codex generates docs, Claude verifies accuracy (#119)
+- multi-model: `/multi-debug` command — independent dual-model bug analysis (#120)
 - multi-model: `skills/multi-model-reference/SKILL.md` — passive reference for prompt engineering, output evaluation, split strategies, and sandbox selection (#114)
 - multi-model: retry logic in codex-wrapper.sh — single automatic retry for transient errors (connection, DNS, HTTP 5xx) with `--no-retry` flag (#115)
 - multi-model: `is_transient_error()` function in `lib.sh` for classifying transient vs. permanent Codex failures (#115)

@@ -52,7 +52,7 @@ claude-forge schuetzt Claude Code vor destruktiven Befehlen, Secret-Leaks und un
 - **9 Rules** — Git, Security, Code-Standards, Performance, API-Design, ...
 - **5 Agents** — Research, Test-Runner, Security-Auditor, Dep-Auditor, Profiler
 - **8 Skills** — Code-Review, Explain, Deploy, Project-Init, Test-Gen, Refactor, Performance-Ref, Multi-Model-Ref
-- **9 Commands** — Multi-Model Workflows + Self-Management
+- **13 Commands** — Multi-Model Workflows + Self-Management
 
 </td>
 </tr>
@@ -189,7 +189,7 @@ Alle Hooks nutzen `hooks/lib.sh` mit `block()`, `warn()`, `context()` und 11 sha
 
 ## Multi-Model (Claude + Codex)
 
-Claude orchestriert, Codex implementiert — 5 Workflow-Commands:
+Claude orchestriert, Codex implementiert — 9 Workflow-Commands:
 
 | Command           | Sandbox  | Beschreibung                                                                 |
 | ----------------- | -------- | ---------------------------------------------------------------------------- |
@@ -198,6 +198,10 @@ Claude orchestriert, Codex implementiert — 5 Workflow-Commands:
 | `/multi-execute`  | variabel | Direkte Codex-Delegation mit waehlbarem Sandbox-Modus                        |
 | `/multi-backend`  | read     | Backend/Algorithmen-Task an Codex                                            |
 | `/multi-frontend` | read     | Claude implementiert Frontend, Codex reviewed                                |
+| `/multi-test`     | read     | Dual-Model Test-Generierung                                                  |
+| `/multi-refactor` | write    | Claude plant, Codex transformiert pro Datei                                  |
+| `/multi-docs`     | read     | Codex dokumentiert, Claude prueft Genauigkeit                                |
+| `/multi-debug`    | read     | Unabhaengige Dual-Bug-Analyse                                                |
 
 ```bash
 # Setup
@@ -314,8 +318,13 @@ claude-forge/
 │   └── session-logger.sh           Session-Ende Log-Rotation
 ├── rules/                          → ~/.claude/rules/ (9 Regeln)
 ├── agents/                         → ~/.claude/agents/ (5 Agenten)
+<<<<<<< HEAD
 ├── skills/                         → ~/.claude/skills/ (8 Skills)
 ├── commands/                       → ~/.claude/commands/ (9 Commands)
+=======
+├── skills/                         → ~/.claude/skills/ (7 Skills)
+├── commands/                       → ~/.claude/commands/ (13 Commands)
+>>>>>>> 70446e4 (feat: add /multi-test, /multi-refactor, /multi-docs, /multi-debug commands (#117-#120))
 ├── multi-model/                    → ~/.claude/multi-model/ (Codex CLI Wrapper)
 ├── tests/                          Test-Suite (277 Tests)
 └── docs/                           Architektur + Assets
