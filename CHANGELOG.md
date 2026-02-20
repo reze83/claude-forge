@@ -7,9 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- skills/performance-reference/: new passive skill — extracted DB/Frontend/Backend optimization tips from performance rule (loaded on demand, not on every session)
+
 ### Changed
 
-- rules/smithery.md: replace passive triggers with sequential thinking as decision engine — 4-step evaluation flow that proactively provisions MCP servers before falling back to built-in tools
+- rules/smithery.md: replace passive triggers with sequential thinking as decision engine — 5-step evaluation flow with 30-category decision matrix that proactively provisions MCP servers before falling back to built-in tools
+- rules/security.md: consolidate 5 hook-enforced sections into compact list (58→17 lines)
+- rules/git-workflow.md: generic CI reference, compress hook section (37→27 lines)
+- rules/token-optimization.md: add activation line, add memory trigger (27→22 lines)
+- rules/code-standards.md: remove forge-specific "Gekoppelte Scripts" section (38→28 lines)
+- rules/docs.md: replace forge-specific terms with generic equivalents (35→30 lines)
+- rules/multi-model.md: remove duplicate codex CLI check from conditions (62→53 lines)
+- rules/performance.md: extract passive reference to skill, keep active checks only (42→15 lines)
+- rules/api-design.md: remove obvious REST knowledge (46→38 lines)
 - user-config/CLAUDE.md.example: remove vague principles (SOLID, DRY, YAGNI), add environment context, NEVER/ALWAYS hard rules, expanded post-compact reminders, and categorized imports (always active / code changes / dynamic)
 
 ## [0.5.1] - 2026-02-20
