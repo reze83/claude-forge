@@ -44,8 +44,8 @@ echo "-- Fehlerbehandlung --"
 OUT=$(bash "$WRAPPER" 2>&1) || true
 assert_contains "Fehlender Prompt → error" '"status":"error"' "$OUT"
 
-# Test 2: JSON-Output bei Fehler
-assert_contains "Fehler-Output ist JSON" '"model":"codex"' "$OUT"
+# Test 2: JSON-Output bei Fehler (default model=gpt-5.3-codex)
+assert_contains "Fehler-Output ist JSON mit model" '"model":"gpt-5.3-codex"' "$OUT"
 
 # Test 3: jq verfuegbar
 if command -v jq >/dev/null 2>&1; then
@@ -69,6 +69,14 @@ assert_contains "Timeout zu gross → error" '"status":"error"' "$OUT"
 OUT=$(bash "$WRAPPER" --sandbox read --timeout abc --prompt "test" 2>&1) || true
 assert_contains "Nicht-numerischer Timeout → error" '"status":"error"' "$OUT"
 assert_contains "Nicht-numerischer Timeout → integer msg" 'integer' "$OUT"
+
+# Test: --model Flag aendert model im Output
+OUT=$(bash "$WRAPPER" --model o4-mini 2>&1) || true
+assert_contains "--model setzt model im Output" '"model":"o4-mini"' "$OUT"
+
+# Test: Default model ist gpt-5.3-codex
+OUT=$(bash "$WRAPPER" 2>&1) || true
+assert_contains "Default model ist gpt-5.3-codex" '"model":"gpt-5.3-codex"' "$OUT"
 
 # --- Live-Tests (nur wenn Codex installiert) ---
 echo ""
