@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.4] - 2026-02-20
+
 ### Fixed
 
 - hooks/bash-firewall.sh: interpreter injection patterns now match versioned variants (`python3.12 -c`, `python2.7 -c`, `nodejs -e`, `perl5.36 -e`, `ruby3.2 -e`)
