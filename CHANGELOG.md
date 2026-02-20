@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- rules/smithery.md: clarify only Sequential Thinking is permanently connected — all other MCP servers are temporary per task
+
 ### Fixed
 
 - install.sh: deploy `VERSION` file to `~/.claude/` via `create_link` — fixes `forgeVersion` always showing `"unknown"` in hooks
