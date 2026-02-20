@@ -72,6 +72,20 @@ Add new test cases to `tests/test-hooks.sh` using the `assert_exit` helper:
 assert_exit "Description" <expected_exit_code> "$SCRIPT" '<json_input>'
 ```
 
+## Agent Requirements
+
+Agent files in `agents/*.md` must include YAML frontmatter with these fields:
+
+| Field       | Required | Allowed values                                                                                                                       |
+| ----------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| name        | yes      | any string                                                                                                                           |
+| description | yes      | any string                                                                                                                           |
+| model       | yes      | `sonnet`, `haiku`, `opus`                                                                                                            |
+| maxTurns    | yes      | integer 1-50                                                                                                                         |
+| tools       | yes      | Read, Write, Edit, MultiEdit, Bash, Glob, Grep, WebSearch, WebFetch, Task, NotebookEdit, TodoRead, TodoWrite, LS, or `mcp__*` prefix |
+
+`validate.sh` checks all agent fields automatically.
+
 ## PR Checklist
 
 - [ ] Tests pass (`bash tests/test-hooks.sh && bash validate.sh`)

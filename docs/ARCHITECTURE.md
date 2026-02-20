@@ -295,7 +295,7 @@ validate.sh prueft in 9 Sektionen:
 1. **Dateien & Symlinks** — Verzeichnisse mit Datei-Symlinks pruefung
 2. **JSON-Validitaet** — settings.json.example, hooks.json, plugin.json
 3. **Hook-Scripts** — Ausfuehrbar, Shebang, set -euo pipefail
-4. **Agents** — YAML Frontmatter, Pflichtfelder
+4. **Agents** — YAML Frontmatter, Pflichtfelder, model (sonnet|haiku|opus), maxTurns (1-50), tools (Allowlist + mcp\_\_ Wildcard)
 5. **Skills** — YAML Frontmatter, Pflichtfelder
 6. **Commands** — YAML Frontmatter, Pflichtfelder
 7. **System-Tools** — Pflicht (node, python3, git, jq) + Optional (codex, ruff, shfmt, shellcheck, bats-core, markdownlint-cli2, gitleaks, actionlint)
