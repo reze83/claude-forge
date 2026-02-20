@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.5] - 2026-02-20
+
+### Added
+
+- codex-wrapper.sh: `--model` flag to select OpenAI model (default: `gpt-5.3-codex`)
+- codex-wrapper.sh: reasoning effort set to `xhigh` via `model_reasoning_effort`
+- codex-wrapper.sh: JSON output now includes actual model name instead of hardcoded `"codex"`
+- tests: +2 model flag tests — 269 total
+
 ## [0.5.4] - 2026-02-20
 
 ### Fixed
