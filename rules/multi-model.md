@@ -14,7 +14,19 @@ Schlage dem User proaktiv Codex-Delegation vor, wenn ALLE Bedingungen zutreffen:
 - Parallele Planung: zwei Perspektiven, dann vergleichen (`/multi-plan`)
 - Boilerplate-Generierung und repetitive Patterns
 
-**Formulierung:** "Diese Aufgabe eignet sich fuer Codex-Delegation (`/multi-backend`). Soll ich das delegieren?"
+### Erweiterte Trigger
+
+| User-Intent           | Erkennungssignal                                         | Empfohlener Command |
+| --------------------- | -------------------------------------------------------- | ------------------- |
+| Tests generieren      | "write tests for", "test coverage", Test-Datei erstellen | `/multi-test`       |
+| Code dokumentieren    | "add docstrings", "document", JSDoc/typedoc Erwaehnung   | `/multi-docs`       |
+| Code refactoren       | "refactor", "extract", "rename across", "move to"        | `/multi-refactor`   |
+| Bug debuggen          | Fehlermeldung + "why", "doesn't work", Stacktrace        | `/multi-debug`      |
+| Repetitive Edits      | >3 aehnliche Edits in Folge erkannt                      | `/multi-execute`    |
+| Grosses File reviewen | Datei >200 Zeilen wird reviewed                          | `/multi-backend`    |
+| Migration             | "migrate", "upgrade", "convert from X to Y"              | `/multi-execute`    |
+
+**Formulierung:** "Diese Aufgabe eignet sich fuer Codex-Delegation (`/multi-<command>`). Soll ich das delegieren?"
 
 ## Wann NICHT delegieren
 
@@ -22,6 +34,8 @@ Schlage dem User proaktiv Codex-Delegation vor, wenn ALLE Bedingungen zutreffen:
 - UI/UX-Entscheidungen und Accessibility
 - Tasks die interaktive User-Rueckfragen brauchen
 - Sicherheitskritische Aenderungen ohne anschliessendes Review
+- Einzelne Zeilen fixen, Tippfehler korrigieren
+- Dateien mit sensiblem Inhalt (.env, Credentials)
 
 ## Sandbox-Wahl
 

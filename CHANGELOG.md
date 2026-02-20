@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- rules/multi-model.md: expanded auto-detection trigger table with 7 new patterns for /multi-test, /multi-docs, /multi-refactor, /multi-debug, repetitive edits, large file review, migration (#121)
+- skills: codex-aware sections in code-review, test-gen, refactor — opt-in Codex second opinion after skill completion (#122)
 - multi-model: `render_template()` function in `lib.sh` for {{placeholder}} substitution in prompt templates (#111)
 - multi-model: `--context-file` flag for codex-wrapper.sh to prepend file contents to prompts (#113)
 - multi-model: `--template` flag for codex-wrapper.sh to render prompt templates before sending to Codex (#111)

@@ -55,4 +55,22 @@ Zeige dem User:
 - Angewandte Refactoring-Techniken
 - Testergebnisse
 
+## Codex-Erweiterung (optional)
+
+Wenn Codex CLI installiert ist (`command -v codex`), biete nach dem Refactoring-Plan an:
+
+> Codex ist verfuegbar. Soll Codex die mechanischen Transformationen uebernehmen? (`/multi-refactor` Pattern)
+
+Bei Zustimmung — pro Zieldatei:
+
+```bash
+bash $HOME/.claude/multi-model/codex-wrapper.sh \
+  --sandbox write \
+  --context-file <zieldatei> \
+  --prompt "Refactoring: <konkrete-transformation>. Keine Verhaltensaenderung."
+```
+
+Nur mechanische Transformationen delegieren; Abwaegungen und finale Review bleiben bei Claude.
+Diese Erweiterung ist IMMER opt-in — niemals automatisch.
+
 Antworte auf Deutsch.

@@ -35,4 +35,22 @@ allowed-tools:
 - MEDIUM: Verbesserung empfohlen
 - LOW: Kosmetisch / Nice-to-have
 
+## Codex-Erweiterung (optional)
+
+Wenn Codex CLI installiert ist (`command -v codex`), biete nach Abschluss an:
+
+> Codex ist verfuegbar. Soll ich eine unabhaengige Codex-Review als zweite Meinung einholen? (`/multi-frontend` Pattern)
+
+Bei Zustimmung:
+
+```bash
+bash $HOME/.claude/multi-model/codex-wrapper.sh \
+  --sandbox read \
+  --context-file <review-datei> \
+  --prompt "Fuehre eine unabhaengige Code-Review durch und liste Findings mit Schweregrad."
+```
+
+Danach Claude- und Codex-Findings vergleichen und Unterschiede hervorheben.
+Diese Erweiterung ist IMMER opt-in — niemals automatisch.
+
 Antworte auf Deutsch.
