@@ -12,7 +12,7 @@
 
 <br>
 
-[![Version](https://img.shields.io/badge/version-0.5.5-blue?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.6.0-blue?style=for-the-badge)](CHANGELOG.md)
 [![CI](https://img.shields.io/github/actions/workflow/status/reze83/claude-forge/test.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/reze83/claude-forge/actions)
 [![Tests](https://img.shields.io/badge/tests-276%20passed-brightgreen?style=for-the-badge)](#)
 [![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](LICENSE)
