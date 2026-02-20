@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- validate.sh: agent validation extended with model (sonnet|haiku|opus), maxTurns (1-50), and tools (allowlist + mcp\_\_ wildcard) checks — 3 new checks per agent (15 total for 5 agents)
+
 ## [0.6.2] - 2026-02-20
 
 ### Fixed

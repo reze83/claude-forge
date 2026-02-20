@@ -137,6 +137,7 @@ done
 # --- Agents ---
 echo ""
 echo "-- Agents --"
+ALLOWED_AGENT_TOOLS="Read Write Edit MultiEdit Bash Glob Grep WebSearch WebFetch Task NotebookEdit TodoRead TodoWrite LS"
 for agent in "$REPO_DIR/agents/"*.md; do
   [[ -f "$agent" ]] || continue
   name="$(basename "$agent")"
@@ -146,6 +147,56 @@ for agent in "$REPO_DIR/agents/"*.md; do
     pass "$name hat name: Feld" || fail "$name hat name: Feld"
   grep -q '^description:' "$agent" 2>/dev/null &&
     pass "$name hat description: Feld" || fail "$name hat description: Feld"
+
+  # model check
+  agent_model="$(grep '^model:' "$agent" 2>/dev/null | head -1 | sed 's/^model:[[:space:]]*//')"
+  if [[ -z "$agent_model" ]]; then
+    fail "$name hat kein model: Feld"
+  elif printf '%s' "$agent_model" | grep -qE '^(sonnet|haiku|opus)$'; then
+    pass "$name model=$agent_model"
+  else
+    fail "$name model=$agent_model (erlaubt: sonnet|haiku|opus)"
+  fi
+
+  # maxTurns check
+  agent_turns="$(grep '^maxTurns:' "$agent" 2>/dev/null | head -1 | sed 's/^maxTurns:[[:space:]]*//')"
+  if [[ -z "$agent_turns" ]]; then
+    fail "$name hat kein maxTurns: Feld"
+  elif printf '%s' "$agent_turns" | grep -qE '^[0-9]+$' && [[ "$agent_turns" -ge 1 && "$agent_turns" -le 50 ]]; then
+    pass "$name maxTurns=$agent_turns"
+  else
+    fail "$name maxTurns=$agent_turns (erlaubt: 1-50)"
+  fi
+
+  # tools check
+  tools_found=0
+  tools_invalid=0
+  while IFS= read -r tool; do
+    tool="$(printf '%s' "$tool" | sed 's/^[[:space:]]*-[[:space:]]*//' | sed 's/[[:space:]]*$//')"
+    [[ -z "$tool" ]] && continue
+    tools_found=$((tools_found + 1))
+    # Allow mcp__ prefixed tools
+    if printf '%s' "$tool" | grep -qE '^mcp__'; then
+      continue
+    fi
+    # Check against allowlist
+    tool_ok=0
+    for allowed in $ALLOWED_AGENT_TOOLS; do
+      if [[ "$tool" == "$allowed" ]]; then
+        tool_ok=1
+        break
+      fi
+    done
+    if [[ $tool_ok -eq 0 ]]; then
+      fail "$name unbekanntes Tool: $tool"
+      tools_invalid=$((tools_invalid + 1))
+    fi
+  done < <(awk '/^tools:/{found=1; next} found && /^[[:space:]]*-/{print; next} found{exit}' "$agent")
+  if [[ $tools_found -eq 0 ]]; then
+    warning "$name hat keine tools definiert"
+  elif [[ $tools_invalid -eq 0 ]]; then
+    pass "$name tools ($tools_found gueltig)"
+  fi
 done
 
 # --- Skills ---
