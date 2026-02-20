@@ -9,12 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- multi-model: `skills/multi-model-reference/SKILL.md` — passive reference for prompt engineering, output evaluation, split strategies, and sandbox selection (#114)
+- multi-model: retry logic in codex-wrapper.sh — single automatic retry for transient errors (connection, DNS, HTTP 5xx) with `--no-retry` flag (#115)
+- multi-model: `is_transient_error()` function in `lib.sh` for classifying transient vs. permanent Codex failures (#115)
 - multi-model: `render_template()` function in `lib.sh` for {{placeholder}} substitution in prompt templates (#111)
 - multi-model: `--context-file` flag for codex-wrapper.sh to prepend file contents to prompts (#113)
 - multi-model: `--template` flag for codex-wrapper.sh to render prompt templates before sending to Codex (#111)
 
 ### Changed
 
+- rules/multi-model.md: add passive reference link to multi-model-reference skill (#114)
 - multi-model: downgrade model from opus to sonnet for /multi-plan, /multi-backend, /multi-execute (#112)
 
 ### Fixed

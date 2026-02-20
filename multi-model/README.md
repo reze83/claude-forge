@@ -39,14 +39,15 @@ Claude Code (Orchestrator)
 
 ### Flags
 
-| Flag           | Default    | Beschreibung                                    |
-| -------------- | ---------- | ----------------------------------------------- |
-| --sandbox      | write      | Sandbox-Modus (read/write/full)                 |
-| --prompt       | (required) | Aufgabe fuer Codex                              |
-| --workdir      | $(pwd)     | Arbeitsverzeichnis                              |
-| --timeout      | 240        | Timeout in Sekunden (30-600)                    |
-| --context-file | -          | Datei-Inhalt an Prompt prependen (wiederholbar) |
-| --template     | -          | Template-Datei rendern statt rohes --prompt     |
+| Flag           | Default    | Beschreibung                                     |
+| -------------- | ---------- | ------------------------------------------------ |
+| --sandbox      | write      | Sandbox-Modus (read/write/full)                  |
+| --prompt       | (required) | Aufgabe fuer Codex                               |
+| --workdir      | $(pwd)     | Arbeitsverzeichnis                               |
+| --timeout      | 240        | Timeout in Sekunden (30-600)                     |
+| --context-file | -          | Datei-Inhalt an Prompt prependen (wiederholbar)  |
+| --template     | -          | Template-Datei rendern statt rohes --prompt      |
+| --no-retry     | -          | Kein automatischer Retry bei transienten Fehlern |
 
 ### --context-file
 

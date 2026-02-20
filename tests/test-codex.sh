@@ -148,6 +148,80 @@ fi
 OUT=$(bash "$WRAPPER" --template /nonexistent/template.md --prompt "test" 2>&1) || true
 assert_contains "--template fehlende Datei → error" 'Template not found' "$OUT"
 
+# --- is_transient_error Tests ---
+echo ""
+echo "-- is_transient_error --"
+
+# Transient: connection refused
+if is_transient_error "connection refused" 1 240; then
+  printf '  %b[PASS]%b connection refused → transient\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b connection refused → transient\n' "$RED" "$NC"
+  FAIL=$((FAIL + 1))
+fi
+
+# Transient: DNS failure
+if is_transient_error "Temporary failure in name resolution" 1 240; then
+  printf '  %b[PASS]%b DNS failure → transient\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b DNS failure → transient\n' "$RED" "$NC"
+  FAIL=$((FAIL + 1))
+fi
+
+# Transient: HTTP 502
+if is_transient_error "HTTP 502 Bad Gateway" 1 240; then
+  printf '  %b[PASS]%b HTTP 502 → transient\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b HTTP 502 → transient\n' "$RED" "$NC"
+  FAIL=$((FAIL + 1))
+fi
+
+# NOT transient: auth failure
+if is_transient_error "authentication failed" 1 240; then
+  printf '  %b[FAIL]%b auth failure → NOT transient\n' "$RED" "$NC"
+  FAIL=$((FAIL + 1))
+else
+  printf '  %b[PASS]%b auth failure → NOT transient\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+fi
+
+# NOT transient: rate limit
+if is_transient_error "429 too many requests" 1 240; then
+  printf '  %b[FAIL]%b rate limit → NOT transient\n' "$RED" "$NC"
+  FAIL=$((FAIL + 1))
+else
+  printf '  %b[PASS]%b rate limit → NOT transient\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+fi
+
+# Timeout short (< 60s) → transient
+if is_transient_error "" 124 30; then
+  printf '  %b[PASS]%b timeout < 60s → transient\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b timeout < 60s → transient\n' "$RED" "$NC"
+  FAIL=$((FAIL + 1))
+fi
+
+# Timeout long (>= 60s) → NOT transient
+if is_transient_error "" 124 240; then
+  printf '  %b[FAIL]%b timeout >= 60s → NOT transient\n' "$RED" "$NC"
+  FAIL=$((FAIL + 1))
+else
+  printf '  %b[PASS]%b timeout >= 60s → NOT transient\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+fi
+
+# --no-retry flag test
+echo ""
+echo "-- --no-retry --"
+
+OUT=$(bash "$WRAPPER" --no-retry 2>&1) || true
+assert_contains "--no-retry ohne --prompt → error (flag akzeptiert)" '"status":"error"' "$OUT"
+
 # --- Live-Tests (nur wenn Codex installiert) ---
 echo ""
 echo "-- Live-Tests --"

@@ -46,6 +46,11 @@ Schlage dem User proaktiv Codex-Delegation vor, wenn ALLE Bedingungen zutreffen:
 | `/multi-backend`  | Backend/Algo-Task                    | read     |
 | `/multi-frontend` | Claude implementiert, Codex reviewed | read     |
 
+## Passive Referenz
+
+Detail-Empfehlungen fuer Prompt-Qualitaet, Output-Bewertung und Split-Strategien:
+siehe `~/.claude/skills/multi-model-reference/SKILL.md`
+
 ## Fehlerbehandlung
 
 - Codex-Output ist JSON: `{"status":"success|error","output":"...","model":"codex"}`
