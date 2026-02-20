@@ -119,6 +119,13 @@ jq empty "$REPO_DIR/hooks/hooks.json" 2>/dev/null &&
   pass "hooks.json valides JSON" || fail "hooks.json valides JSON"
 jq empty "$REPO_DIR/.claude-plugin/plugin.json" 2>/dev/null &&
   pass "plugin.json valides JSON" || fail "plugin.json valides JSON"
+PLUGIN_VER="$(jq -r '.version' "$REPO_DIR/.claude-plugin/plugin.json" 2>/dev/null)"
+REPO_VER="$(tr -d '[:space:]' <"$REPO_DIR/VERSION")"
+if [[ "$PLUGIN_VER" == "$REPO_VER" ]]; then
+  pass "plugin.json version == VERSION ($REPO_VER)"
+else
+  fail "plugin.json version ($PLUGIN_VER) != VERSION ($REPO_VER)"
+fi
 
 # --- Hook-Scripts ---
 echo ""

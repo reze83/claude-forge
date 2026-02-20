@@ -7,9 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- plugin.json: version synced to 0.6.2 (was stale at 0.5.0)
+
 ### Added
 
 - validate.sh: agent validation extended with model (sonnet|haiku|opus), maxTurns (1-50), and tools (allowlist + mcp\_\_ wildcard) checks — 3 new checks per agent (15 total for 5 agents)
+- tests/test-plugin.sh: 9 plugin-mode E2E tests (JSON validity, name, description, no hooks field, version sync, directories, CLAUDE_PLUGIN_ROOT usage)
+- validate.sh: plugin.json version == VERSION sync check
+- test.yml: "Run plugin tests" CI step
 
 ## [0.6.2] - 2026-02-20
 
