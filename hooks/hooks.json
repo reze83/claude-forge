@@ -42,6 +42,7 @@
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/pre-write-backup.sh",
             "timeout": 10,
+            "async": true,
             "statusMessage": "Creating backup..."
           }
         ]
