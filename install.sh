@@ -593,6 +593,9 @@ else
   log_dry "Wuerde Repo-Marker schreiben: $CLAUDE_DIR/.forge-repo"
 fi
 
+# --- VERSION ---
+create_link "$REPO_DIR/VERSION" "$CLAUDE_DIR/VERSION"
+
 # --- Validierung ---
 echo ""
 if ! $DRY_RUN; then
