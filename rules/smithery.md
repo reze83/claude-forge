@@ -7,29 +7,40 @@
 1. **Task analysieren:** Was ist das Ziel? Welche Faehigkeiten braucht es?
 2. **Gegen Entscheidungsmatrix pruefen** — faellt der Task in eine dieser Kategorien?
 
-   | Task-Kontext                                                                 | Suchbegriff                 |
-   | ---------------------------------------------------------------------------- | --------------------------- |
-   | Spezialisierte Sprachen (PowerShell, Terraform, Kotlin, Swift, Ruby, Lua, R) | `"<sprache>"`               |
-   | Container / Orchestrierung                                                   | `"docker"`, `"kubernetes"`  |
-   | IaC (Terraform, Pulumi, CloudFormation)                                      | `"infrastructure"`          |
-   | CI/CD (Jenkins, GitLab CI, GitHub Actions)                                   | `"<tool-name>"`             |
-   | Datenbank-Operationen (SQL, NoSQL, Graph)                                    | `"database"`                |
-   | Externe APIs / SaaS-Services                                                 | `"<service-name>"`          |
-   | Datenkonvertierung (PDF, CSV, XML)                                           | `"<format> convert"`        |
-   | Code-Analyse / Security-Audit                                                | `"code analysis"`           |
-   | Performance-Profiling                                                        | `"profiling"`               |
-   | Kommunikation (Slack, Discord, Teams)                                        | `"<platform>"`              |
-   | Projektmanagement (Jira, Linear, Notion)                                     | `"<tool-name>"`             |
-   | Cloud-spezifisch (AWS, GCP, Azure)                                           | `"<cloud-provider>"`        |
-   | Monitoring / Logs / Alerting                                                 | `"monitoring"`              |
-   | Web-Recherche / Scraping                                                     | `"web search"`, `"scraper"` |
-   | Akademische Papers (arXiv, Scholar, PubMed)                                  | `"arxiv"`, `"paper search"` |
-   | DevTools / Browser-Automation (Playwright, Puppeteer)                        | `"browser"`, `"devtools"`   |
-   | DNS / CDN / Domain-Verwaltung                                                | `"dns"`, `"domain"`         |
-   | E-Mail (SMTP, IMAP, Transactional)                                           | `"email"`                   |
-   | Dokumentation externer Projekte                                              | `"documentation"`           |
+   | Task-Kontext                                                                 | Suchbegriff                   |
+   | ---------------------------------------------------------------------------- | ----------------------------- |
+   | Spezialisierte Sprachen (PowerShell, Terraform, Kotlin, Swift, Ruby, Lua, R) | `"<sprache>"`                 |
+   | Container / Orchestrierung                                                   | `"docker"`, `"kubernetes"`    |
+   | IaC (Terraform, Pulumi, CloudFormation)                                      | `"infrastructure"`            |
+   | CI/CD (Jenkins, GitLab CI, GitHub Actions)                                   | `"<tool-name>"`               |
+   | Datenbank-Operationen (SQL, NoSQL, Graph)                                    | `"database"`                  |
+   | Externe APIs / SaaS-Services                                                 | `"<service-name>"`            |
+   | Datenkonvertierung (PDF, CSV, XML)                                           | `"<format> convert"`          |
+   | Code-Analyse / Security-Audit                                                | `"code analysis"`             |
+   | Performance-Profiling                                                        | `"profiling"`                 |
+   | Kommunikation (Slack, Discord, Teams)                                        | `"<platform>"`                |
+   | Projektmanagement (Jira, Linear, Notion)                                     | `"<tool-name>"`               |
+   | Cloud-spezifisch (AWS, GCP, Azure)                                           | `"<cloud-provider>"`          |
+   | Monitoring / Logs / Alerting                                                 | `"monitoring"`                |
+   | Web-Recherche / Scraping                                                     | `"web search"`, `"scraper"`   |
+   | Akademische Papers (arXiv, Scholar, PubMed)                                  | `"arxiv"`, `"paper search"`   |
+   | DevTools / Browser-Automation (Playwright, Puppeteer)                        | `"browser"`, `"devtools"`     |
+   | DNS / CDN / Domain-Verwaltung                                                | `"dns"`, `"domain"`           |
+   | E-Mail (SMTP, IMAP, Transactional)                                           | `"email"`                     |
+   | Dokumentation externer Projekte                                              | `"documentation"`             |
+   | Tabellenkalkulation (Google Sheets, Excel)                                   | `"spreadsheet"`, `"excel"`    |
+   | Cloud Storage (Google Drive, OneDrive, Dropbox, S3)                          | `"cloud storage"`, `"drive"`  |
+   | Kalender / Scheduling (Google Calendar, Calendly)                            | `"calendar"`, `"scheduling"`  |
+   | Geospatial / Karten / GIS (Google Maps, Mapbox)                              | `"maps"`, `"gis"`             |
+   | Design-Tools / Whiteboard (Figma, Miro, Excalidraw)                          | `"figma"`, `"design"`         |
+   | CRM / Marketing / Analytics (Salesforce, HubSpot, PostHog)                   | `"crm"`, `"analytics"`        |
+   | Finance / Payment / E-Commerce (Stripe, Shopify, PayPal)                     | `"payment"`, `"e-commerce"`   |
+   | Social Media (Twitter/X, LinkedIn, Reddit)                                   | `"social media"`, `"twitter"` |
+   | Bild- / Medienverarbeitung (OCR, Image Gen)                                  | `"image"`, `"ocr"`            |
+   | Wissensmanagement / Memory / RAG                                             | `"memory"`, `"knowledge"`     |
+   | IoT / Home Automation (Home Assistant)                                       | `"iot"`, `"home automation"`  |
 
-   **Faustregel:** Wenn ein spezialisiertes Tool bessere Ergebnisse liefern wuerde als Bash + WebSearch, ZUERST smithery durchsuchen.
+   **Faustregel:** Die Matrix ist ein Trigger — sequential thinking entscheidet zur Laufzeit ob ein bereits verbundener Server reicht oder ein neuer gesucht werden muss.
 
 3. **Verbundene Server pruefen:** Deckt ein bereits verbundener Server den Bedarf?
    - Server-IDs: im Context unter `smithery_ids`
