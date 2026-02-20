@@ -45,6 +45,10 @@ Schlage dem User proaktiv Codex-Delegation vor, wenn ALLE Bedingungen zutreffen:
 | `/multi-execute`  | Direkte Delegation (Modus waehlbar)  | variabel |
 | `/multi-backend`  | Backend/Algo-Task                    | read     |
 | `/multi-frontend` | Claude implementiert, Codex reviewed | read     |
+| `/multi-test`     | Dual-Model Test-Generierung          | read     |
+| `/multi-refactor` | Claude plant, Codex transformiert    | write    |
+| `/multi-docs`     | Codex dokumentiert, Claude prueft    | read     |
+| `/multi-debug`    | Unabhaengige Dual-Analyse            | read     |
 
 ## Fehlerbehandlung
 

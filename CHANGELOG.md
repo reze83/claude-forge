@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- multi-model: `/multi-test` command — dual-model test generation with Claude review (#117)
+- multi-model: `/multi-refactor` command — Claude plans, Codex transforms per-file (#118)
+- multi-model: `/multi-docs` command — Codex generates docs, Claude verifies accuracy (#119)
+- multi-model: `/multi-debug` command — independent dual-model bug analysis (#120)
 - multi-model: `render_template()` function in `lib.sh` for {{placeholder}} substitution in prompt templates (#111)
 - multi-model: `--context-file` flag for codex-wrapper.sh to prepend file contents to prompts (#113)
 - multi-model: `--template` flag for codex-wrapper.sh to render prompt templates before sending to Codex (#111)

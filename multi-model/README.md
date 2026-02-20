@@ -19,13 +19,17 @@ Claude Code (Orchestrator)
 
 ## Commands
 
-| Command         | Sandbox  | Beschreibung                 |
-| --------------- | -------- | ---------------------------- |
-| /multi-workflow | write    | Voller 6-Phasen Workflow     |
-| /multi-plan     | read     | Parallele Planung, Vergleich |
-| /multi-execute  | variabel | Direkte Codex-Delegation     |
-| /multi-backend  | read     | Backend/Algo-Task            |
-| /multi-frontend | write    | Frontend (Claude-led)        |
+| Command         | Sandbox  | Beschreibung                      |
+| --------------- | -------- | --------------------------------- |
+| /multi-workflow | write    | Voller 6-Phasen Workflow          |
+| /multi-plan     | read     | Parallele Planung, Vergleich      |
+| /multi-execute  | variabel | Direkte Codex-Delegation          |
+| /multi-backend  | read     | Backend/Algo-Task                 |
+| /multi-frontend | write    | Frontend (Claude-led)             |
+| /multi-test     | read     | Dual-Model Test-Generierung       |
+| /multi-refactor | write    | Claude plant, Codex refactort     |
+| /multi-docs     | read     | Codex dokumentiert, Claude prueft |
+| /multi-debug    | read     | Unabhaengige Dual-Bug-Analyse     |
 
 ## Sandbox-Modi (Codex CLI v0.101+)
 
