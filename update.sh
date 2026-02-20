@@ -93,6 +93,11 @@ else
   STASHED=false
 fi
 
+# --- ERR-Trap: restore stash on failure ---
+if $STASHED; then
+  trap 'echo -e "${RED}[ERR]${NC} Update fehlgeschlagen. Stash wiederherstellen..."; git stash pop 2>/dev/null || true; exit 1' ERR
+fi
+
 # --- Pull ---
 echo ""
 echo "-- Update --"
@@ -100,7 +105,8 @@ git pull --ff-only origin "$CURRENT_BRANCH" || {
   echo -e "${RED}[ERR]${NC} Fast-forward merge nicht moeglich. Manuell mergen:"
   echo "  git pull origin $CURRENT_BRANCH"
   if $STASHED; then
-    git stash pop
+    trap - ERR
+    git stash pop 2>/dev/null || true
   fi
   exit 1
 }
@@ -114,6 +120,9 @@ echo ""
 echo "-- Installation aktualisieren --"
 bash "$REPO_DIR/install.sh"
 
+# --- Disable ERR trap before stash restore ---
+trap - ERR
+
 # --- Stash wiederherstellen ---
 if $STASHED; then
   echo ""
@@ -121,10 +130,9 @@ if $STASHED; then
   if git stash pop; then
     echo -e "  ${GREEN}[OK]${NC} Stash wiederhergestellt."
   else
-    echo -e "${YELLOW}[INFO]${NC} Stash-Konflikte — uebernehme Remote-Version."
-    git checkout -- . 2>/dev/null
-    git stash drop 2>/dev/null || true
-    echo -e "  ${GREEN}[OK]${NC} Konflikte aufgeloest (Remote-Version uebernommen)."
+    echo -e "${RED}[ERR]${NC} Stash-Konflikte erkannt. Aenderungen bleiben im Stash."
+    echo -e "${YELLOW}[INFO]${NC} Manuell loesen mit: git stash pop"
+    exit 1
   fi
 fi
 

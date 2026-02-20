@@ -52,9 +52,9 @@ echo ""
 # --- --help ---
 echo "-- update.sh --help --"
 HELP_OUT=$(bash "$UPDATE" --help 2>&1)
-assert_contains "--help zeigt Usage"     "Usage:" "$HELP_OUT"
-assert_contains "--help zeigt --check"   "check" "$HELP_OUT"
-assert_exit_code "--help exit 0"         0 "bash '$UPDATE' --help"
+assert_contains "--help zeigt Usage" "Usage:" "$HELP_OUT"
+assert_contains "--help zeigt --check" "check" "$HELP_OUT"
+assert_exit_code "--help exit 0" 0 "bash '$UPDATE' --help"
 
 echo ""
 
