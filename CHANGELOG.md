@@ -9,7 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- hooks/lib.sh: new shared functions `notify()`, `log_event()` — reduces duplication across stop.sh, session-logger.sh, session-start.sh, subagent-start.sh, subagent-stop.sh
+- validate.sh: agents/ and skills/ hardlink validation, hook↔hooks.json cross-reference check
+- tests: teammate-gate dirty-tree exit-2 (+2), pre-write-backup .bak creation (+2), url-allowlist IPv6 (+4) — 240 total (+8)
+- skills: `allowed-tools` for code-review (Read/Glob/Grep), explain-code (Read/Glob/Grep), deploy (Read/Glob/Grep/Bash)
 - skills/performance-reference/: new passive skill — extracted DB/Frontend/Backend optimization tips from performance rule (loaded on demand, not on every session)
+
+### Changed
+
+- hooks: stop.sh, session-logger.sh, session-start.sh, subagent-start.sh, subagent-stop.sh refactored to use shared `notify()` and `log_event()` from lib.sh
 
 ### Fixed
 

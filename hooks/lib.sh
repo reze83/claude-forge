@@ -116,6 +116,44 @@ if [[ -f "$_local_patterns_file" ]]; then
 fi
 unset _local_patterns_file
 
+# --- Desktop Notification (WSL2 / Linux) ---
+# Sends a Windows Toast notification (WSL2) or notify-send (Linux).
+# Usage: notify "Message text"
+notify() {
+  local message="$1"
+  if command -v powershell.exe >/dev/null 2>&1; then
+    powershell.exe -Command "
+      [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
+      \$xml = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent(0)
+      \$xml.GetElementsByTagName('text')[0].AppendChild(\$xml.CreateTextNode('$message')) | Out-Null
+      [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('Claude Code').Show([Windows.UI.Notifications.ToastNotification]::new(\$xml))
+    " 2>/dev/null || true
+  elif command -v notify-send >/dev/null 2>&1; then
+    notify-send "Claude Code" "$message" 2>/dev/null || true
+  fi
+}
+
+# --- Event Logger ---
+# Appends a timestamped log entry to a file. Creates parent dirs if needed.
+# Usage: log_event "/path/to/logfile" "message"
+log_event() {
+  local log_file="$1" message="$2"
+  local timestamp
+  timestamp="$(date -Iseconds 2>/dev/null || date)"
+  mkdir -p "$(dirname "$log_file")" 2>/dev/null || true
+  printf '%s %s\n' "$timestamp" "$message" >>"$log_file" 2>/dev/null || true
+}
+
+# --- Input Parser ---
+# Reads hook JSON input from stdin and sets global variables.
+# Sets: HOOK_INPUT, HOOK_TOOL_NAME, HOOK_FILE_PATH
+# Usage: parse_input (call once at top of hook script)
+parse_input() {
+  HOOK_INPUT=$(cat 2>/dev/null || true)
+  HOOK_TOOL_NAME=$(printf '%s' "$HOOK_INPUT" | jq -r '.tool_name // ""' 2>/dev/null) || HOOK_TOOL_NAME=""
+  HOOK_FILE_PATH=$(printf '%s' "$HOOK_INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""' 2>/dev/null) || HOOK_FILE_PATH=""
+}
+
 # --- Constants ---
 readonly MAX_CONTENT_SIZE=1048576 # 1MB limit for secret scanning
 

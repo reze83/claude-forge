@@ -783,6 +783,107 @@ unset _METRICS_HOME METRIC_OUT
 
 echo ""
 
+# --- teammate-gate.sh: exit 2 on dirty git tree ---
+echo "-- teammate-gate.sh: dirty tree blocks --"
+TMG="$HOOKS_DIR/teammate-gate.sh"
+
+# Create temp git repo with dirty working tree
+_TMG_REPO="$TMPDIR_TEST/tmg-repo"
+mkdir -p "$_TMG_REPO"
+git -C "$_TMG_REPO" init -q 2>/dev/null
+git -C "$_TMG_REPO" config user.email "test@test" 2>/dev/null
+git -C "$_TMG_REPO" config user.name "test" 2>/dev/null
+printf 'initial\n' >"$_TMG_REPO/file.txt"
+git -C "$_TMG_REPO" add file.txt 2>/dev/null
+git -C "$_TMG_REPO" commit -q -m "init" 2>/dev/null
+# Dirty the working tree
+printf 'modified\n' >"$_TMG_REPO/file.txt"
+
+# With gate enabled + dirty tree → exit 2
+_TMG_EXIT=0
+echo '{"teammate_name":"alice","team_name":"core"}' |
+  CLAUDE_FORGE_TEAMMATE_GATE=1 bash -c "cd '$_TMG_REPO' && bash '$TMG'" >/dev/null 2>/dev/null || _TMG_EXIT=$?
+if [[ "$_TMG_EXIT" -eq 2 ]]; then
+  printf '  %b[PASS]%b teammate-gate: exit 2 on dirty tree\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b teammate-gate: expected exit 2, got %s\n' "$RED" "$NC" "$_TMG_EXIT"
+  FAIL=$((FAIL + 1))
+fi
+
+# With gate enabled + clean tree → exit 0
+git -C "$_TMG_REPO" checkout -- file.txt 2>/dev/null
+_TMG_EXIT=0
+echo '{"teammate_name":"alice","team_name":"core"}' |
+  CLAUDE_FORGE_TEAMMATE_GATE=1 bash -c "cd '$_TMG_REPO' && bash '$TMG'" >/dev/null 2>/dev/null || _TMG_EXIT=$?
+if [[ "$_TMG_EXIT" -eq 0 ]]; then
+  printf '  %b[PASS]%b teammate-gate: exit 0 on clean tree\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b teammate-gate: expected exit 0, got %s\n' "$RED" "$NC" "$_TMG_EXIT"
+  FAIL=$((FAIL + 1))
+fi
+unset _TMG_REPO _TMG_EXIT
+
+echo ""
+
+# --- pre-write-backup.sh: actual .bak creation ---
+echo "-- pre-write-backup.sh: .bak creation --"
+PWB="$HOOKS_DIR/pre-write-backup.sh"
+
+# Hook skips /tmp/* paths, so use /var/tmp/ for this test
+_BAK_DIR="/var/tmp/forge-bak-test-$$"
+mkdir -p "$_BAK_DIR"
+printf 'original content\n' >"$_BAK_DIR/target.txt"
+
+echo '{"tool_name":"Write","tool_input":{"file_path":"'"$_BAK_DIR/target.txt"'","content":"new content"}}' |
+  CLAUDE_FORGE_BACKUP=1 bash "$PWB" >/dev/null 2>/dev/null
+if [[ -f "$_BAK_DIR/target.txt.bak" ]]; then
+  _BAK_CONTENT=$(cat "$_BAK_DIR/target.txt.bak" 2>/dev/null)
+  if [[ "$_BAK_CONTENT" == "original content" ]]; then
+    printf '  %b[PASS]%b pre-write-backup: .bak file created with correct content\n' "$GREEN" "$NC"
+    PASS=$((PASS + 1))
+  else
+    printf '  %b[FAIL]%b pre-write-backup: .bak has wrong content: %s\n' "$RED" "$NC" "$_BAK_CONTENT"
+    FAIL=$((FAIL + 1))
+  fi
+else
+  printf '  %b[FAIL]%b pre-write-backup: .bak file not created\n' "$RED" "$NC"
+  FAIL=$((FAIL + 1))
+fi
+
+# Edit tool also creates backup
+rm -f "$_BAK_DIR/target.txt.bak"
+echo '{"tool_name":"Edit","tool_input":{"file_path":"'"$_BAK_DIR/target.txt"'","old_string":"original","new_string":"edited"}}' |
+  CLAUDE_FORGE_BACKUP=1 bash "$PWB" >/dev/null 2>/dev/null
+if [[ -f "$_BAK_DIR/target.txt.bak" ]]; then
+  printf '  %b[PASS]%b pre-write-backup: .bak created for Edit tool\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b pre-write-backup: .bak not created for Edit tool\n' "$RED" "$NC"
+  FAIL=$((FAIL + 1))
+fi
+rm -rf "$_BAK_DIR"
+unset _BAK_DIR _BAK_CONTENT
+
+echo ""
+
+# --- url-allowlist.sh: IPv6 addresses ---
+echo "-- url-allowlist.sh: IPv6 --"
+UA="$HOOKS_DIR/url-allowlist.sh"
+
+# IPv6 loopback ::1
+assert_exit "Blocks http://[::1]/" 0 "$UA" '{"tool_name":"WebFetch","tool_input":{"url":"http://[::1]/"}}'
+assert_exit "Blocks http://[::1]:8080/" 0 "$UA" '{"tool_name":"WebFetch","tool_input":{"url":"http://[::1]:8080/api"}}'
+
+# IPv6 unspecified ::
+assert_exit "Blocks http://[::]/" 0 "$UA" '{"tool_name":"WebFetch","tool_input":{"url":"http://[::]/"}}'
+
+# IPv6 link-local fe80::
+assert_exit "Blocks http://[fe80::1]/" 0 "$UA" '{"tool_name":"WebFetch","tool_input":{"url":"http://[fe80::1]/admin"}}'
+
+echo ""
+
 # --- Ergebnis ---
 echo "================================="
 printf 'Tests: %d | %b%d passed%b | %b%d failed%b\n' $((PASS + FAIL)) "$GREEN" "$PASS" "$NC" "$RED" "$FAIL" "$NC"

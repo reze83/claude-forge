@@ -4,7 +4,13 @@ description: "Verwende diesen Skill wenn der User ein Deployment durchfuehren od
 version: "1.0.0"
 user-invocable: true
 disable-model-invocation: true
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - Bash
 ---
+
 # Deploy
 
 Deploy $ARGUMENTS:
@@ -23,6 +29,7 @@ Deploy $ARGUMENTS:
 ## Unterstuetzte Targets
 
 Erkenne automatisch anhand vorhandener Config-Dateien:
+
 - `vercel.json` / `.vercel/` → `vercel --prod`
 - `netlify.toml` → `netlify deploy --prod`
 - `Dockerfile` → Docker build + push
