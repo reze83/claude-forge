@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - tests/test-plugin.sh: 9 plugin-mode E2E tests (JSON validity, name, description, no hooks field, version sync, directories, CLAUDE_PLUGIN_ROOT usage)
 - validate.sh: plugin.json version == VERSION sync check
 - test.yml: "Run plugin tests" CI step
+- test.yml: "Check changelog updated" CI step — warns (non-blocking) when code PRs lack CHANGELOG.md update
 
 ## [0.6.2] - 2026-02-20
 
