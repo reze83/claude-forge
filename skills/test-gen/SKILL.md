@@ -50,4 +50,22 @@ Zeige dem User:
 - Abgedeckte Szenarien (Happy Path, Error Cases, Edge Cases)
 - Empfehlung fuer weitere Tests (falls Luecken erkannt)
 
+## Codex-Erweiterung (optional)
+
+Wenn Codex CLI installiert ist (`command -v codex`), biete nach Abschluss an:
+
+> Codex ist verfuegbar. Soll Codex zusaetzliche Tests aus einer anderen Perspektive generieren? (`/multi-test` Pattern)
+
+Bei Zustimmung:
+
+```bash
+bash $HOME/.claude/multi-model/codex-wrapper.sh \
+  --sandbox read \
+  --context-file <quelldatei> \
+  --prompt "Generiere zusaetzliche Tests aus einer anderen Perspektive. Framework: <framework>."
+```
+
+Nur einzigartige, nicht-duplizierte Testfaelle uebernehmen und mit bestehenden Tests zusammenfuehren.
+Diese Erweiterung ist IMMER opt-in — niemals automatisch.
+
 Antworte auf Deutsch.

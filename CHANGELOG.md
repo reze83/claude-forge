@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- rules/multi-model.md: expanded auto-detection trigger table with 7 new patterns for /multi-test, /multi-docs, /multi-refactor, /multi-debug, repetitive edits, large file review, migration (#121)
+- skills: codex-aware sections in code-review, test-gen, refactor — opt-in Codex second opinion after skill completion (#122)
 - multi-model: `/multi-test` command — dual-model test generation with Claude review (#117)
 - multi-model: `/multi-refactor` command — Claude plans, Codex transforms per-file (#118)
 - multi-model: `/multi-docs` command — Codex generates docs, Claude verifies accuracy (#119)
