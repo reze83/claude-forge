@@ -123,6 +123,22 @@ HOME="$SYNC_HOME" bash "$SCRIPT_DIR/install.sh" >/dev/null 2>&1 || true
 assert "Empty settings.json -> hooks added" "jq -e '.hooks' '$SYNC_HOME/.claude/settings.json' >/dev/null 2>&1"
 rm -rf "$SYNC_HOME"
 
+# Array merge — template entries must survive user overrides
+SYNC_HOME=$(mktemp -d /tmp/claude-test-sync-XXXXXX)
+mkdir -p "$SYNC_HOME/.claude"
+cat >"$SYNC_HOME/.claude/settings.json" <<'USERJSON'
+{"permissions":{"ask":["Bash(git push *)","Bash(docker *)","Bash(my-custom *)"],"deny":["Bash(curl *)"]},
+ "sandbox":{"network":{"allowedDomains":["api.anthropic.com","pypi.org","my-extra.example.com"]}},
+ "customField":"keep-me"}
+USERJSON
+HOME="$SYNC_HOME" bash "$SCRIPT_DIR/install.sh" >/dev/null 2>&1 || true
+assert "Array merge -> template ask entries present" "jq -e '.permissions.ask | index(\"Bash(npm install *)\")' '$SYNC_HOME/.claude/settings.json' >/dev/null 2>&1"
+assert "Array merge -> user ask entries preserved" "jq -e '.permissions.ask | index(\"Bash(my-custom *)\")' '$SYNC_HOME/.claude/settings.json' >/dev/null 2>&1"
+assert "Array merge -> template domain present" "jq -e '.sandbox.network.allowedDomains | index(\"server.smithery.ai\")' '$SYNC_HOME/.claude/settings.json' >/dev/null 2>&1"
+assert "Array merge -> user domain preserved" "jq -e '.sandbox.network.allowedDomains | index(\"my-extra.example.com\")' '$SYNC_HOME/.claude/settings.json' >/dev/null 2>&1"
+assert "Array merge -> user scalar preserved" "jq -e '.customField == \"keep-me\"' '$SYNC_HOME/.claude/settings.json' >/dev/null 2>&1"
+rm -rf "$SYNC_HOME"
+
 # Dry-run mode — sync should only log, not modify
 SYNC_HOME=$(mktemp -d /tmp/claude-test-sync-XXXXXX)
 mkdir -p "$SYNC_HOME/.claude"

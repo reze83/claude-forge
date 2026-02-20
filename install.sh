@@ -183,8 +183,18 @@ sync_settings_json() {
   fi
 
   merged_tmp="$(mktemp "${TMPDIR:-/tmp}/settings-merged-XXXXXX.json")"
-  if jq -s '.[0] as $tpl | .[1] as $usr | ($tpl * $usr) | .hooks = $tpl.hooks' \
-    "$example_settings" "$user_settings" >"$merged_tmp" 2>/dev/null; then
+  # Deep-merge: user values win for scalars, hooks from template,
+  # array union for permissions and allowedDomains (template baseline + user additions)
+  if jq -s '
+    .[0] as $tpl | .[1] as $usr |
+    ($tpl * $usr) |
+    .hooks = $tpl.hooks |
+    .permissions.ask = (($tpl.permissions.ask // []) + ($usr.permissions.ask // []) | unique) |
+    .permissions.deny = (($tpl.permissions.deny // []) + ($usr.permissions.deny // []) | unique) |
+    .sandbox.network.allowedDomains = (
+      ($tpl.sandbox.network.allowedDomains // []) +
+      ($usr.sandbox.network.allowedDomains // []) | unique
+    )' "$example_settings" "$user_settings" >"$merged_tmp" 2>/dev/null; then
     backup_if_exists "$user_settings"
     mv "$merged_tmp" "$user_settings"
     log_ok "settings.json mit Template synchronisiert"
