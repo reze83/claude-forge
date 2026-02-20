@@ -139,6 +139,15 @@ link_dir_contents() {
 link_dir_recursive() {
   local source_dir="$1"
   local target_dir="$2"
+  # Migration: alte Verzeichnis-Symlinks durch echte Dirs ersetzen
+  if [[ -L "$target_dir" ]]; then
+    if $DRY_RUN; then
+      log_dry "Wuerde Verzeichnis-Symlink ersetzen: $target_dir"
+    else
+      rm -f "$target_dir"
+      log_ok "Verzeichnis-Symlink migriert: $target_dir"
+    fi
+  fi
   mkdir -p "$target_dir"
   for item in "$source_dir"/*; do
     [[ -e "$item" ]] || continue

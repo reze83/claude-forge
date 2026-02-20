@@ -75,6 +75,23 @@ echo '{"custom": true}' >"$FAKE_HOME/.claude/settings.json"
 HOME="$FAKE_HOME" bash "$SCRIPT_DIR/install.sh" >/dev/null 2>&1
 assert "Zweite Installation ueberschreibt settings.json nicht" "grep -q 'custom' '$FAKE_HOME/.claude/settings.json'"
 
+# --- Symlink-Migration ---
+echo ""
+echo "-- Symlink-Migration --"
+# Simulate legacy state: replace real dir with directory symlink
+MIGRATE_HOME=$(mktemp -d /tmp/claude-test-migrate-XXXXXX)
+mkdir -p "$MIGRATE_HOME/.claude"
+HOME="$MIGRATE_HOME" bash "$SCRIPT_DIR/install.sh" >/dev/null 2>&1
+# Replace multi-model/prompts dir with legacy symlink
+rm -rf "$MIGRATE_HOME/.claude/multi-model/prompts"
+ln -s "$SCRIPT_DIR/multi-model/prompts" "$MIGRATE_HOME/.claude/multi-model/prompts"
+assert "Pre-migration: prompts is symlink" "[[ -L '$MIGRATE_HOME/.claude/multi-model/prompts' ]]"
+# Re-run installer — should migrate symlink to real dir
+HOME="$MIGRATE_HOME" bash "$SCRIPT_DIR/install.sh" >/dev/null 2>&1
+assert "Post-migration: prompts is real dir" "[[ -d '$MIGRATE_HOME/.claude/multi-model/prompts' && ! -L '$MIGRATE_HOME/.claude/multi-model/prompts' ]]"
+assert "Post-migration: prompts files are hardlinks" "is_linked_to_repo '$MIGRATE_HOME/.claude/multi-model/prompts/backend-prompt.md' 'multi-model/prompts/backend-prompt.md'"
+rm -rf "$MIGRATE_HOME"
+
 # --- QA-Tools Sektion ---
 echo ""
 echo "-- QA-Tools Sektion --"
