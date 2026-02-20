@@ -94,6 +94,18 @@ assert_exit "Blocks exec rm -rf /" 0 "$FW" '{"tool_input":{"command":"exec rm -r
 
 echo ""
 
+# --- bash-firewall.sh: Interpreter injection ---
+echo "-- bash-firewall.sh: Interpreter injection --"
+assert_exit "Blocks python -c" 0 "$FW" '{"tool_input":{"command":"python -c \"import os; os.system(\\\"rm -rf /\\\")\""}}'
+assert_exit "Blocks python3 -c" 0 "$FW" '{"tool_input":{"command":"python3 -c \"import shutil; shutil.rmtree(\\\".\\\")\""}}'
+assert_exit "Blocks node -e" 0 "$FW" '{"tool_input":{"command":"node -e \"require(\\\"child_process\\\").exec(\\\"evil\\\")\""}}'
+assert_exit "Blocks perl -e" 0 "$FW" '{"tool_input":{"command":"perl -e \"system(\\\"rm -rf /\\\")\""}}'
+assert_exit "Blocks ruby -e" 0 "$FW" '{"tool_input":{"command":"ruby -e \"system(\\\"rm -rf /\\\")\""}}'
+assert_exit "Allows python script.py" 0 "$FW" '{"tool_input":{"command":"python script.py"}}'
+assert_exit "Allows node app.js" 0 "$FW" '{"tool_input":{"command":"node app.js"}}'
+
+echo ""
+
 # --- bash-firewall.sh: Subshell/pipe protection ---
 echo "-- bash-firewall.sh: Subshell/pipe protection --"
 assert_exit "Blocks cmd subst rm -rf" 0 "$FW" '{"tool_input":{"command":"echo $(rm -rf /)"}}'
@@ -138,6 +150,16 @@ assert_exit "Allows package-lock.json Read" 0 "$PF" '{"tool_name":"Read","tool_i
 assert_exit "Allows src/index.ts" 0 "$PF" '{"tool_input":{"file_path":"/home/c/src/index.ts"}}'
 assert_exit "Allows README.md" 0 "$PF" '{"tool_input":{"file_path":"/home/c/README.md"}}'
 assert_exit "Allows empty path" 0 "$PF" '{"tool_input":{}}'
+
+echo ""
+
+# --- protect-files.sh: Glob/Grep path protection ---
+echo "-- protect-files.sh: Glob/Grep path --"
+assert_exit "Blocks Glob on .ssh/" 0 "$PF" '{"tool_name":"Glob","tool_input":{"path":"/home/c/.ssh/","pattern":"**/*"}}'
+assert_exit "Blocks Grep on .aws/" 0 "$PF" '{"tool_name":"Grep","tool_input":{"path":"/home/c/.aws/","pattern":"key"}}'
+assert_exit "Blocks Glob on .env" 0 "$PF" '{"tool_name":"Glob","tool_input":{"path":"/home/c/.env"}}'
+assert_exit "Allows Glob on src/" 0 "$PF" '{"tool_name":"Glob","tool_input":{"path":"/home/c/src/","pattern":"**/*.ts"}}'
+assert_exit "Allows Grep on project/" 0 "$PF" '{"tool_name":"Grep","tool_input":{"path":"/home/c/project/","pattern":"TODO"}}'
 
 echo ""
 
