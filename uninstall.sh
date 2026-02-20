@@ -107,6 +107,16 @@ for dir in skills multi-model; do
   fi
 done
 
+# VERSION entfernen
+if [[ -f "$CLAUDE_DIR/VERSION" ]]; then
+  if $DRY_RUN; then
+    printf "  ${YELLOW}[DRY]${NC} Wuerde entfernen: %s\n" "$CLAUDE_DIR/VERSION"
+  else
+    rm "$CLAUDE_DIR/VERSION"
+    printf "  ${GREEN}[OK]${NC} Entfernt: %s\n" "$CLAUDE_DIR/VERSION"
+  fi
+fi
+
 # Repo-Marker entfernen
 if [[ -f "$CLAUDE_DIR/.forge-repo" ]]; then
   if $DRY_RUN; then

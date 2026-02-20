@@ -34,6 +34,7 @@ echo ""
 # --- Dateien & Links ---
 echo "-- Dateien & Links --"
 [[ -f "$REPO_DIR/VERSION" ]] && pass "VERSION vorhanden" || fail "VERSION vorhanden"
+[[ -f "$CLAUDE_DIR/VERSION" ]] && pass "VERSION in ~/.claude/ deployed" || fail "VERSION in ~/.claude/ deployed"
 [[ -f "$CLAUDE_DIR/settings.json" ]] && pass "settings.json vorhanden" || fail "settings.json vorhanden"
 [[ -f "$CLAUDE_DIR/CLAUDE.md" ]] && pass "CLAUDE.md vorhanden" || fail "CLAUDE.md vorhanden"
 
