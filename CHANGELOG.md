@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - skills/performance-reference/: new passive skill — extracted DB/Frontend/Backend optimization tips from performance rule (loaded on demand, not on every session)
 
+### Fixed
+
+- install.sh: `link_dir_recursive` now detects and replaces legacy directory symlinks before `mkdir -p`, fixing migration of e.g. `multi-model/prompts` from symlink to real dir with file-level hardlinks (#70)
+
 ### Changed
 
 - rules/smithery.md: replace passive triggers with sequential thinking as decision engine — 5-step evaluation flow with 30-category decision matrix that proactively provisions MCP servers before falling back to built-in tools
