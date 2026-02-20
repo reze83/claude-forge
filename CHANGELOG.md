@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- install.sh: deploy `VERSION` file to `~/.claude/` via `create_link` — fixes `forgeVersion` always showing `"unknown"` in hooks
+- uninstall.sh: clean up `~/.claude/VERSION` on uninstall (with dry-run support)
+- validate.sh: add deployed VERSION check (`~/.claude/VERSION` exists)
+- tests: +2 install tests (VERSION deployed, VERSION removed) — 242 total
+
 ## [0.5.2] - 2026-02-20
 
 ### Added
