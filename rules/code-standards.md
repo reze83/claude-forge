@@ -20,18 +20,10 @@
 
 ## Testing
 
-- TDD bevorzugt: Test zuerst, dann Implementierung
-- Jedes neue Feature braucht Tests
+- Neues Feature: Test vor Implementierung (TDD)
+- Bugfix: Reproduzierenden Test schreiben, dann fixen
 - Tests vor Commit ausfuehren
 
-## Gekoppelte Scripts
+## Auto-Formatierung
 
-- Lifecycle-Scripts (install, uninstall, update, validate, migrate) sind gekoppelt
-- Aenderung an einem erfordert Pruefung aller anderen auf Konsistenz
-- Typische Kopplungen: Linking-Logik, Verzeichnisstruktur, Cleanup, Validierung
-
-## Auto-Formatierung (Hook-gestuetzt)
-
-- `auto-format.sh` formatiert nach jedem Edit automatisch (async)
-- JS/TS: `prettier`, Python: `ruff format`, Rust: `rustfmt`, Go: `gofmt`, Shell: `shfmt`
-- Fehlende Formatter werden uebersprungen — kein Fehler
+Hooks formatieren automatisch nach jedem Edit (prettier, ruff, rustfmt, gofmt, shfmt). Kein manuelles Formatting noetig.
