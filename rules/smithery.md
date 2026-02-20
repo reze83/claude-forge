@@ -7,21 +7,27 @@
 1. **Task analysieren:** Was ist das Ziel? Welche Faehigkeiten braucht es?
 2. **Gegen Entscheidungsmatrix pruefen** — faellt der Task in eine dieser Kategorien?
 
-   | Task-Kontext                                                                 | Suchbegriff                |
-   | ---------------------------------------------------------------------------- | -------------------------- |
-   | Spezialisierte Sprachen (PowerShell, Terraform, Kotlin, Swift, Ruby, Lua, R) | `"<sprache>"`              |
-   | Container / Orchestrierung                                                   | `"docker"`, `"kubernetes"` |
-   | IaC (Terraform, Pulumi, CloudFormation)                                      | `"infrastructure"`         |
-   | CI/CD (Jenkins, GitLab CI, GitHub Actions)                                   | `"<tool-name>"`            |
-   | Datenbank-Operationen (SQL, NoSQL, Graph)                                    | `"database"`               |
-   | Externe APIs / SaaS-Services                                                 | `"<service-name>"`         |
-   | Datenkonvertierung (PDF, CSV, XML)                                           | `"<format> convert"`       |
-   | Code-Analyse / Security-Audit                                                | `"code analysis"`          |
-   | Performance-Profiling                                                        | `"profiling"`              |
-   | Kommunikation (Slack, Discord, Teams)                                        | `"<platform>"`             |
-   | Projektmanagement (Jira, Linear, Notion)                                     | `"<tool-name>"`            |
-   | Cloud-spezifisch (AWS, GCP, Azure)                                           | `"<cloud-provider>"`       |
-   | Monitoring / Logs / Alerting                                                 | `"monitoring"`             |
+   | Task-Kontext                                                                 | Suchbegriff                 |
+   | ---------------------------------------------------------------------------- | --------------------------- |
+   | Spezialisierte Sprachen (PowerShell, Terraform, Kotlin, Swift, Ruby, Lua, R) | `"<sprache>"`               |
+   | Container / Orchestrierung                                                   | `"docker"`, `"kubernetes"`  |
+   | IaC (Terraform, Pulumi, CloudFormation)                                      | `"infrastructure"`          |
+   | CI/CD (Jenkins, GitLab CI, GitHub Actions)                                   | `"<tool-name>"`             |
+   | Datenbank-Operationen (SQL, NoSQL, Graph)                                    | `"database"`                |
+   | Externe APIs / SaaS-Services                                                 | `"<service-name>"`          |
+   | Datenkonvertierung (PDF, CSV, XML)                                           | `"<format> convert"`        |
+   | Code-Analyse / Security-Audit                                                | `"code analysis"`           |
+   | Performance-Profiling                                                        | `"profiling"`               |
+   | Kommunikation (Slack, Discord, Teams)                                        | `"<platform>"`              |
+   | Projektmanagement (Jira, Linear, Notion)                                     | `"<tool-name>"`             |
+   | Cloud-spezifisch (AWS, GCP, Azure)                                           | `"<cloud-provider>"`        |
+   | Monitoring / Logs / Alerting                                                 | `"monitoring"`              |
+   | Web-Recherche / Scraping                                                     | `"web search"`, `"scraper"` |
+   | Akademische Papers (arXiv, Scholar, PubMed)                                  | `"arxiv"`, `"paper search"` |
+   | DevTools / Browser-Automation (Playwright, Puppeteer)                        | `"browser"`, `"devtools"`   |
+   | DNS / CDN / Domain-Verwaltung                                                | `"dns"`, `"domain"`         |
+   | E-Mail (SMTP, IMAP, Transactional)                                           | `"email"`                   |
+   | Dokumentation externer Projekte                                              | `"documentation"`           |
 
    **Faustregel:** Wenn ein spezialisiertes Tool bessere Ergebnisse liefern wuerde als Bash + WebSearch, ZUERST smithery durchsuchen.
 
