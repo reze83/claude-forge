@@ -72,6 +72,11 @@ Add new test cases to `tests/test-hooks.sh` using the `assert_exit` helper:
 assert_exit "Description" <expected_exit_code> "$SCRIPT" '<json_input>'
 ```
 
+## CI Changelog Check
+
+CI warns (non-blocking) when a PR changes code files but does not update `CHANGELOG.md`.
+Code paths checked: `hooks/`, `rules/`, `agents/`, `commands/`, `skills/`, `multi-model/`, `.claude-plugin/`, and lifecycle scripts (`install.sh`, `uninstall.sh`, `update.sh`, `validate.sh`).
+
 ## PR Checklist
 
 - [ ] Tests pass (`bash tests/test-hooks.sh && bash validate.sh`)
@@ -79,4 +84,5 @@ assert_exit "Description" <expected_exit_code> "$SCRIPT" '<json_input>'
 - [ ] JSON files are valid (`jq empty <file>`)
 - [ ] Hook timeouts are consistent across hooks.json and settings.json.example
 - [ ] No secrets or API keys in committed files
+- [ ] CHANGELOG.md updated (CI warns if missing for code changes)
 - [ ] Conventional Commit message used

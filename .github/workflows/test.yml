@@ -20,6 +20,22 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Check changelog updated
+        if: github.event_name == 'pull_request'
+        run: |
+          base_ref="${{ github.event.pull_request.base.ref }}"
+          code_changed=$(git diff "origin/${base_ref}...HEAD" --name-only -- \
+            'hooks/' 'rules/' 'agents/' 'commands/' 'skills/' \
+            'install.sh' 'uninstall.sh' 'update.sh' 'validate.sh' \
+            'multi-model/' '.claude-plugin/' \
+            | head -1)
+          if [[ -n "$code_changed" ]]; then
+            changelog_changed=$(git diff "origin/${base_ref}...HEAD" --name-only -- CHANGELOG.md | head -1)
+            if [[ -z "$changelog_changed" ]]; then
+              echo "::warning::Code changed but CHANGELOG.md was not updated"
+            fi
+          fi
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
