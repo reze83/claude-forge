@@ -40,9 +40,9 @@
    | Wissensmanagement / Memory / RAG                                             | `"memory"`, `"knowledge"`     |
    | IoT / Home Automation (Home Assistant)                                       | `"iot"`, `"home automation"`  |
 
-   **Faustregel:** Die Matrix ist ein Trigger — sequential thinking entscheidet zur Laufzeit ob ein bereits verbundener Server reicht oder ein neuer gesucht werden muss.
+   **Faustregel:** Die Matrix ist ein Trigger — sequential thinking entscheidet zur Laufzeit ob ein temporaerer Server gesucht und verbunden werden muss.
 
-3. **Verbundene Server pruefen:** Deckt ein bereits verbundener Server den Bedarf?
+3. **Verbundene Server pruefen:** Nur Sequential Thinking ist dauerhaft verbunden. Alle anderen werden bei Bedarf temporaer hinzugefuegt.
    - Server-IDs: im Context unter `smithery_ids`
    - Tools auflisten: `smithery tool list <id>`
 4. **Luecke erkannt?** → `smithery mcp search "<capability>"` ausfuehren
@@ -59,7 +59,7 @@
 ## Aufraeumen
 
 - Temporaere Server nach Task entfernen: `smithery mcp remove <id>`
-- User fragen ob Server dauerhaft bleiben soll — sonst entfernen
+- Nur Sequential Thinking bleibt dauerhaft — alle anderen nach Task entfernen
 
 ## Fehlerbehandlung
 
