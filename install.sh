@@ -633,7 +633,7 @@ link_dir_recursive "$REPO_DIR/multi-model" "$CLAUDE_DIR/multi-model"
 # --- Phase 8: Codex CLI (optional) ---
 if $WITH_CODEX; then
   echo ""
-  echo "-- Phase 7: Codex CLI --"
+  echo "-- Phase 8: Codex CLI --"
   if $DRY_RUN; then
     log_dry "Wuerde codex-setup.sh ausfuehren"
   else

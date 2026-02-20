@@ -82,7 +82,7 @@ assert_contains "Default model ist gpt-5.3-codex" '"model":"gpt-5.3-codex"' "$OU
 echo ""
 echo "-- Live-Tests --"
 
-if command -v codex >/dev/null 2>&1 || npm config get prefix >/dev/null 2>&1; then
+if command -v codex >/dev/null 2>&1; then
   # Test 4: Sandbox read (Codex antwortet)
   OUT=$(bash "$WRAPPER" --sandbox read --prompt "Reply with exactly one word: PING" --timeout 30 2>&1) || true
   assert_contains "Sandbox read → success" '"status":"success"' "$OUT"

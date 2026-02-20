@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- multi-model: downgrade model from opus to sonnet for /multi-plan, /multi-backend, /multi-execute (#112)
+
+### Fixed
+
+- test-codex.sh: live test gate no longer triggers on npm-only environments (#116)
+- install.sh: fix phase label "Phase 7" → "Phase 8" for Codex CLI setup (#116)
+
 ## [0.7.0] - 2026-02-20
 
 ### Fixed
