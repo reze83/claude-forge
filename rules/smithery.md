@@ -12,11 +12,16 @@
    | Spezialisierte Sprachen (PowerShell, Terraform, Kotlin, Swift, Ruby, Lua, R) | `"<sprache>"`              |
    | Container / Orchestrierung                                                   | `"docker"`, `"kubernetes"` |
    | IaC (Terraform, Pulumi, CloudFormation)                                      | `"infrastructure"`         |
+   | CI/CD (Jenkins, GitLab CI, GitHub Actions)                                   | `"<tool-name>"`            |
    | Datenbank-Operationen (SQL, NoSQL, Graph)                                    | `"database"`               |
+   | Externe APIs / SaaS-Services                                                 | `"<service-name>"`         |
    | Datenkonvertierung (PDF, CSV, XML)                                           | `"<format> convert"`       |
    | Code-Analyse / Security-Audit                                                | `"code analysis"`          |
+   | Performance-Profiling                                                        | `"profiling"`              |
+   | Kommunikation (Slack, Discord, Teams)                                        | `"<platform>"`             |
+   | Projektmanagement (Jira, Linear, Notion)                                     | `"<tool-name>"`            |
+   | Cloud-spezifisch (AWS, GCP, Azure)                                           | `"<cloud-provider>"`       |
    | Monitoring / Logs / Alerting                                                 | `"monitoring"`             |
-   | Externe Services / Plattformen                                               | `"<service-name>"`         |
 
    **Faustregel:** Wenn ein spezialisiertes Tool bessere Ergebnisse liefern wuerde als Bash + WebSearch, ZUERST smithery durchsuchen.
 
