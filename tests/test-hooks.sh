@@ -544,6 +544,24 @@ assert_exit "Exit 0 on normal stop" 0 "$STOPH" \
 assert_exit "Exit 0 when stop_hook_active true (skip loop)" 0 "$STOPH" \
   '{"stop_hook_active":true}'
 
+# Test: async notify runs in background and creates flag file
+_NOTIFY_HOME="$TMPDIR_TEST/notify-async"
+mkdir -p "$_NOTIFY_HOME/.claude" "$_NOTIFY_HOME/bin"
+# Mock powershell.exe that writes a flag file
+printf '#!/usr/bin/env bash\ntouch "%s/notify-ran"\n' "$_NOTIFY_HOME" >"$_NOTIFY_HOME/bin/powershell.exe"
+chmod +x "$_NOTIFY_HOME/bin/powershell.exe"
+echo '{"stop_hook_active":false}' |
+  HOME="$_NOTIFY_HOME" PATH="$_NOTIFY_HOME/bin:$PATH" bash "$STOPH" >/dev/null 2>/dev/null
+sleep 1
+if [[ -f "$_NOTIFY_HOME/notify-ran" ]]; then
+  printf '  %b[PASS]%b stop.sh: async notify ran and created flag\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b stop.sh: async notify did not create flag file\n' "$RED" "$NC"
+  FAIL=$((FAIL + 1))
+fi
+unset _NOTIFY_HOME
+
 echo ""
 
 # --- bash-firewall.sh: Dry-run mode ---
@@ -685,7 +703,49 @@ else
   printf '  %b[FAIL]%b smithery-context: sequential_thinking_mcp should be false: %s\n' "$RED" "$NC" "$SC_OUT"
   FAIL=$((FAIL + 1))
 fi
-unset _SC_MOCK_DIR _SC_MCP_HOME _SC_MCP_HOME_NO SC_OUT
+unset _SC_MCP_HOME _SC_MCP_HOME_NO SC_OUT
+
+# --- smithery-context.sh: TTL cache ---
+echo "-- smithery-context.sh: TTL cache --"
+
+_SC_CACHE_DIR="$TMPDIR_TEST/smithery-cache"
+_SC_CACHE_FILE="$_SC_CACHE_DIR/cache.json"
+mkdir -p "$_SC_CACHE_DIR"
+
+# Test: cache file written after CLI call
+SC_OUT=$(echo '{}' | SMITHERY_CACHE_FILE="$_SC_CACHE_FILE" SMITHERY_CACHE_TTL=60 PATH="$_SC_MOCK_DIR:$PATH" bash "$SC" 2>/dev/null || true)
+if [[ -f "$_SC_CACHE_FILE" ]] && jq -e '.total' "$_SC_CACHE_FILE" >/dev/null 2>&1; then
+  printf '  %b[PASS]%b smithery-context: cache file written after CLI call\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b smithery-context: cache file not written or invalid\n' "$RED" "$NC"
+  FAIL=$((FAIL + 1))
+fi
+
+# Test: cache hit bypasses CLI call (replace mock with failing script)
+_SC_NOCLI_DIR="$TMPDIR_TEST/smithery-nocli"
+mkdir -p "$_SC_NOCLI_DIR"
+printf '#!/usr/bin/env bash\nexit 1\n' >"$_SC_NOCLI_DIR/smithery"
+chmod +x "$_SC_NOCLI_DIR/smithery"
+SC_OUT=$(echo '{}' | SMITHERY_CACHE_FILE="$_SC_CACHE_FILE" SMITHERY_CACHE_TTL=60 PATH="$_SC_NOCLI_DIR:$PATH" bash "$SC" 2>/dev/null || true)
+if [[ "$SC_OUT" == *"additionalContext"* && "$SC_OUT" == *"smithery_connected"* ]]; then
+  printf '  %b[PASS]%b smithery-context: cache hit bypasses CLI call\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b smithery-context: cache hit should bypass CLI, got: %s\n' "$RED" "$NC" "$SC_OUT"
+  FAIL=$((FAIL + 1))
+fi
+
+# Test: expired cache triggers CLI call (TTL=0)
+SC_OUT=$(echo '{}' | SMITHERY_CACHE_FILE="$_SC_CACHE_FILE" SMITHERY_CACHE_TTL=0 PATH="$_SC_MOCK_DIR:$PATH" bash "$SC" 2>/dev/null || true)
+if [[ "$SC_OUT" == *"additionalContext"* && "$SC_OUT" == *"smithery_connected"* ]]; then
+  printf '  %b[PASS]%b smithery-context: expired cache triggers CLI call\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b smithery-context: expired cache should trigger CLI, got: %s\n' "$RED" "$NC" "$SC_OUT"
+  FAIL=$((FAIL + 1))
+fi
+unset _SC_MOCK_DIR _SC_CACHE_DIR _SC_CACHE_FILE _SC_NOCLI_DIR SC_OUT
 
 echo ""
 

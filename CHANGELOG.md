@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Performance
+
+- lib.sh: `notify()` runs asynchronously in background subshell (stop.sh 663ms→15ms, session-logger.sh 652ms→21ms)
+- smithery-context.sh: TTL-based cache for `smithery mcp list` avoids Node.js startup on every prompt (927ms→15ms)
+- tests/test-hooks.sh: 4 new tests — async notify (1), smithery cache (3) — 217→221 total
+
 ## [0.6.0] - 2026-02-20
 
 ### Added
