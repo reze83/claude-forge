@@ -165,14 +165,29 @@ readonly MAX_CONTENT_SIZE=1048576 # 1MB limit for secret scanning
 
 # --- Hook Metrics (CLAUDE_FORGE_DEBUG=1 only) ---
 # Records execution time of each hook that sources lib.sh.
-# Uses SECONDS (built-in, Bash 3.2+ compatible) + EXIT trap.
-_HOOK_START_SECONDS="$SECONDS"
+# Uses millisecond-precision via date +%s%N + EXIT trap.
+_hook_now_ms() {
+  local ns
+  ns=$(date +%s%N 2>/dev/null) || ns=""
+  if [[ -n "$ns" && "$ns" != *N ]]; then
+    printf '%s' "$((ns / 1000000))"
+  else
+    # macOS fallback: gdate or SECONDS*1000
+    ns=$(gdate +%s%N 2>/dev/null) || ns=""
+    if [[ -n "$ns" && "$ns" != *N ]]; then
+      printf '%s' "$((ns / 1000000))"
+    else
+      printf '%s' "$((SECONDS * 1000))"
+    fi
+  fi
+}
+_HOOK_START_MS=$(_hook_now_ms)
 _HOOK_SCRIPT_NAME="${BASH_SOURCE[1]:-unknown}"
 _HOOK_SCRIPT_NAME="${_HOOK_SCRIPT_NAME##*/}" # basename only
 _hook_metrics_trap() {
   if [[ "${CLAUDE_FORGE_DEBUG:-0}" == "1" ]]; then
-    local elapsed=$((SECONDS - _HOOK_START_SECONDS))
-    printf '%s [METRIC] %s completed in %ds\n' \
+    local elapsed=$(($(_hook_now_ms) - _HOOK_START_MS))
+    printf '%s [METRIC] %s completed in %dms\n' \
       "$(date -Iseconds 2>/dev/null || date)" "$_HOOK_SCRIPT_NAME" "$elapsed" \
       >>"${HOME}/.claude/hooks-debug.log" 2>/dev/null || true
   fi

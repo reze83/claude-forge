@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- lib.sh: hook metrics use millisecond precision via `date +%s%N` instead of integer `SECONDS` (format: `12ms` instead of `0s`)
+
+### Added
+
+- tests/bench-hooks.sh: benchmark tool for all 18 hooks (avg/min/max ms, configurable iterations via `BENCH_ITERATIONS`)
+- tests/test-hooks.sh: 1 new test — ms precision in hook metrics — 221→222 total
+
 ### Performance
 
 - lib.sh: `notify()` runs asynchronously in background subshell (stop.sh 663ms→15ms, session-logger.sh 652ms→21ms)
