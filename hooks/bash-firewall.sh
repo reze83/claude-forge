@@ -81,10 +81,10 @@ DENY_PATTERNS=(
   '[<>]\([^)]*(rm\s+-rf\s+(/|~|\$HOME|\.\.?/)|eval\s+|(bash|sh)\s+-c\s+)'
   '\|\s*(/[a-z/]*/)?\.?(bash|sh)(\s|$)'
   '(bash|sh)\s*<<<'
-  'python3?\s+-c\s+'
-  'node\s+-e\s+'
-  'perl\s+-e\s+'
-  'ruby\s+-e\s+'
+  'python[0-9.]*\s+-c\s+'
+  'node(js)?\s+-e\s+'
+  'perl[0-9.]*\s+-e\s+'
+  'ruby[0-9.]*\s+-e\s+'
 )
 
 DENY_REASONS=(
@@ -115,7 +115,7 @@ DENY_REASONS=(
   "Piping output into bash/sh not allowed. Run commands directly."
   "Herestring into bash/sh not allowed. Run commands directly."
   "python -c not allowed. Use a .py script file instead."
-  "node -e not allowed. Use a .js script file instead."
+  "node/nodejs -e not allowed. Use a .js script file instead."
   "perl -e not allowed. Use a .pl script file instead."
   "ruby -e not allowed. Use a .rb script file instead."
 )

@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- hooks/bash-firewall.sh: interpreter injection patterns now match versioned variants (`python3.12 -c`, `python2.7 -c`, `nodejs -e`, `perl5.36 -e`, `ruby3.2 -e`)
+- hooks/protect-files.sh: tiered block model — critical patterns (`.env`, `.ssh/`, `.aws/`, `.gnupg/`, `*.pem`, `*.key`, hook config) use `block()` directly, never bypassable via `CLAUDE_FORGE_DRY_RUN`; non-critical patterns (`secrets/`, `.git/`, `.npmrc`, `.netrc`) remain at `block_or_warn()`
+- rules/security.md: document tiered DRY_RUN behavior (critical vs non-critical patterns)
+- tests: +8 tests (3 interpreter variants, 5 tiered block DRY_RUN) — 267 total
+
 ## [0.5.3] - 2026-02-20
 
 ### Changed
