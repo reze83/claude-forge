@@ -5,16 +5,19 @@ set -euo pipefail
 # Codex CLI Wrapper fuer Claude Code (v0.101+)
 # Aufgerufen von multi-* Commands via Bash.
 #
-# Usage: codex-wrapper.sh --sandbox <mode> --prompt "<prompt>"
+# Usage: codex-wrapper.sh --sandbox <mode> --prompt "<prompt>" [--model <model>]
 #   --sandbox: read | write | full (default: write)
 #   --prompt:  Die Aufgabe fuer Codex
+#   --model:   OpenAI-Modell (default: gpt-5.3-codex)
 #
 # Output: JSON auf stdout
-#   { "status": "success|error", "output": "...", "model": "codex" }
+#   { "status": "success|error", "output": "...", "model": "<model>" }
 # ============================================================
 
 SANDBOX="write"
 PROMPT=""
+MODEL="gpt-5.3-codex"
+REASONING="xhigh"
 TIMEOUT=240
 WORKDIR="$(pwd)"
 
@@ -23,16 +26,16 @@ readonly MAX_TIMEOUT=600
 
 # --- Pre-Checks ---
 if ! command -v jq >/dev/null 2>&1; then
-  echo '{"status":"error","output":"jq nicht installiert. apt install jq","model":"codex"}'
+  echo '{"status":"error","output":"jq nicht installiert. apt install jq","model":"'"$MODEL"'"}'
   exit 0
 fi
 
 # --- Argumente ---
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --sandbox | --prompt | --workdir | --timeout)
+    --sandbox | --prompt | --workdir | --timeout | --model)
       if [[ $# -lt 2 ]]; then
-        echo "{\"status\":\"error\",\"output\":\"Missing value for $1\",\"model\":\"codex\"}"
+        echo "{\"status\":\"error\",\"output\":\"Missing value for $1\",\"model\":\"$MODEL\"}"
         exit 0
       fi
       ;;&
@@ -52,25 +55,29 @@ while [[ $# -gt 0 ]]; do
       TIMEOUT="$2"
       shift 2
       ;;
+    --model)
+      MODEL="$2"
+      shift 2
+      ;;
     *)
-      echo "{\"status\":\"error\",\"output\":\"Unknown argument: $1\",\"model\":\"codex\"}"
+      echo "{\"status\":\"error\",\"output\":\"Unknown argument: $1\",\"model\":\"$MODEL\"}"
       exit 0
       ;;
   esac
 done
 
 if [[ -z "$PROMPT" ]]; then
-  echo '{"status":"error","output":"--prompt ist erforderlich","model":"codex"}'
+  echo '{"status":"error","output":"--prompt ist erforderlich","model":"'"$MODEL"'"}'
   exit 0
 fi
 
 # --- Timeout validieren ---
 if ! [[ "$TIMEOUT" =~ ^[0-9]+$ ]]; then
-  echo '{"status":"error","output":"--timeout must be a positive integer","model":"codex"}'
+  echo '{"status":"error","output":"--timeout must be a positive integer","model":"'"$MODEL"'"}'
   exit 0
 fi
 if [[ "$TIMEOUT" -lt "$MIN_TIMEOUT" || "$TIMEOUT" -gt "$MAX_TIMEOUT" ]]; then
-  echo "{\"status\":\"error\",\"output\":\"Timeout must be between ${MIN_TIMEOUT}s and ${MAX_TIMEOUT}s (got: ${TIMEOUT}s)\",\"model\":\"codex\"}"
+  echo "{\"status\":\"error\",\"output\":\"Timeout must be between ${MIN_TIMEOUT}s and ${MAX_TIMEOUT}s (got: ${TIMEOUT}s)\",\"model\":\"$MODEL\"}"
   exit 0
 fi
 
@@ -85,7 +92,7 @@ fi
 
 # --- Codex verfuegbar? ---
 if ! command -v codex >/dev/null 2>&1; then
-  echo '{"status":"error","output":"Codex CLI nicht installiert. bash multi-model/codex-setup.sh ausfuehren.","model":"codex"}'
+  echo '{"status":"error","output":"Codex CLI nicht installiert. bash multi-model/codex-setup.sh ausfuehren.","model":"'"$MODEL"'"}'
   exit 0
 fi
 
@@ -95,7 +102,7 @@ case "$SANDBOX" in
   write) SANDBOX_FLAG="workspace-write" ;;
   full) SANDBOX_FLAG="danger-full-access" ;;
   *)
-    echo "{\"status\":\"error\",\"output\":\"Invalid sandbox mode: $SANDBOX (use read|write|full)\",\"model\":\"codex\"}"
+    echo "{\"status\":\"error\",\"output\":\"Invalid sandbox mode: $SANDBOX (use read|write|full)\",\"model\":\"$MODEL\"}"
     exit 0
     ;;
 esac
@@ -120,7 +127,7 @@ trap 'rm -f "$OUTFILE" "$ERRFILE"' EXIT
 
 # --- timeout verfuegbar? (fehlt auf nativem macOS) ---
 if ! command -v timeout >/dev/null 2>&1; then
-  echo '{"status":"error","output":"timeout command not found. Install coreutils (brew install coreutils on macOS).","model":"codex"}'
+  echo '{"status":"error","output":"timeout command not found. Install coreutils (brew install coreutils on macOS).","model":"'"$MODEL"'"}'
   exit 0
 fi
 
@@ -128,6 +135,8 @@ fi
 cd "$WORKDIR"
 # shellcheck disable=SC2086
 timeout "$TIMEOUT" codex exec \
+  -m "$MODEL" \
+  -c "model_reasoning_effort=\"$REASONING\"" \
   --sandbox "$SANDBOX_FLAG" \
   $SKIP_GIT_FLAG \
   -o "$OUTFILE" \
@@ -139,10 +148,10 @@ timeout "$TIMEOUT" codex exec \
   [[ -s "$OUTFILE" ]] && OUTPUT_MSG="$(cat "$OUTFILE")"
 
   if [[ $EXIT_CODE -eq 124 ]]; then
-    echo "{\"status\":\"error\",\"output\":\"Codex timeout after ${TIMEOUT}s. Try a smaller task.\",\"model\":\"codex\"}"
+    echo "{\"status\":\"error\",\"output\":\"Codex timeout after ${TIMEOUT}s. Try a smaller task.\",\"model\":\"$MODEL\"}"
   else
     COMBINED="${OUTPUT_MSG:+$OUTPUT_MSG\n}${STDERR_MSG}"
-    echo "{\"status\":\"error\",\"output\":$(printf '%s' "$COMBINED" | jq -Rs .),\"model\":\"codex\"}"
+    echo "{\"status\":\"error\",\"output\":$(printf '%s' "$COMBINED" | jq -Rs .),\"model\":\"$MODEL\"}"
   fi
   exit 0
 }
@@ -150,4 +159,4 @@ timeout "$TIMEOUT" codex exec \
 # --- Erfolg ---
 OUTPUT=""
 [[ -s "$OUTFILE" ]] && OUTPUT="$(cat "$OUTFILE")"
-echo "{\"status\":\"success\",\"output\":$(printf '%s' "$OUTPUT" | jq -Rs .),\"model\":\"codex\"}"
+echo "{\"status\":\"success\",\"output\":$(printf '%s' "$OUTPUT" | jq -Rs .),\"model\":\"$MODEL\"}"
