@@ -8,7 +8,7 @@ Docs aktualisieren wenn MINDESTENS EINES zutrifft:
 
 - Public API-Surface geaendert (neue/entfernte/umbenannte Endpoints, Funktionen, CLI-Flags)
 - Neue Abhaengigkeit hinzugefuegt oder entfernt
-- Neues User-sichtbares Verhalten (Feature, Hook, Skill, Command)
+- Neues User-sichtbares Verhalten (Feature, Konfigurationsoption, CLI-Befehl)
 - Architektur-Entscheidung getroffen (neues Pattern, neue Komponente)
 
 NICHT aktualisieren bei:
@@ -16,8 +16,6 @@ NICHT aktualisieren bei:
 - Reines Refactoring ohne externe Auswirkung
 - Bugfixes die kein Verhalten aendern
 - Interne Umbenennung ohne API-Effekt
-
-Inline-Kommentare: **Warum** erklaeren, nicht **Was** — der Code ist das "Was"
 
 ## Was aktualisieren
 
@@ -30,5 +28,4 @@ Inline-Kommentare: **Warum** erklaeren, nicht **Was** — der Code ist das "Was"
 ## Projektspezifische Mappings
 
 - Projekt-CLAUDE.md definiert welche Docs bei welchen Aenderungen zu aktualisieren sind
-- CLAUDE.md selbst aktualisieren wenn sich Projektstruktur, Befehle oder Konventionen aendern
 - Bei fehlender Zuordnung: CHANGELOG immer, README/ARCHITECTURE wenn User-sichtbar

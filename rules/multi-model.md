@@ -2,19 +2,12 @@
 
 **Aktivierung:** Diese Regeln gelten wenn `codex` CLI installiert ist (`command -v codex`) und die Aufgabe klar abgegrenzten Input/Output hat.
 
-## Rollenverteilung
-
-- **Claude** (Orchestrator): Planung, Frontend, Review, Refactoring, komplexe Logik
-- **Codex** (Executor): Backend-Prototypen, Algorithmen, isolierte Tasks
-- Claude zerlegt grosse Aufgaben in Teilschritte — Codex fuehrt einzeln aus
-
 ## Wann Codex delegieren
 
 Schlage dem User proaktiv Codex-Delegation vor, wenn ALLE Bedingungen zutreffen:
 
-1. `codex` CLI ist installiert (`command -v codex`)
-2. Die Aufgabe hat klar abgegrenzten Input/Output (1 Datei, 1 Funktion)
-3. Die Aufgabe faellt in eine dieser Kategorien:
+1. Die Aufgabe hat klar abgegrenzten Input/Output (1 Datei, 1 Funktion)
+2. Die Aufgabe faellt in eine dieser Kategorien:
 
 - Backend-Logik und Algorithmen mit klarem Input/Output
 - Code-Reviews und Security-Audits (Sandbox `read`)
@@ -25,16 +18,16 @@ Schlage dem User proaktiv Codex-Delegation vor, wenn ALLE Bedingungen zutreffen:
 
 ## Wann NICHT delegieren
 
-- Aufgaben die Kontext ueber mehrere Dateien erfordern (Claude kennt den Codebase besser)
+- Aufgaben die Kontext ueber mehrere Dateien erfordern
 - UI/UX-Entscheidungen und Accessibility
 - Tasks die interaktive User-Rueckfragen brauchen
 - Sicherheitskritische Aenderungen ohne anschliessendes Review
 
 ## Sandbox-Wahl
 
-- `read` — Reviews, Analyse, Planung (Standard fuer `/multi-backend`, `/multi-plan`)
-- `write` — Code-Generierung im Projektordner (Standard fuer `/multi-workflow`)
-- `full` — Nur wenn explizit vom User angefordert (System-Zugriff noetig)
+- `read` — Reviews, Analyse, Planung
+- `write` — Code-Generierung im Projektordner
+- `full` — Nur wenn explizit vom User angefordert
 
 ## Prompt-Qualitaet
 
