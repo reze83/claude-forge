@@ -5,29 +5,29 @@
 ## Entscheidungs-Flow (in sequential thinking ausfuehren)
 
 1. **Task analysieren:** Was ist das Ziel? Welche Faehigkeiten braucht es?
-2. **Verbundene Server pruefen:** Deckt ein bereits verbundener Server den Bedarf?
+2. **Gegen Entscheidungsmatrix pruefen** — faellt der Task in eine dieser Kategorien?
+
+   | Task-Kontext                                                                 | Suchbegriff                |
+   | ---------------------------------------------------------------------------- | -------------------------- |
+   | Spezialisierte Sprachen (PowerShell, Terraform, Kotlin, Swift, Ruby, Lua, R) | `"<sprache>"`              |
+   | Container / Orchestrierung                                                   | `"docker"`, `"kubernetes"` |
+   | IaC (Terraform, Pulumi, CloudFormation)                                      | `"infrastructure"`         |
+   | Datenbank-Operationen (SQL, NoSQL, Graph)                                    | `"database"`               |
+   | Datenkonvertierung (PDF, CSV, XML)                                           | `"<format> convert"`       |
+   | Code-Analyse / Security-Audit                                                | `"code analysis"`          |
+   | Monitoring / Logs / Alerting                                                 | `"monitoring"`             |
+   | Externe Services / Plattformen                                               | `"<service-name>"`         |
+
+   **Faustregel:** Wenn ein spezialisiertes Tool bessere Ergebnisse liefern wuerde als Bash + WebSearch, ZUERST smithery durchsuchen.
+
+3. **Verbundene Server pruefen:** Deckt ein bereits verbundener Server den Bedarf?
    - Server-IDs: im Context unter `smithery_ids`
    - Tools auflisten: `smithery tool list <id>`
-3. **Luecke erkannt?** → `smithery mcp search "<capability>"` ausfuehren
+4. **Luecke erkannt?** → `smithery mcp search "<capability>"` ausfuehren
    - Server mit hohem `useCount` bevorzugen (bewaehrt, stabil)
    - Verbinden: `smithery mcp add "<connectionUrl>"`
    - User kurz informieren welcher Server aktiviert wurde
-4. **Task ausfuehren** mit allen verfuegbaren Tools (eingebaut + MCP)
-
-## Entscheidungsmatrix — Wann MCP-Server suchen
-
-| Task-Kontext                                                                 | Suchbegriff                |
-| ---------------------------------------------------------------------------- | -------------------------- |
-| Spezialisierte Sprachen (PowerShell, Terraform, Kotlin, Swift, Ruby, Lua, R) | `"<sprache>"`              |
-| Container / Orchestrierung                                                   | `"docker"`, `"kubernetes"` |
-| IaC (Terraform, Pulumi, CloudFormation)                                      | `"infrastructure"`         |
-| Datenbank-Operationen (SQL, NoSQL, Graph)                                    | `"database"`               |
-| Datenkonvertierung (PDF, CSV, XML)                                           | `"<format> convert"`       |
-| Code-Analyse / Security-Audit                                                | `"code analysis"`          |
-| Monitoring / Logs / Alerting                                                 | `"monitoring"`             |
-| Externe Services / Plattformen                                               | `"<service-name>"`         |
-
-**Faustregel:** Wenn ein spezialisiertes Tool bessere Ergebnisse liefern wuerde als Bash + WebSearch, ZUERST smithery durchsuchen.
+5. **Task ausfuehren** mit allen verfuegbaren Tools (eingebaut + MCP)
 
 ## Verbundene Server nutzen
 
