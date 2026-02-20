@@ -32,6 +32,7 @@ block() {
 # --- Dry-run aware block (PreToolUse) ---
 # Set CLAUDE_FORGE_DRY_RUN=1 to report violations without blocking.
 # Uses warn() in dry-run mode, block() in normal mode.
+# Note: Critical hooks use block() directly — not bypassable even in DRY_RUN.
 block_or_warn() {
   if [[ "${CLAUDE_FORGE_DRY_RUN:-0}" == "1" ]]; then
     warn "[DRY-RUN] Would block: $1"

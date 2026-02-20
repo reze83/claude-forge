@@ -19,8 +19,12 @@ debug "protect-files: tool=$TOOL_NAME path=$FILE_PATH"
 # Case-insensitive comparison (Bash 3.2+ compatible)
 FILE_PATH_LOWER=$(printf '%s' "$FILE_PATH" | tr '[:upper:]' '[:lower:]')
 
-PATTERNS=(".env" ".env." "secrets/" ".ssh/" ".aws/" ".gnupg/" ".git/" ".npmrc" ".netrc")
-EXTENSIONS=(".pem" ".key" ".p12" ".pfx" ".keystore")
+# Critical patterns: always block() — never bypassable, even in DRY_RUN
+CRITICAL_PATTERNS=(".env" ".env." ".ssh/" ".aws/" ".gnupg/")
+CRITICAL_EXTENSIONS=(".pem" ".key" ".p12" ".pfx" ".keystore")
+
+# Non-critical patterns: block_or_warn() — respects DRY_RUN
+PATTERNS=("secrets/" ".git/" ".npmrc" ".netrc")
 
 # Allowlist: safe .env template files (check before blocking)
 ALLOWLIST=(".env.example" ".env.sample" ".env.template")
@@ -32,7 +36,7 @@ done
 HOOK_PROTECTED=("hooks.json" "hooks/" "settings.json" "settings.local.json")
 if [[ "$TOOL_NAME" == "Write" || "$TOOL_NAME" == "Edit" ]]; then
   for hp in "${HOOK_PROTECTED[@]}"; do
-    [[ "$FILE_PATH_LOWER" == *".claude/$hp"* ]] && block_or_warn "'$FILE_PATH' is protected (hook configuration)"
+    [[ "$FILE_PATH_LOWER" == *".claude/$hp"* ]] && block "'$FILE_PATH' is protected (hook configuration)"
   done
 fi
 
@@ -43,12 +47,18 @@ if [[ "$FILE_PATH_LOWER" == *"package-lock.json"* ]]; then
   fi
 fi
 
-for p in "${PATTERNS[@]}"; do
-  [[ "$FILE_PATH_LOWER" == *"$p"* ]] && block_or_warn "'$FILE_PATH' is protected (pattern: '$p')"
+# Critical: always block — never bypassable
+for cp in "${CRITICAL_PATTERNS[@]}"; do
+  [[ "$FILE_PATH_LOWER" == *"$cp"* ]] && block "'$FILE_PATH' is protected (pattern: '$cp')"
 done
 
-for e in "${EXTENSIONS[@]}"; do
-  [[ "$FILE_PATH_LOWER" == *"$e" ]] && block_or_warn "'$FILE_PATH' is protected (extension: '$e')"
+for ce in "${CRITICAL_EXTENSIONS[@]}"; do
+  [[ "$FILE_PATH_LOWER" == *"$ce" ]] && block "'$FILE_PATH' is protected (extension: '$ce')"
+done
+
+# Non-critical: respects DRY_RUN
+for p in "${PATTERNS[@]}"; do
+  [[ "$FILE_PATH_LOWER" == *"$p"* ]] && block_or_warn "'$FILE_PATH' is protected (pattern: '$p')"
 done
 
 exit 0

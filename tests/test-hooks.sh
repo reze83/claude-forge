@@ -101,8 +101,12 @@ assert_exit "Blocks python3 -c" 0 "$FW" '{"tool_input":{"command":"python3 -c \"
 assert_exit "Blocks node -e" 0 "$FW" '{"tool_input":{"command":"node -e \"require(\\\"child_process\\\").exec(\\\"evil\\\")\""}}'
 assert_exit "Blocks perl -e" 0 "$FW" '{"tool_input":{"command":"perl -e \"system(\\\"rm -rf /\\\")\""}}'
 assert_exit "Blocks ruby -e" 0 "$FW" '{"tool_input":{"command":"ruby -e \"system(\\\"rm -rf /\\\")\""}}'
+assert_exit "Blocks python3.12 -c" 0 "$FW" '{"tool_input":{"command":"python3.12 -c \"import os\""}}'
+assert_exit "Blocks python2.7 -c" 0 "$FW" '{"tool_input":{"command":"python2.7 -c \"print 1\""}}'
+assert_exit "Blocks nodejs -e" 0 "$FW" '{"tool_input":{"command":"nodejs -e \"console.log(1)\""}}'
 assert_exit "Allows python script.py" 0 "$FW" '{"tool_input":{"command":"python script.py"}}'
 assert_exit "Allows node app.js" 0 "$FW" '{"tool_input":{"command":"node app.js"}}'
+assert_exit "Allows nodejs app.js" 0 "$FW" '{"tool_input":{"command":"nodejs app.js"}}'
 
 echo ""
 
@@ -730,17 +734,61 @@ CLAUDE_FORGE_BACKUP=1 assert_exit "Skips non-existent file" 0 "$PWB" '{"tool_nam
 
 echo ""
 
-# --- protect-files.sh dry-run ---
-echo "-- protect-files.sh: dry-run mode --"
+# --- protect-files.sh dry-run (tiered block model) ---
+echo "-- protect-files.sh: dry-run mode (tiered) --"
 PF="$HOOKS_DIR/protect-files.sh"
 
-# Dry-run: .env should produce warning, not deny
+# Critical pattern: .env blocks even in DRY_RUN
 PF_OUT=$(echo '{"tool_name":"Read","tool_input":{"file_path":"/home/user/.env"}}' | CLAUDE_FORGE_DRY_RUN=1 bash "$PF" 2>/dev/null || true)
-if [[ "$PF_OUT" == *"DRY-RUN"* && "$PF_OUT" == *"systemMessage"* ]]; then
-  printf '  %b[PASS]%b protect-files: dry-run warns instead of blocking\n' "$GREEN" "$NC"
+if [[ "$PF_OUT" == *"deny"* && "$PF_OUT" != *"DRY-RUN"* ]]; then
+  printf '  %b[PASS]%b protect-files: DRY_RUN still blocks critical .env\n' "$GREEN" "$NC"
   PASS=$((PASS + 1))
 else
-  printf '  %b[FAIL]%b protect-files: dry-run should warn, got: %s\n' "$RED" "$NC" "$PF_OUT"
+  printf '  %b[FAIL]%b protect-files: critical .env should block in DRY_RUN, got: %s\n' "$RED" "$NC" "$PF_OUT"
+  FAIL=$((FAIL + 1))
+fi
+unset PF_OUT
+
+# Critical pattern: .ssh/ blocks even in DRY_RUN
+PF_OUT=$(echo '{"tool_name":"Read","tool_input":{"file_path":"/home/user/.ssh/id_rsa"}}' | CLAUDE_FORGE_DRY_RUN=1 bash "$PF" 2>/dev/null || true)
+if [[ "$PF_OUT" == *"deny"* && "$PF_OUT" != *"DRY-RUN"* ]]; then
+  printf '  %b[PASS]%b protect-files: DRY_RUN still blocks critical .ssh/\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b protect-files: critical .ssh/ should block in DRY_RUN, got: %s\n' "$RED" "$NC" "$PF_OUT"
+  FAIL=$((FAIL + 1))
+fi
+unset PF_OUT
+
+# Critical extension: .pem blocks even in DRY_RUN
+PF_OUT=$(echo '{"tool_name":"Read","tool_input":{"file_path":"/home/user/cert.pem"}}' | CLAUDE_FORGE_DRY_RUN=1 bash "$PF" 2>/dev/null || true)
+if [[ "$PF_OUT" == *"deny"* && "$PF_OUT" != *"DRY-RUN"* ]]; then
+  printf '  %b[PASS]%b protect-files: DRY_RUN still blocks critical .pem\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b protect-files: critical .pem should block in DRY_RUN, got: %s\n' "$RED" "$NC" "$PF_OUT"
+  FAIL=$((FAIL + 1))
+fi
+unset PF_OUT
+
+# Critical: hook-tampering blocks even in DRY_RUN
+PF_OUT=$(echo '{"tool_name":"Write","tool_input":{"file_path":"/home/user/.claude/hooks.json"}}' | CLAUDE_FORGE_DRY_RUN=1 bash "$PF" 2>/dev/null || true)
+if [[ "$PF_OUT" == *"deny"* && "$PF_OUT" != *"DRY-RUN"* ]]; then
+  printf '  %b[PASS]%b protect-files: DRY_RUN still blocks hook-tampering\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b protect-files: hook-tampering should block in DRY_RUN, got: %s\n' "$RED" "$NC" "$PF_OUT"
+  FAIL=$((FAIL + 1))
+fi
+unset PF_OUT
+
+# Non-critical pattern: .git/ warns in DRY_RUN
+PF_OUT=$(echo '{"tool_name":"Read","tool_input":{"file_path":"/repo/.git/config"}}' | CLAUDE_FORGE_DRY_RUN=1 bash "$PF" 2>/dev/null || true)
+if [[ "$PF_OUT" == *"DRY-RUN"* && "$PF_OUT" == *"systemMessage"* ]]; then
+  printf '  %b[PASS]%b protect-files: DRY_RUN warns on non-critical .git/\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b protect-files: non-critical .git/ should warn in DRY_RUN, got: %s\n' "$RED" "$NC" "$PF_OUT"
   FAIL=$((FAIL + 1))
 fi
 unset PF_OUT
