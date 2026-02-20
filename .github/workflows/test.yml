@@ -82,5 +82,8 @@ jobs:
       - name: Run validate tests
         run: bash tests/test-validate.sh
 
+      - name: Run plugin tests
+        run: bash tests/test-plugin.sh
+
       - name: Run install tests
         run: bash tests/test-install.sh
