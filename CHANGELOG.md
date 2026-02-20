@@ -18,10 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - settings.json.example: remove dead `autoUpdatesChannel` (overridden by `autoUpdates: false`)
 - settings.json.example: add `Bash(npm install *)` and `Bash(pip install *)` to `ask` permissions (supply-chain protection)
 - settings.json.example: add `server.smithery.ai` to sandbox `allowedDomains`
+- install.sh: `sync_settings_json()` uses array union for `permissions.ask`, `permissions.deny` and `sandbox.network.allowedDomains` — template baseline entries now reach existing users on update instead of being silently dropped
 - install.sh: deploy `VERSION` file to `~/.claude/` via `create_link` — fixes `forgeVersion` always showing `"unknown"` in hooks
 - uninstall.sh: clean up `~/.claude/VERSION` on uninstall (with dry-run support)
 - validate.sh: add deployed VERSION check (`~/.claude/VERSION` exists)
-- tests: +2 install tests (VERSION deployed, VERSION removed), +12 hook tests — 254 total
+- tests: +2 install tests (VERSION deployed, VERSION removed), +12 hook tests, +5 array merge tests — 259 total
 
 ## [0.5.2] - 2026-02-20
 
