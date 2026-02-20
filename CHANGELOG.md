@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-02-20
+
 ### Fixed
 
 - plugin.json: version synced to 0.6.2 (was stale at 0.5.0)
