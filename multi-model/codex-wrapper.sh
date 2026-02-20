@@ -5,10 +5,12 @@ set -euo pipefail
 # Codex CLI Wrapper fuer Claude Code (v0.104+)
 # Aufgerufen von multi-* Commands via Bash.
 #
-# Usage: codex-wrapper.sh --sandbox <mode> --prompt "<prompt>" [--model <model>]
-#   --sandbox: read | write | full (default: write)
-#   --prompt:  Die Aufgabe fuer Codex
-#   --model:   OpenAI-Modell (default: gpt-5.3-codex)
+# Usage: codex-wrapper.sh --sandbox <mode> --prompt "<prompt>" [options]
+#   --sandbox:      read | write | full (default: write)
+#   --prompt:       Die Aufgabe fuer Codex
+#   --model:        OpenAI-Modell (default: gpt-5.3-codex)
+#   --context-file: Datei-Inhalt an Prompt prependen (wiederholbar)
+#   --template:     Template-Datei rendern statt --prompt (key=value args)
 #
 # Output: JSON auf stdout
 #   { "status": "success|error", "output": "...", "model": "<model>" }
@@ -20,9 +22,17 @@ MODEL="gpt-5.3-codex"
 REASONING="xhigh"
 TIMEOUT=240
 WORKDIR="$(pwd)"
+CONTEXT_FILES=()
+TEMPLATE=""
 
+readonly MAX_CONTEXT_BYTES=50000
 readonly MIN_TIMEOUT=30
 readonly MAX_TIMEOUT=600
+
+# --- Source shared library ---
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib.sh
+source "$SCRIPT_DIR/lib.sh"
 
 # --- Pre-Checks ---
 if ! command -v jq >/dev/null 2>&1; then
@@ -33,7 +43,7 @@ fi
 # --- Argumente ---
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --sandbox | --prompt | --workdir | --timeout | --model)
+    --sandbox | --prompt | --workdir | --timeout | --model | --context-file | --template)
       if [[ $# -lt 2 ]]; then
         echo "{\"status\":\"error\",\"output\":\"Missing value for $1\",\"model\":\"$MODEL\"}"
         exit 0
@@ -59,6 +69,14 @@ while [[ $# -gt 0 ]]; do
       MODEL="$2"
       shift 2
       ;;
+    --context-file)
+      CONTEXT_FILES+=("$2")
+      shift 2
+      ;;
+    --template)
+      TEMPLATE="$2"
+      shift 2
+      ;;
     *)
       echo "{\"status\":\"error\",\"output\":\"Unknown argument: $1\",\"model\":\"$MODEL\"}"
       exit 0
@@ -66,9 +84,50 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# --- Template-Rendering (--template ersetzt --prompt) ---
+if [[ -n "$TEMPLATE" ]]; then
+  # Remaining positional-style key=value args were consumed by --template parsing
+  # Template file gets rendered via render_template from lib.sh
+  if [[ ! -f "$TEMPLATE" ]]; then
+    echo "{\"status\":\"error\",\"output\":\"Template not found: $TEMPLATE\",\"model\":\"$MODEL\"}"
+    exit 0
+  fi
+  # If PROMPT already set, use it as the "task" variable
+  TEMPLATE_ARGS=()
+  [[ -n "$PROMPT" ]] && TEMPLATE_ARGS+=("task=$PROMPT")
+  PROMPT="$(render_template "$TEMPLATE" "${TEMPLATE_ARGS[@]}")" 2>/dev/null || {
+    echo "{\"status\":\"error\",\"output\":\"Template rendering failed: $TEMPLATE\",\"model\":\"$MODEL\"}"
+    exit 0
+  }
+fi
+
 if [[ -z "$PROMPT" ]]; then
   echo '{"status":"error","output":"--prompt ist erforderlich","model":"'"$MODEL"'"}'
   exit 0
+fi
+
+# --- Context-Files an Prompt prependen ---
+if [[ ${#CONTEXT_FILES[@]} -gt 0 ]]; then
+  CONTEXT_PREFIX=""
+  USED_BYTES=0
+  for CTX_FILE in "${CONTEXT_FILES[@]}"; do
+    if [[ ! -f "$CTX_FILE" ]]; then
+      echo "{\"status\":\"error\",\"output\":\"Context file not found: $CTX_FILE\",\"model\":\"$MODEL\"}"
+      exit 0
+    fi
+    CTX_NAME="${CTX_FILE##*/}"
+    CTX_HEADER="$(printf -- '--- Context: %s ---\n' "$CTX_NAME")"
+    CTX_CONTENT="$(cat "$CTX_FILE")"
+    CTX_BLOCK="${CTX_HEADER}${CTX_CONTENT}"$'\n'
+    BLOCK_BYTES=${#CTX_BLOCK}
+    if [[ $((USED_BYTES + BLOCK_BYTES)) -gt $MAX_CONTEXT_BYTES ]]; then
+      break
+    fi
+    CONTEXT_PREFIX+="$CTX_BLOCK"
+    USED_BYTES=$((USED_BYTES + BLOCK_BYTES))
+  done
+  PROMPT="${CONTEXT_PREFIX}--- Task ---
+${PROMPT}"
 fi
 
 # --- Timeout validieren ---

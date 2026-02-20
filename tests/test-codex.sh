@@ -78,6 +78,76 @@ assert_contains "--model setzt model im Output" '"model":"o4-mini"' "$OUT"
 OUT=$(bash "$WRAPPER" 2>&1) || true
 assert_contains "Default model ist gpt-5.3-codex" '"model":"gpt-5.3-codex"' "$OUT"
 
+# --- render_template Tests ---
+echo ""
+echo "-- render_template --"
+
+# Source lib.sh directly (no bash -c subshell)
+# shellcheck source=../multi-model/lib.sh
+source "$SCRIPT_DIR/multi-model/lib.sh"
+
+# Temp-Template erstellen
+TPL_DIR="$(mktemp -d)"
+trap 'rm -rf "$TPL_DIR"' EXIT
+
+cat >"$TPL_DIR/test.tpl" <<'TMPL'
+Hello {{name}}, welcome to {{project}}.
+TMPL
+
+# Test: Einfache Substitution
+OUT=$(render_template "$TPL_DIR/test.tpl" name=World project=Forge 2>&1) || true
+assert_contains "render_template: einfache Substitution" 'Hello World, welcome to Forge.' "$OUT"
+
+# Test: Fehlende Datei → exit 1
+OUT=$(render_template /nonexistent/file.md 2>&1) || true
+assert_contains "render_template: fehlende Datei → Fehler" 'not found' "$OUT"
+
+# Test: Unsubstituierte Placeholder → Warning
+cat >"$TPL_DIR/warn.tpl" <<'TMPL'
+{{greeting}} {{unused}}
+TMPL
+OUT=$(render_template "$TPL_DIR/warn.tpl" greeting=Hi 2>&1) || true
+assert_contains "render_template: warnt ueber unsubstituierte Placeholder" 'unsubstituted' "$OUT"
+assert_contains "render_template: Output enthaelt substituierten Wert" 'Hi' "$OUT"
+
+# Test: Sonderzeichen in Werten (sed-safe)
+cat >"$TPL_DIR/special.tpl" <<'TMPL'
+path={{path}}
+TMPL
+OUT=$(render_template "$TPL_DIR/special.tpl" "path=/usr/local/bin" 2>&1) || true
+assert_contains "render_template: Sonderzeichen in Werten" '/usr/local/bin' "$OUT"
+
+# --- context-file Tests ---
+echo ""
+echo "-- context-file --"
+
+cat >"$TPL_DIR/ctx1.txt" <<'TMPL'
+file content here
+TMPL
+cat >"$TPL_DIR/ctx2.txt" <<'TMPL'
+second file
+TMPL
+
+# Test: --context-file fehlende Datei → error
+OUT=$(bash "$WRAPPER" --context-file /nonexistent/file.txt --prompt "test" 2>&1) || true
+assert_contains "--context-file fehlende Datei → error" '"status":"error"' "$OUT"
+assert_contains "--context-file nennt Datei" 'Context file not found' "$OUT"
+
+# Test: --context-file existierend (wrapper wird wegen fehlendem codex/timeout scheitern,
+#       aber NICHT wegen context-file — also kein "Context file not found" im Output)
+OUT=$(bash "$WRAPPER" --context-file "$TPL_DIR/ctx1.txt" --prompt "test" 2>&1) || true
+if echo "$OUT" | grep -q 'Context file not found'; then
+  printf '  %b[FAIL]%b context-file akzeptiert existierende Datei\n' "$RED" "$NC"
+  FAIL=$((FAIL + 1))
+else
+  printf '  %b[PASS]%b context-file akzeptiert existierende Datei\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+fi
+
+# Test: --template fehlende Datei → error
+OUT=$(bash "$WRAPPER" --template /nonexistent/template.md --prompt "test" 2>&1) || true
+assert_contains "--template fehlende Datei → error" 'Template not found' "$OUT"
+
 # --- Live-Tests (nur wenn Codex installiert) ---
 echo ""
 echo "-- Live-Tests --"

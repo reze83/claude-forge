@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- multi-model: `render_template()` function in `lib.sh` for {{placeholder}} substitution in prompt templates (#111)
+- multi-model: `--context-file` flag for codex-wrapper.sh to prepend file contents to prompts (#113)
+- multi-model: `--template` flag for codex-wrapper.sh to render prompt templates before sending to Codex (#111)
+
 ### Changed
 
 - multi-model: downgrade model from opus to sonnet for /multi-plan, /multi-backend, /multi-execute (#112)
