@@ -119,19 +119,24 @@ unset _local_patterns_file
 
 # --- Desktop Notification (WSL2 / Linux) ---
 # Sends a Windows Toast notification (WSL2) or notify-send (Linux).
+# Runs asynchronously in background to avoid blocking hooks.
 # Usage: notify "Message text"
 notify() {
   local message="$1"
-  if command -v powershell.exe >/dev/null 2>&1; then
-    powershell.exe -Command "
-      [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
-      \$xml = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent(0)
-      \$xml.GetElementsByTagName('text')[0].AppendChild(\$xml.CreateTextNode('$message')) | Out-Null
-      [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('Claude Code').Show([Windows.UI.Notifications.ToastNotification]::new(\$xml))
-    " 2>/dev/null || true
-  elif command -v notify-send >/dev/null 2>&1; then
-    notify-send "Claude Code" "$message" 2>/dev/null || true
-  fi
+  (
+    trap - EXIT # prevent duplicate metrics trap in subshell
+    if command -v powershell.exe >/dev/null 2>&1; then
+      powershell.exe -Command "
+        [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
+        \$xml = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent(0)
+        \$xml.GetElementsByTagName('text')[0].AppendChild(\$xml.CreateTextNode('$message')) | Out-Null
+        [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('Claude Code').Show([Windows.UI.Notifications.ToastNotification]::new(\$xml))
+      " 2>/dev/null || true
+    elif command -v notify-send >/dev/null 2>&1; then
+      notify-send "Claude Code" "$message" 2>/dev/null || true
+    fi
+  ) &
+  disown $! 2>/dev/null || true
 }
 
 # --- Event Logger ---
