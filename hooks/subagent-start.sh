@@ -7,7 +7,7 @@ set -euo pipefail
 source "$(cd "$(dirname "$0")" && pwd)/lib.sh"
 
 main() {
-  local input session_id agent_id agent_type timestamp log_file
+  local input session_id agent_id agent_type
 
   input="$(cat 2>/dev/null || true)"
   session_id="$(printf '%s' "$input" | jq -r '.session_id // "unknown"' 2>/dev/null || printf 'unknown')"

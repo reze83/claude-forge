@@ -3,7 +3,7 @@ set -euo pipefail
 source "$(cd "$(dirname "$0")" && pwd)/lib.sh"
 
 main() {
-  local input session_id source_name model timestamp script_dir forge_dir version hooks_file active_hooks context_json
+  local input session_id source_name model script_dir forge_dir version hooks_file active_hooks context_json
 
   input="$(cat 2>/dev/null || true)"
   session_id="$(printf '%s' "$input" | jq -r '.session_id // "unknown"' 2>/dev/null || printf 'unknown')"
