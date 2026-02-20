@@ -16,7 +16,7 @@ ITERATIONS="${BENCH_ITERATIONS:-50}"
 # with date +%s%N fallback for older Bash.
 _bench_now_ms() {
   if [[ -n "${EPOCHREALTIME:-}" ]]; then
-    local t="$EPOCHREALTIME" s="${EPOCHREALTIME%.*}" f="${EPOCHREALTIME#*.}"
+    local s="${EPOCHREALTIME%.*}" f="${EPOCHREALTIME#*.}"
     printf '%s%s' "$s" "${f:0:3}"
   else
     local ns
