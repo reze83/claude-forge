@@ -53,7 +53,7 @@ Hook timeouts must match between `hooks/hooks.json` (plugin mode) and `user-conf
 Run all tests before committing:
 
 ```bash
-bash tests/test-hooks.sh      # Hook unit tests (187 tests)
+bash tests/test-hooks.sh      # Hook unit tests (195 tests)
 bash tests/test-update.sh     # Update script tests (6 tests)
 bash tests/test-install.sh    # Install/uninstall tests (27 tests)
 bash tests/test-codex.sh      # Codex wrapper tests (11 tests)
@@ -61,7 +61,7 @@ bash tests/test-validate.sh   # Validation tests (1 test)
 bash validate.sh              # Full validation suite
 ```
 
-Total: 229 tests
+Total: 240 tests
 
 ### Adding Tests
 

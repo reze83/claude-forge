@@ -105,7 +105,9 @@ check_dir_with_links_recursive() {
 check_dir_with_links "rules"
 check_dir_with_links "hooks"
 check_dir_with_links "commands"
+check_dir_with_links "agents"
 check_dir_with_links_recursive "multi-model"
+check_dir_with_links_recursive "skills"
 
 # --- JSON-Validitaet ---
 echo ""
@@ -246,6 +248,29 @@ for event in $HOOK_EVENTS; do
       pass "${event}[$i] ($H_MATCHER) Timeout konsistent (${H_TO}s)"
     fi
   done
+done
+
+# --- Hook-Script ↔ hooks.json Abgleich ---
+echo ""
+echo "-- Hook-Script Abgleich --"
+# Every .sh in hooks/ (except lib.sh) should be referenced in hooks.json
+for hook in "$REPO_DIR/hooks/"*.sh; do
+  [[ -f "$hook" ]] || continue
+  name="$(basename "$hook")"
+  [[ "$name" == "lib.sh" ]] && continue
+  if grep -q "$name" "$REPO_DIR/hooks/hooks.json" 2>/dev/null; then
+    pass "$name in hooks.json referenziert"
+  else
+    warning "$name nicht in hooks.json referenziert (verwaist?)"
+  fi
+done
+# Every script referenced in hooks.json should exist
+for ref in $(jq -r '.. | .command? // empty' "$REPO_DIR/hooks/hooks.json" 2>/dev/null | grep -oE '[a-z_-]+\.sh'); do
+  if [[ -f "$REPO_DIR/hooks/$ref" ]]; then
+    pass "$ref existiert"
+  else
+    fail "$ref in hooks.json referenziert aber fehlt"
+  fi
 done
 
 # --- Ergebnis ---
