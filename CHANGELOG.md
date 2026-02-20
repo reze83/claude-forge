@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.3] - 2026-02-20
+
 ### Changed
 
 - rules/smithery.md: clarify only Sequential Thinking is permanently connected — all other MCP servers are temporary per task
