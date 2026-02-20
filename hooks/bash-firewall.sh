@@ -81,6 +81,10 @@ DENY_PATTERNS=(
   '[<>]\([^)]*(rm\s+-rf\s+(/|~|\$HOME|\.\.?/)|eval\s+|(bash|sh)\s+-c\s+)'
   '\|\s*(/[a-z/]*/)?\.?(bash|sh)(\s|$)'
   '(bash|sh)\s*<<<'
+  'python3?\s+-c\s+'
+  'node\s+-e\s+'
+  'perl\s+-e\s+'
+  'ruby\s+-e\s+'
 )
 
 DENY_REASONS=(
@@ -110,30 +114,65 @@ DENY_REASONS=(
   "Dangerous command inside process substitution. Run commands directly."
   "Piping output into bash/sh not allowed. Run commands directly."
   "Herestring into bash/sh not allowed. Run commands directly."
+  "python -c not allowed. Use a .py script file instead."
+  "node -e not allowed. Use a .js script file instead."
+  "perl -e not allowed. Use a .pl script file instead."
+  "ruby -e not allowed. Use a .rb script file instead."
 )
 
 # Check both original and normalized command against built-in patterns
 # Built-in patterns always use block() — never bypassable via dry-run
+# Performance: build alternation for quick-check (2 grep calls instead of 60)
+deny_alt=""
 for i in "${!DENY_PATTERNS[@]}"; do
-  if echo "$CMD" | grep -Eiq "${DENY_PATTERNS[$i]}"; then
-    block "${DENY_REASONS[$i]}"
-  fi
-  if echo "$CMD_NORM" | grep -Eiq "${DENY_PATTERNS[$i]}"; then
-    block "${DENY_REASONS[$i]}"
+  if [[ -z "$deny_alt" ]]; then
+    deny_alt="${DENY_PATTERNS[$i]}"
+  else
+    deny_alt="${deny_alt}|${DENY_PATTERNS[$i]}"
   fi
 done
+
+if echo "$CMD" | grep -Eiq "$deny_alt"; then
+  for i in "${!DENY_PATTERNS[@]}"; do
+    if echo "$CMD" | grep -Eiq "${DENY_PATTERNS[$i]}"; then
+      block "${DENY_REASONS[$i]}"
+    fi
+  done
+fi
+if echo "$CMD_NORM" | grep -Eiq "$deny_alt"; then
+  for i in "${!DENY_PATTERNS[@]}"; do
+    if echo "$CMD_NORM" | grep -Eiq "${DENY_PATTERNS[$i]}"; then
+      block "${DENY_REASONS[$i]}"
+    fi
+  done
+fi
 
 # Check local deny patterns (user overrides from ~/.claude/local-patterns.sh)
 # Local patterns use block_or_warn() — supports dry-run for testing custom rules
 if [[ ${#LOCAL_DENY_PATTERNS[@]} -gt 0 && ${#LOCAL_DENY_PATTERNS[@]} -eq ${#LOCAL_DENY_REASONS[@]} ]]; then
+  local_deny_alt=""
   for i in "${!LOCAL_DENY_PATTERNS[@]}"; do
-    if echo "$CMD" | grep -Eiq "${LOCAL_DENY_PATTERNS[$i]}" 2>/dev/null; then
-      block_or_warn "${LOCAL_DENY_REASONS[$i]}"
-    fi
-    if echo "$CMD_NORM" | grep -Eiq "${LOCAL_DENY_PATTERNS[$i]}" 2>/dev/null; then
-      block_or_warn "${LOCAL_DENY_REASONS[$i]}"
+    if [[ -z "$local_deny_alt" ]]; then
+      local_deny_alt="${LOCAL_DENY_PATTERNS[$i]}"
+    else
+      local_deny_alt="${local_deny_alt}|${LOCAL_DENY_PATTERNS[$i]}"
     fi
   done
+
+  if echo "$CMD" | grep -Eiq "$local_deny_alt" 2>/dev/null; then
+    for i in "${!LOCAL_DENY_PATTERNS[@]}"; do
+      if echo "$CMD" | grep -Eiq "${LOCAL_DENY_PATTERNS[$i]}" 2>/dev/null; then
+        block_or_warn "${LOCAL_DENY_REASONS[$i]}"
+      fi
+    done
+  fi
+  if echo "$CMD_NORM" | grep -Eiq "$local_deny_alt" 2>/dev/null; then
+    for i in "${!LOCAL_DENY_PATTERNS[@]}"; do
+      if echo "$CMD_NORM" | grep -Eiq "${LOCAL_DENY_PATTERNS[$i]}" 2>/dev/null; then
+        block_or_warn "${LOCAL_DENY_REASONS[$i]}"
+      fi
+    done
+  fi
 fi
 
 exit 0

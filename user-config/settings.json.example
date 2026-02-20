@@ -55,7 +55,7 @@
         ]
       },
       {
-        "matcher": "Read|Write|Edit",
+        "matcher": "Read|Write|Edit|Glob|Grep",
         "hooks": [
           {
             "type": "command",
