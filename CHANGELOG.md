@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- bench-hooks.sh: replace `date +%s%3N` with `$EPOCHREALTIME` (Bash 5+ built-in) to eliminate intermittent clock-race overflows on WSL2; use heredoc instead of pipe; skip anomalous samples instead of zeroing them
+
 ### Changed
 
 - lib.sh: hook metrics use millisecond precision via `date +%s%N` instead of integer `SECONDS` (format: `12ms` instead of `0s`)

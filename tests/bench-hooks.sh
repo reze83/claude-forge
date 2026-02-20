@@ -12,6 +12,19 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 HOOKS_DIR="$SCRIPT_DIR/../hooks"
 ITERATIONS="${BENCH_ITERATIONS:-50}"
 
+# Portable millisecond timestamp: EPOCHREALTIME (Bash 5+, atomic, no fork)
+# with date +%s%N fallback for older Bash.
+_bench_now_ms() {
+  if [[ -n "${EPOCHREALTIME:-}" ]]; then
+    local t="$EPOCHREALTIME" s="${EPOCHREALTIME%.*}" f="${EPOCHREALTIME#*.}"
+    printf '%s%s' "$s" "${f:0:3}"
+  else
+    local ns
+    ns=$(date +%s%N 2>/dev/null)
+    printf '%s' "$((ns / 1000000))"
+  fi
+}
+
 printf "claude-forge hook benchmark (%d iterations)\n\n" "$ITERATIONS"
 printf "%-25s %8s %8s %8s\n" "Hook" "Avg(ms)" "Min(ms)" "Max(ms)"
 printf "%-25s %8s %8s %8s\n" "-------------------------" "--------" "--------" "--------"
@@ -19,21 +32,28 @@ printf "%-25s %8s %8s %8s\n" "-------------------------" "--------" "--------" "
 bench() {
   local hook="$1" input="$2"
   local script="$HOOKS_DIR/$hook"
-  local total=0 min=999999 max=0
+  local total=0 min=999999 max=0 count=0
 
   for ((i = 0; i < ITERATIONS; i++)); do
-    start=$(date +%s%3N)
-    printf '%s' "$input" | bash "$script" >/dev/null 2>&1 || true
-    end=$(date +%s%3N)
+    start=$(_bench_now_ms)
+    bash "$script" <<<"$input" >/dev/null 2>&1 || true
+    end=$(_bench_now_ms)
     elapsed=$((end - start))
-    # Guard against clock wrap (negative elapsed)
-    ((elapsed < 0)) && elapsed=0
+    # Skip clock anomalies (negative or >10s)
+    if ((elapsed < 0 || elapsed > 10000)); then
+      continue
+    fi
+    count=$((count + 1))
     total=$((total + elapsed))
     ((elapsed < min)) && min=$elapsed
     ((elapsed > max)) && max=$elapsed
   done
 
-  avg=$((total / ITERATIONS))
+  if ((count > 0)); then
+    avg=$((total / count))
+  else
+    avg=0 min=0 max=0
+  fi
   printf "%-25s %8d %8d %8d\n" "$hook" "$avg" "$min" "$max"
 }
 
