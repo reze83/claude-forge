@@ -658,7 +658,34 @@ else
   printf '  %b[FAIL]%b smithery-context: missing additionalContext: %s\n' "$RED" "$NC" "$SC_OUT"
   FAIL=$((FAIL + 1))
 fi
-unset _SC_MOCK_DIR SC_OUT
+unset SC_OUT
+
+# Test: sequential_thinking_mcp is "true" when .mcp.json has entry (plugin format)
+_SC_MCP_HOME="$TMPDIR_TEST/mcp-home-true"
+mkdir -p "$_SC_MCP_HOME/.claude"
+printf '%s\n' '{"sequential-thinking":{"command":"npx","args":["-y","@modelcontextprotocol/server-sequential-thinking"]}}' >"$_SC_MCP_HOME/.claude/.mcp.json"
+SC_OUT=$(echo '{}' | HOME="$_SC_MCP_HOME" PATH="$_SC_MOCK_DIR:$PATH" bash "$SC" 2>/dev/null || true)
+if [[ "$SC_OUT" == *"sequential_thinking_mcp"* ]] && printf '%s' "$SC_OUT" | jq -e '.additionalContext.sequential_thinking_mcp == "true"' >/dev/null 2>&1; then
+  printf '  %b[PASS]%b smithery-context: sequential_thinking_mcp=true with .mcp.json\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b smithery-context: sequential_thinking_mcp should be true: %s\n' "$RED" "$NC" "$SC_OUT"
+  FAIL=$((FAIL + 1))
+fi
+
+# Test: sequential_thinking_mcp is "false" when .mcp.json missing
+# Run from temp dir to avoid picking up repo .mcp.json in cwd
+_SC_MCP_HOME_NO="$TMPDIR_TEST/mcp-home-false"
+mkdir -p "$_SC_MCP_HOME_NO/.claude"
+SC_OUT=$(cd "$_SC_MCP_HOME_NO" && echo '{}' | HOME="$_SC_MCP_HOME_NO" PATH="$_SC_MOCK_DIR:$PATH" bash "$SC" 2>/dev/null || true)
+if [[ "$SC_OUT" == *"sequential_thinking_mcp"* ]] && printf '%s' "$SC_OUT" | jq -e '.additionalContext.sequential_thinking_mcp == "false"' >/dev/null 2>&1; then
+  printf '  %b[PASS]%b smithery-context: sequential_thinking_mcp=false without .mcp.json\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b smithery-context: sequential_thinking_mcp should be false: %s\n' "$RED" "$NC" "$SC_OUT"
+  FAIL=$((FAIL + 1))
+fi
+unset _SC_MOCK_DIR _SC_MCP_HOME _SC_MCP_HOME_NO SC_OUT
 
 echo ""
 

@@ -32,8 +32,19 @@ main() {
 
   [[ -z "$names" ]] && exit 0
 
+  # Check if Sequential Thinking is registered as native MCP server
+  local has_st="false"
+  local mcp_json="$HOME/.claude/.mcp.json"
+  if [[ -f "$mcp_json" ]] && jq -e '."sequential-thinking"' "$mcp_json" >/dev/null 2>&1; then
+    has_st="true"
+  fi
+  # Also check project-scope .mcp.json (mcpServers wrapper)
+  if [[ "$has_st" == "false" && -f ".mcp.json" ]] && jq -e '.["sequential-thinking"] // .mcpServers["sequential-thinking"]' ".mcp.json" >/dev/null 2>&1; then
+    has_st="true"
+  fi
+
   local ctx
-  ctx=$(context "smithery_connected" "$names" "smithery_ids" "$ids")
+  ctx=$(context "smithery_connected" "$names" "smithery_ids" "$ids" "sequential_thinking_mcp" "$has_st")
   printf '{"additionalContext":%s}\n' "$ctx"
 }
 
