@@ -903,7 +903,7 @@ echo ""
 
 # --- lib.sh: hook metrics ---
 echo "-- lib.sh: hook metrics --"
-# Verify CLAUDE_FORGE_DEBUG=1 creates METRIC entries
+# Verify CLAUDE_FORGE_DEBUG=1 creates METRIC entries with ms precision
 _METRICS_HOME="$TMPDIR_TEST/metrics-test"
 mkdir -p "$_METRICS_HOME/.claude"
 echo '{}' | CLAUDE_FORGE_DEBUG=1 HOME="$_METRICS_HOME" bash "$HOOKS_DIR/session-start.sh" >/dev/null 2>/dev/null || true
@@ -912,6 +912,14 @@ if [[ -f "$_METRICS_HOME/.claude/hooks-debug.log" ]] && grep -q "METRIC" "$_METR
   PASS=$((PASS + 1))
 else
   printf '  %b[FAIL]%b lib.sh: no METRIC entry in debug log\n' "$RED" "$NC"
+  FAIL=$((FAIL + 1))
+fi
+# Verify metric uses ms (not seconds)
+if grep -q "[0-9]ms$" "$_METRICS_HOME/.claude/hooks-debug.log" 2>/dev/null; then
+  printf '  %b[PASS]%b lib.sh: hook metrics use ms precision\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b lib.sh: hook metrics missing ms unit\n' "$RED" "$NC"
   FAIL=$((FAIL + 1))
 fi
 unset _METRICS_HOME METRIC_OUT
