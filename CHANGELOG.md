@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.2] - 2026-02-21
+
 ### Changed
 
 - rules/smithery.md: extract decision matrix, CLI commands, and error handling into `skills/smithery-reference/SKILL.md` — rule reduced from 96 to 40 lines
