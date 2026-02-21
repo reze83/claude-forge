@@ -51,7 +51,7 @@ claude-forge schuetzt Claude Code vor destruktiven Befehlen, Secret-Leaks und un
 - **18 Hooks** — Security, Productivity, Logging
 - **9 Rules** — Git, Security, Code-Standards, Performance, API-Design, ...
 - **5 Agents** — Research, Test-Runner, Security-Auditor, Dep-Auditor, Profiler
-- **8 Skills** — Code-Review, Explain, Deploy, Project-Init, Test-Gen, Refactor, Performance-Ref, Multi-Model-Ref
+- **9 Skills** — Code-Review, Explain, Deploy, Project-Init, Test-Gen, Refactor, Performance-Ref, Multi-Model-Ref, Smithery-Ref
 - **13 Commands** — Multi-Model Workflows + Self-Management
 
 </td>
@@ -318,7 +318,7 @@ claude-forge/
 │   └── session-logger.sh           Session-Ende Log-Rotation
 ├── rules/                          → ~/.claude/rules/ (9 Regeln)
 ├── agents/                         → ~/.claude/agents/ (5 Agenten)
-├── skills/                         → ~/.claude/skills/ (8 Skills)
+├── skills/                         → ~/.claude/skills/ (9 Skills)
 ├── commands/                       → ~/.claude/commands/ (13 Commands)
 ├── multi-model/                    → ~/.claude/multi-model/ (Codex CLI Wrapper)
 ├── tests/                          Test-Suite (303 Tests)
