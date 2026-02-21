@@ -1073,6 +1073,168 @@ assert_exit "Blocks http://[fe80::1]/" 0 "$UA" '{"tool_name":"WebFetch","tool_in
 
 echo ""
 
+# --- input-sanitizer.sh ---
+echo "-- input-sanitizer.sh: Input sanitization (PreToolUse) --"
+IS="$HOOKS_DIR/input-sanitizer.sh"
+
+# Passthrough tests
+assert_exit "IS: Clean Bash -> exit 0" 0 "$IS" \
+  '{"tool_name":"Bash","tool_input":{"command":"ls -la"}}'
+assert_exit "IS: Clean Write -> exit 0" 0 "$IS" \
+  '{"tool_name":"Write","tool_input":{"file_path":"/tmp/test.txt","content":"clean content"}}'
+assert_exit "IS: Non-sanitizable tool (Read) -> exit 0" 0 "$IS" \
+  '{"tool_name":"Read","tool_input":{"file_path":"/tmp/test.txt"}}'
+assert_exit "IS: Clean path -> exit 0" 0 "$IS" \
+  '{"tool_name":"Write","tool_input":{"file_path":"/home/user/file.txt","content":"x"}}'
+
+# ANSI stripping
+_ANSI_INPUT=$(jq -n --arg cmd "$(printf '\033[31mls\033[0m')" \
+  '{"tool_name":"Bash","tool_input":{"command":$cmd}}')
+ANSI_OUT=$(printf '%s\n' "$_ANSI_INPUT" | bash "$IS" 2>/dev/null || true)
+if printf '%s' "$ANSI_OUT" | jq -e '.hookSpecificOutput.updatedInput.command' >/dev/null 2>&1; then
+  printf '  %b[PASS]%b IS: ANSI stripping: updatedInput.command present\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b IS: ANSI stripping: updatedInput.command missing: %s\n' "$RED" "$NC" "$ANSI_OUT"
+  FAIL=$((FAIL + 1))
+fi
+if printf '%s' "$ANSI_OUT" | jq -e '.hookSpecificOutput.permissionDecision == "allow"' >/dev/null 2>&1; then
+  printf '  %b[PASS]%b IS: ANSI stripping: permissionDecision=allow\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b IS: ANSI stripping: expected allow: %s\n' "$RED" "$NC" "$ANSI_OUT"
+  FAIL=$((FAIL + 1))
+fi
+
+# Path normalization: double slash
+PATH_OUT=$(printf '%s' '{"tool_name":"Write","tool_input":{"file_path":"/home//user//file.txt","content":"x"}}' |
+  bash "$IS" 2>/dev/null || true)
+if printf '%s' "$PATH_OUT" | jq -e '.hookSpecificOutput.updatedInput.file_path == "/home/user/file.txt"' >/dev/null 2>&1; then
+  printf '  %b[PASS]%b IS: Path normalization: double slash collapsed\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b IS: Path normalization failed: %s\n' "$RED" "$NC" "$PATH_OUT"
+  FAIL=$((FAIL + 1))
+fi
+
+# Path normalization: trailing slash
+TRAIL_OUT=$(printf '%s' '{"tool_name":"Write","tool_input":{"file_path":"/home/user/file.txt/","content":"x"}}' |
+  bash "$IS" 2>/dev/null || true)
+if printf '%s' "$TRAIL_OUT" | jq -e '.hookSpecificOutput.updatedInput.file_path == "/home/user/file.txt"' >/dev/null 2>&1; then
+  printf '  %b[PASS]%b IS: Path normalization: trailing slash removed\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b IS: Trailing slash removal failed: %s\n' "$RED" "$NC" "$TRAIL_OUT"
+  FAIL=$((FAIL + 1))
+fi
+
+# CRLF normalization in Write content
+CRLF_INPUT=$(jq -n '{"tool_name":"Write","tool_input":{"file_path":"/tmp/t.txt","content":"line1\r\nline2\r\n"}}')
+CRLF_OUT=$(printf '%s\n' "$CRLF_INPUT" | bash "$IS" 2>/dev/null || true)
+if printf '%s' "$CRLF_OUT" | jq -e '.hookSpecificOutput.updatedInput.content' >/dev/null 2>&1; then
+  printf '  %b[PASS]%b IS: CRLF normalization: updatedInput.content present\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b IS: CRLF normalization failed: %s\n' "$RED" "$NC" "$CRLF_OUT"
+  FAIL=$((FAIL + 1))
+fi
+
+# CRLF normalization in Edit new_string
+EDIT_CRLF=$(jq -n '{"tool_name":"Edit","tool_input":{"file_path":"/tmp/t.txt","old_string":"x","new_string":"line1\r\nline2"}}')
+EDIT_CRLF_OUT=$(printf '%s\n' "$EDIT_CRLF" | bash "$IS" 2>/dev/null || true)
+if printf '%s' "$EDIT_CRLF_OUT" | jq -e '.hookSpecificOutput.updatedInput.new_string' >/dev/null 2>&1; then
+  printf '  %b[PASS]%b IS: CRLF normalization in Edit new_string\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b IS: CRLF in Edit failed: %s\n' "$RED" "$NC" "$EDIT_CRLF_OUT"
+  FAIL=$((FAIL + 1))
+fi
+
+# Protocol :// preserved
+PROTO_OUT=$(printf '%s' '{"tool_name":"Write","tool_input":{"file_path":"https://example.com//path","content":"x"}}' |
+  bash "$IS" 2>/dev/null || true)
+if [[ -z "$PROTO_OUT" ]] || printf '%s' "$PROTO_OUT" | jq -e '.hookSpecificOutput.updatedInput.file_path | test("^https://")' >/dev/null 2>&1; then
+  printf '  %b[PASS]%b IS: Protocol :// not mangled\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b IS: Protocol mangled: %s\n' "$RED" "$NC" "$PROTO_OUT"
+  FAIL=$((FAIL + 1))
+fi
+
+# Error resilience
+assert_exit "IS: Exit 0 on corrupt JSON" 0 "$IS" '{not-json'
+assert_exit "IS: Exit 0 on empty stdin" 0 "$IS" ''
+assert_exit "IS: Exit 0 on missing tool_input" 0 "$IS" '{"tool_name":"Bash"}'
+
+echo ""
+
+# --- config-change.sh ---
+echo "-- config-change.sh: ConfigChange audit and protection --"
+CC="$HOOKS_DIR/config-change.sh"
+
+assert_exit "CC: user_settings -> exit 0" 0 "$CC" \
+  '{"source":"user_settings","session_id":"s1"}'
+assert_exit "CC: policy_settings -> exit 0" 0 "$CC" \
+  '{"source":"policy_settings","session_id":"s1"}'
+assert_exit "CC: project_settings -> exit 0" 0 "$CC" \
+  '{"source":"project_settings","session_id":"s1"}'
+
+# Log file written
+_CC_TMPDIR="/var/tmp/claude-test-cc-$$"
+mkdir -p "$_CC_TMPDIR"
+_CC_LOG="$_CC_TMPDIR/config-changes.log"
+printf '%s' '{"source":"user_settings","session_id":"logtest"}' |
+  CLAUDE_LOG_DIR="$_CC_TMPDIR" bash "$CC" >/dev/null 2>/dev/null || true
+if [[ -f "$_CC_LOG" ]] && grep -q "logtest" "$_CC_LOG"; then
+  printf '  %b[PASS]%b CC: config-change writes to log file\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b CC: config-change log not written\n' "$RED" "$NC"
+  FAIL=$((FAIL + 1))
+fi
+rm -rf "$_CC_TMPDIR"
+
+# Opt-in lock: non-policy blocked
+_CC_EXIT=0
+printf '%s' '{"source":"user_settings","session_id":"s1"}' |
+  CLAUDE_FORGE_CONFIG_LOCK=1 bash "$CC" >/dev/null 2>/dev/null || _CC_EXIT=$?
+if [[ "$_CC_EXIT" -eq 2 ]]; then
+  printf '  %b[PASS]%b CC: CONFIG_LOCK=1 blocks user_settings (exit 2)\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b CC: CONFIG_LOCK=1 expected exit 2, got %d\n' "$RED" "$NC" "$_CC_EXIT"
+  FAIL=$((FAIL + 1))
+fi
+
+# Opt-in lock: policy_settings exempt
+_CC_EXIT=0
+printf '%s' '{"source":"policy_settings","session_id":"s1"}' |
+  CLAUDE_FORGE_CONFIG_LOCK=1 bash "$CC" >/dev/null 2>/dev/null || _CC_EXIT=$?
+if [[ "$_CC_EXIT" -eq 0 ]]; then
+  printf '  %b[PASS]%b CC: CONFIG_LOCK=1 policy_settings exempt (exit 0)\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b CC: policy_settings should be exempt, got exit %d\n' "$RED" "$NC" "$_CC_EXIT"
+  FAIL=$((FAIL + 1))
+fi
+
+# Stderr contains reason when blocked
+_CC_ERR="$(printf '%s' '{"source":"local_settings","session_id":"s1"}' |
+  CLAUDE_FORGE_CONFIG_LOCK=1 bash "$CC" 2>&1 >/dev/null || true)"
+if printf '%s' "$_CC_ERR" | grep -q "CONFIG_LOCK"; then
+  printf '  %b[PASS]%b CC: stderr contains CONFIG_LOCK reason\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b CC: expected CONFIG_LOCK in stderr\n' "$RED" "$NC"
+  FAIL=$((FAIL + 1))
+fi
+
+# Error resilience
+assert_exit "CC: Exit 0 on corrupt JSON" 0 "$CC" '{not-json'
+assert_exit "CC: Exit 0 on empty input" 0 "$CC" '{}'
+
+echo ""
+
 # --- Ergebnis ---
 echo "================================="
 printf 'Tests: %d | %b%d passed%b | %b%d failed%b\n' $((PASS + FAIL)) "$GREEN" "$PASS" "$NC" "$RED" "$FAIL" "$NC"

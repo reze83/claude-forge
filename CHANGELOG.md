@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 2026-02-21
+
+### Added
+
+- hooks/input-sanitizer.sh: new PreToolUse hook — sanitizes tool inputs via `updatedInput` (ANSI stripping, CRLF→LF, BOM removal, path normalization)
+- hooks/config-change.sh: new ConfigChange hook — audit logging to `~/.claude/config-changes.log`, opt-in blocking via `CLAUDE_FORGE_CONFIG_LOCK=1`
+- hooks/lib.sh: `modify_input()` function for PreToolUse `updatedInput` middleware pattern
+- docs/adr/0001-llm-based-hooks.md: ADR documenting opt-in LLM hook templates (`type: prompt`/`type: agent`)
+- docs/adr/0002-config-change-protection.md: ADR documenting ConfigChange hook design decisions
+
+### Changed
+
+- docs/ARCHITECTURE.md: hook table updated (20→22 hooks, 15→16 event types), lib.sh table (+modify_input), test counts (229→252 hooks, 313→336 total)
+
 ## [0.9.1] - 2026-02-21
 
 ### Added
