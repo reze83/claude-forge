@@ -52,6 +52,19 @@ warn() {
   printf '{"systemMessage":%s}' "$message"
 }
 
+# --- Input Modifier (PreToolUse updatedInput) ---
+# Outputs hookSpecificOutput with permissionDecision:"allow" and
+# the provided updatedInput JSON object, then exits.
+# Call ONLY when input actually changed — exit 0 without output = no change.
+# Usage: modify_input '{"command": "new_value"}'
+modify_input() {
+  local updated_json="$1"
+  debug "modify_input: $updated_json"
+  printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow","updatedInput":%s}}' \
+    "$updated_json"
+  exit 0
+}
+
 # --- JSON context builder (Setup/SessionStart) ---
 # Builds additionalContext JSON from key-value pairs
 # Usage: context "key1" "val1" "key2" "val2"

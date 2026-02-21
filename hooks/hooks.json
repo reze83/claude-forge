@@ -57,6 +57,17 @@
             "statusMessage": "Checking URL safety..."
           }
         ]
+      },
+      {
+        "matcher": "Write|Edit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/input-sanitizer.sh",
+            "timeout": 10,
+            "statusMessage": "Sanitizing input..."
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -235,6 +246,18 @@
             "timeout": 10,
             "async": true,
             "statusMessage": "Processing notification..."
+          }
+        ]
+      }
+    ],
+    "ConfigChange": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/config-change.sh",
+            "timeout": 10,
+            "statusMessage": "Logging config change..."
           }
         ]
       }
