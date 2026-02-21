@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-02-21
+
 ### Fixed
 
 - CI: disable Go module cache in setup-go action (no go.sum in repo) — removes `Restore cache failed` annotation
