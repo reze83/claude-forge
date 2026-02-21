@@ -15,4 +15,4 @@ Weise unaufgefordert auf diese Probleme hin, wenn sie im geschriebenen oder edit
 
 ## Passive Referenz
 
-Detail-Empfehlungen fuer Datenbank, Frontend und Backend-Optimierung: siehe `~/.claude/skills/performance-reference.md`
+Detail-Empfehlungen fuer Datenbank, Frontend und Backend-Optimierung: siehe `~/.claude/skills/performance-reference/SKILL.md`

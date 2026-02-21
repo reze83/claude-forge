@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- rules/smithery.md: extract decision matrix, CLI commands, and error handling into `skills/smithery-reference/SKILL.md` — rule reduced from 96 to 40 lines
+- rules/smithery.md: rewrite flow as ST-orchestrated Thought sequence (Sequential Thinking as outer frame, tool calls between thoughts)
+- rules/performance.md: fix skill reference path to subdirectory pattern (`performance-reference/SKILL.md`)
+
+### Added
+
+- skills/smithery-reference/SKILL.md: new passive skill — 30-category decision matrix, Smithery CLI commands, error handling (loaded on demand)
+
 ## [0.8.1] - 2026-02-21
 
 ### Fixed
