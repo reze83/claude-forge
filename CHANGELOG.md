@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- rules/multi-model.md: rewrite for aggressive Codex auto-delegation — default is now auto-execute, not suggest-and-ask
+- rules/multi-model.md: expand trigger matrix from 7 to 11 patterns with catch-all fallback
+- rules/multi-model.md: add auto-review section (>50 LOC or >3 files triggers Codex review)
+- rules/multi-model.md: narrow exclusion list from 6 to 4 cases, remove "Prompt-Qualitaet" section
+
 ## [0.8.2] - 2026-02-21
 
 ### Changed

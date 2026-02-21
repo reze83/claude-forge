@@ -1,54 +1,52 @@
 # Multi-Model (Claude + Codex)
 
-**Aktivierung:** Diese Regeln gelten wenn `codex` CLI installiert ist (`command -v codex`) und die Aufgabe klar abgegrenzten Input/Output hat.
+**Aktivierung:** Bei JEDER Codeaenderung wenn `codex` CLI installiert ist (`command -v codex`). Codex ist der Standard — nicht die Ausnahme.
 
-## Wann Codex delegieren
+## Auto-Delegation
 
-Schlage dem User proaktiv Codex-Delegation vor, wenn ALLE Bedingungen zutreffen:
+Bei jeder Code-Aufgabe automatisch den passenden Command waehlen und ausfuehren:
 
-1. Die Aufgabe hat klar abgegrenzten Input/Output (1 Datei, 1 Funktion)
-2. Die Aufgabe faellt in eine dieser Kategorien:
+1. Ist es eine Codeaenderung? → Nein: kein Codex noetig
+2. Ist `codex` installiert? → Nein: ohne Codex weiterarbeiten
+3. Trigger-Matrix pruefen → passenden Auto-Command ausfuehren
 
-- Backend-Logik und Algorithmen mit klarem Input/Output
-- Code-Reviews und Security-Audits (Sandbox `read`)
-- Parallele Planung: zwei Perspektiven, dann vergleichen (`/multi-plan`)
-- Boilerplate-Generierung und repetitive Patterns
+### Trigger-Matrix
 
-### Erweiterte Trigger
+| User-Intent           | Erkennungssignal                                         | Auto-Command      |
+| --------------------- | -------------------------------------------------------- | ----------------- |
+| Neues Feature         | "implement", "add feature", neue Datei/Modul erstellen   | `/multi-workflow` |
+| Tests generieren      | "write tests for", "test coverage", Test-Datei erstellen | `/multi-test`     |
+| Code dokumentieren    | "add docstrings", "document", JSDoc/typedoc Erwaehnung   | `/multi-docs`     |
+| Code refactoren       | "refactor", "extract", "rename across", "move to"        | `/multi-refactor` |
+| Bug debuggen          | Fehlermeldung + "why", "doesn't work", Stacktrace        | `/multi-debug`    |
+| Backend/Algorithmus   | Datenstrukturen, Algorithmen, Business-Logik             | `/multi-backend`  |
+| Repetitive Edits      | >3 aehnliche Edits in Folge erkannt                      | `/multi-execute`  |
+| Grosses File reviewen | Datei >200 Zeilen wird reviewed                          | `/multi-backend`  |
+| Migration             | "migrate", "upgrade", "convert from X to Y"              | `/multi-execute`  |
+| Security-Analyse      | "audit", "security review", Vulnerability-Check          | `/multi-backend`  |
+| Architektur-Vergleich | "how should we structure", Design-Entscheidung           | `/multi-plan`     |
+| **Kein Match**        | Codeaenderung ohne spezifischen Trigger                  | `/multi-execute`  |
 
-| User-Intent           | Erkennungssignal                                         | Empfohlener Command |
-| --------------------- | -------------------------------------------------------- | ------------------- |
-| Tests generieren      | "write tests for", "test coverage", Test-Datei erstellen | `/multi-test`       |
-| Code dokumentieren    | "add docstrings", "document", JSDoc/typedoc Erwaehnung   | `/multi-docs`       |
-| Code refactoren       | "refactor", "extract", "rename across", "move to"        | `/multi-refactor`   |
-| Bug debuggen          | Fehlermeldung + "why", "doesn't work", Stacktrace        | `/multi-debug`      |
-| Repetitive Edits      | >3 aehnliche Edits in Folge erkannt                      | `/multi-execute`    |
-| Grosses File reviewen | Datei >200 Zeilen wird reviewed                          | `/multi-backend`    |
-| Migration             | "migrate", "upgrade", "convert from X to Y"              | `/multi-execute`    |
+## Auto-Review
 
-**Formulierung:** "Diese Aufgabe eignet sich fuer Codex-Delegation (`/multi-<command>`). Soll ich das delegieren?"
+Automatisch nach groesseren Aenderungen ausfuehren — kein User-Prompt noetig:
+
+- **Trigger:** >50 Zeilen geschrieben ODER >3 Dateien bearbeitet
+- **Aktion:** `codex-wrapper.sh --sandbox read --context-file <geaenderte-dateien> --prompt "Review auf Korrektheit, Security, Performance, Best Practices"`
+- **Ergebnis:** Findings zusammenfassen, kritische Issues sofort fixen
 
 ## Wann NICHT delegieren
 
-- Aufgaben die Kontext ueber mehrere Dateien erfordern
-- UI/UX-Entscheidungen und Accessibility
-- Tasks die interaktive User-Rueckfragen brauchen
-- Sicherheitskritische Aenderungen ohne anschliessendes Review
-- Einzelne Zeilen fixen, Tippfehler korrigieren
+- Triviale Aenderungen (einzelne Zeilen, Tippfehler)
+- Reine Exploration ohne Code-Output (Dateien lesen, Fragen beantworten)
 - Dateien mit sensiblem Inhalt (.env, Credentials)
+- Tasks die interaktive User-Rueckfragen brauchen
 
 ## Sandbox-Wahl
 
 - `read` — Reviews, Analyse, Planung
 - `write` — Code-Generierung im Projektordner
 - `full` — Nur wenn explizit vom User angefordert
-
-## Prompt-Qualitaet
-
-- Tasks klein halten: 1 Datei, 1 Aufgabe — reduziert Timeout-Risiko
-- Projektkontext mitgeben: Sprache, Framework, relevante Dateien
-- Erwartetes Output-Format definieren (z.B. "Return als TypeScript-Modul")
-- Codex-Output immer gegen Code-Standards pruefen und refactoren
 
 ## Commands
 
