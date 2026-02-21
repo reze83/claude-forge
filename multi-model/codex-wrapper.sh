@@ -21,7 +21,7 @@ SANDBOX="write"
 PROMPT=""
 MODEL="gpt-5.3-codex"
 REASONING="xhigh"
-TIMEOUT=240
+TIMEOUT=${CLAUDE_FORGE_CODEX_TIMEOUT:-240}
 WORKDIR="$(pwd)"
 CONTEXT_FILES=()
 TEMPLATE=""
@@ -30,7 +30,7 @@ NO_RETRY=0
 readonly MAX_CONTEXT_BYTES=50000
 readonly RETRY_DELAY=5
 readonly MIN_TIMEOUT=30
-readonly MAX_TIMEOUT=600
+readonly MAX_TIMEOUT=1800
 
 # --- Source shared library ---
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"

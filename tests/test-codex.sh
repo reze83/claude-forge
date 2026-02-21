@@ -70,6 +70,30 @@ OUT=$(bash "$WRAPPER" --sandbox read --timeout abc --prompt "test" 2>&1) || true
 assert_contains "Nicht-numerischer Timeout → error" '"status":"error"' "$OUT"
 assert_contains "Nicht-numerischer Timeout → integer msg" 'integer' "$OUT"
 
+# Test: Env-Variable setzt Default-Timeout
+OUT=$(CLAUDE_FORGE_CODEX_TIMEOUT=120 bash "$WRAPPER" --sandbox read --prompt "test" 2>&1) || true
+if ! echo "$OUT" | grep -q 'between'; then
+  printf '  %b[PASS]%b Env-Timeout 120 ist gueltig (kein Bereichsfehler)\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b Env-Timeout 120 ist gueltig (unerwarteter Bereichsfehler)\n' "$RED" "$NC"
+  FAIL=$((FAIL + 1))
+fi
+
+# Test: CLI-Timeout ueberschreibt Env-Timeout
+OUT=$(CLAUDE_FORGE_CODEX_TIMEOUT=120 bash "$WRAPPER" --sandbox read --timeout 5 --prompt "test" 2>&1) || true
+assert_contains "CLI-Timeout ueberschreibt Env → Bereichsfehler" 'between' "$OUT"
+
+# Test: Neues Maximum 1800 ist gueltig
+OUT=$(bash "$WRAPPER" --sandbox read --timeout 1800 --prompt "test" 2>&1) || true
+if ! echo "$OUT" | grep -q 'between'; then
+  printf '  %b[PASS]%b Timeout 1800 ist gueltig (kein Bereichsfehler)\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b Timeout 1800 ist gueltig (unerwarteter Bereichsfehler)\n' "$RED" "$NC"
+  FAIL=$((FAIL + 1))
+fi
+
 # Test: --model Flag aendert model im Output
 OUT=$(bash "$WRAPPER" --model o4-mini 2>&1) || true
 assert_contains "--model setzt model im Output" '"model":"o4-mini"' "$OUT"

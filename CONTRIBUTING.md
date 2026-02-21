@@ -63,7 +63,7 @@ bash tests/bench-hooks.sh     # Hook benchmark (avg/min/max ms)
 bash validate.sh              # Full validation suite
 ```
 
-Total: 310 tests
+Total: 313 tests
 
 ### Adding Tests
 
