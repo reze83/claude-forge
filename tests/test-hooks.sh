@@ -534,6 +534,52 @@ assert_exit "Exit 0 with stop_hook_active true" 0 "$SASP" \
 
 echo ""
 
+# --- permission-request.sh ---
+echo "-- permission-request.sh --"
+PR="$HOOKS_DIR/permission-request.sh"
+
+assert_exit "Exit 0 with valid permission request" 0 "$PR" \
+  '{"session_id":"s1","tool_name":"Bash","permission_type":"network"}'
+
+assert_exit "Exit 0 with empty input" 0 "$PR" '{}'
+
+# Opt-in gate: exit 2 when PERMISSION_GATE=1
+(
+  export CLAUDE_FORGE_PERMISSION_GATE=1
+  assert_exit "Exit 2 when permission gate enabled" 2 "$PR" \
+    '{"session_id":"s1","tool_name":"Bash","permission_type":"shell_execution"}'
+)
+
+# Verify stderr contains reason message when gate is enabled
+_PR_ERR="$(echo '{"session_id":"s1","tool_name":"Read","permission_type":"file_access"}' |
+  CLAUDE_FORGE_PERMISSION_GATE=1 bash "$PR" 2>&1 >/dev/null || true)"
+if printf '%s' "$_PR_ERR" | grep -q "PERMISSION_GATE"; then
+  printf '  %b[PASS]%b permission-request: stderr contains gate reason\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b permission-request: expected PERMISSION_GATE in stderr\n' "$RED" "$NC"
+  FAIL=$((FAIL + 1))
+fi
+unset _PR_ERR
+
+echo ""
+
+# --- notification.sh ---
+echo "-- notification.sh --"
+NF="$HOOKS_DIR/notification.sh"
+
+assert_exit "Exit 0 with valid notification" 0 "$NF" \
+  '{"session_id":"s1","message":"Task completed","title":"Claude"}'
+
+assert_exit "Exit 0 with empty message" 0 "$NF" '{"session_id":"s1","message":"","title":"Test"}'
+
+assert_exit "Exit 0 with empty input" 0 "$NF" '{}'
+
+assert_exit "Exit 0 with missing title uses default" 0 "$NF" \
+  '{"session_id":"s1","message":"Hello"}'
+
+echo ""
+
 # --- stop.sh ---
 echo "-- stop.sh --"
 STOPH="$HOOKS_DIR/stop.sh"

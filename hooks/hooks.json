@@ -214,6 +214,31 @@
         ]
       }
     ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/permission-request.sh",
+            "timeout": 10,
+            "statusMessage": "Checking permission request..."
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/notification.sh",
+            "timeout": 10,
+            "async": true,
+            "statusMessage": "Processing notification..."
+          }
+        ]
+      }
+    ],
     "SessionEnd": [
       {
         "matcher": "",

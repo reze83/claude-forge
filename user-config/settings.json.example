@@ -244,6 +244,31 @@
         ]
       }
     ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $HOME/.claude/hooks/permission-request.sh",
+            "timeout": 10,
+            "statusMessage": "Checking permission request..."
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $HOME/.claude/hooks/notification.sh",
+            "timeout": 10,
+            "async": true,
+            "statusMessage": "Processing notification..."
+          }
+        ]
+      }
+    ],
     "SessionEnd": [
       {
         "matcher": "",
