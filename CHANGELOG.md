@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- CI: disable Go module cache in setup-go action (no go.sum in repo) — removes `Restore cache failed` annotation
+- README: fix merge conflict markers in directory tree section, update skills (8), commands (13), tests (303) counts
+
 ## [0.8.0] - 2026-02-21
 
 ### Added

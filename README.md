@@ -318,15 +318,10 @@ claude-forge/
 │   └── session-logger.sh           Session-Ende Log-Rotation
 ├── rules/                          → ~/.claude/rules/ (9 Regeln)
 ├── agents/                         → ~/.claude/agents/ (5 Agenten)
-<<<<<<< HEAD
 ├── skills/                         → ~/.claude/skills/ (8 Skills)
-├── commands/                       → ~/.claude/commands/ (9 Commands)
-=======
-├── skills/                         → ~/.claude/skills/ (7 Skills)
 ├── commands/                       → ~/.claude/commands/ (13 Commands)
->>>>>>> 70446e4 (feat: add /multi-test, /multi-refactor, /multi-docs, /multi-debug commands (#117-#120))
 ├── multi-model/                    → ~/.claude/multi-model/ (Codex CLI Wrapper)
-├── tests/                          Test-Suite (277 Tests)
+├── tests/                          Test-Suite (303 Tests)
 └── docs/                           Architektur + Assets
 ```
 
