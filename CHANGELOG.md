@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- hooks/permission-request.sh: new PermissionRequest hook — logs permission requests, opt-in gate via `CLAUDE_FORGE_PERMISSION_GATE=1`
+- hooks/notification.sh: new Notification hook — forwards Claude Code notifications to desktop via `notify()`
+
 ### Changed
 
 - rules/multi-model.md: rewrite for aggressive Codex auto-delegation — default is now auto-execute, not suggest-and-ask

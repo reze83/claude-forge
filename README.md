@@ -14,7 +14,7 @@
 
 [![Version](https://img.shields.io/badge/version-0.8.3-blue?style=for-the-badge)](CHANGELOG.md)
 [![CI](https://img.shields.io/github/actions/workflow/status/reze83/claude-forge/test.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/reze83/claude-forge/actions)
-[![Tests](https://img.shields.io/badge/tests-303%20passed-brightgreen?style=for-the-badge)](#)
+[![Tests](https://img.shields.io/badge/tests-310%20passed-brightgreen?style=for-the-badge)](#)
 [![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](LICENSE)
 [![Shell](https://img.shields.io/badge/bash-3.2%2B-4EAA25?style=for-the-badge&logo=gnubash&logoColor=white)](#)
 
@@ -48,7 +48,7 @@ claude-forge schuetzt Claude Code vor destruktiven Befehlen, Secret-Leaks und un
 
 ### Was es mitbringt
 
-- **18 Hooks** — Security, Productivity, Logging
+- **20 Hooks** — Security, Productivity, Logging
 - **9 Rules** — Git, Security, Code-Standards, Performance, API-Design, ...
 - **5 Agents** — Research, Test-Runner, Security-Auditor, Dep-Auditor, Profiler
 - **9 Skills** — Code-Review, Explain, Deploy, Project-Init, Test-Gen, Refactor, Performance-Ref, Multi-Model-Ref, Smithery-Ref
@@ -179,6 +179,8 @@ Testen ohne zu blocken: `CLAUDE_FORGE_DRY_RUN=1` (gilt fuer bash-firewall, prote
 <tr><td><code>teammate-gate</code></td><td>TeammateIdle</td><td>Uncommitted-Changes Check (opt-in)</td></tr>
 <tr><td><code>url-allowlist</code></td><td>PreToolUse</td><td>Private/interne URLs bei WebFetch blocken</td></tr>
 <tr><td><code>pre-write-backup</code></td><td>PreToolUse</td><td>.bak-Backup vor Write/Edit (opt-in)</td></tr>
+<tr><td><code>permission-request</code></td><td>PermissionRequest</td><td>Permission-Anfragen loggen + opt-in Gate</td></tr>
+<tr><td><code>notification</code></td><td>Notification</td><td>Notifications an Desktop weiterleiten</td></tr>
 <tr><td><code>session-logger</code></td><td>SessionEnd</td><td>Session-Ende Notification + Log-Rotation</td></tr>
 <tr><td><code>setup</code></td><td>Setup</td><td>Dependency-Check + Symlink-Health (Plugin-Modus)</td></tr>
 </table>
