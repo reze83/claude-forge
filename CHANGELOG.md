@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- .mcp.json: register Context7 MCP server (HTTP, `mcp.context7.com`) for up-to-date library documentation
+- .mcp.json: register Exa MCP server (HTTP, `mcp.exa.ai`) for web search and research
+
+### Changed
+
+- codex-wrapper.sh: dynamic timeout via `CLAUDE_FORGE_CODEX_TIMEOUT` env var (default: 240s, `--timeout` flag overrides)
+- codex-wrapper.sh: raise MAX_TIMEOUT from 600s to 1800s (30 min) for complex multi-model tasks
+- install.sh: generalize `sync_mcp_json()` to iterate all servers in `.mcp.json` with support for both stdio and HTTP transport
+
 ## [0.9.0] - 2026-02-21
 
 ### Added

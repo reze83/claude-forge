@@ -260,47 +260,71 @@ sync_claude_md() {
 
 sync_mcp_json() {
   local src="$REPO_DIR/.mcp.json"
-  local server_name="sequential-thinking"
 
   [[ -f "$src" ]] || return 0
 
-  # Read server config from .mcp.json
-  local cmd args
-  cmd=$(jq -r ".[\"$server_name\"].command // empty" "$src" 2>/dev/null) || return 0
-  args=$(jq -r ".[\"$server_name\"].args // [] | join(\" \")" "$src" 2>/dev/null) || return 0
-
-  if [[ -z "$cmd" ]]; then
-    log_skip ".mcp.json: kein command fuer $server_name"
-    return 0
-  fi
-
-  if $DRY_RUN; then
-    log_dry "Wuerde MCP-Server '$server_name' registrieren (user scope, stdio)"
-    return 0
-  fi
-
-  # Check if claude CLI is available
+  # Check if claude CLI is available (once for all servers)
   if ! command -v claude >/dev/null 2>&1; then
     log_skip "claude CLI nicht gefunden (MCP-Registrierung uebersprungen)"
     return 0
   fi
 
-  # Check if already registered at user scope
-  local existing
-  existing=$(claude mcp get "$server_name" 2>/dev/null || true)
-  if [[ -n "$existing" && "$existing" != *"not found"* && "$existing" != *"No server"* ]]; then
-    log_skip "MCP-Server '$server_name' bereits registriert"
-    return 0
-  fi
+  # Iterate all server entries in .mcp.json
+  local server_name
+  while IFS= read -r server_name; do
+    [[ -z "$server_name" ]] && continue
 
-  # Register via claude mcp add (user scope, stdio transport)
-  # shellcheck disable=SC2086
-  if claude mcp add --transport stdio --scope user "$server_name" -- $cmd $args 2>/dev/null; then
-    log_ok "MCP-Server '$server_name' registriert (user scope)"
-  else
-    log_err "MCP-Server '$server_name' konnte nicht registriert werden"
-    return 1
-  fi
+    # Determine transport type: http (has "url") or stdio (has "command")
+    local transport url cmd args
+    transport=$(jq -r ".[\"$server_name\"].type // empty" "$src" 2>/dev/null) || continue
+    url=$(jq -r ".[\"$server_name\"].url // empty" "$src" 2>/dev/null) || continue
+    cmd=$(jq -r ".[\"$server_name\"].command // empty" "$src" 2>/dev/null) || continue
+    args=$(jq -r ".[\"$server_name\"].args // [] | join(\" \")" "$src" 2>/dev/null) || continue
+
+    if [[ -z "$transport" ]]; then
+      # Infer: url present → http, command present → stdio
+      if [[ -n "$url" ]]; then
+        transport="http"
+      elif [[ -n "$cmd" ]]; then
+        transport="stdio"
+      else
+        log_skip ".mcp.json: kein command/url fuer $server_name"
+        continue
+      fi
+    fi
+
+    if $DRY_RUN; then
+      log_dry "Wuerde MCP-Server '$server_name' registrieren (user scope, $transport)"
+      continue
+    fi
+
+    # Check if already registered at user scope
+    local existing
+    existing=$(claude mcp get "$server_name" 2>/dev/null || true)
+    if [[ -n "$existing" && "$existing" != *"not found"* && "$existing" != *"No server"* ]]; then
+      log_skip "MCP-Server '$server_name' bereits registriert"
+      continue
+    fi
+
+    # Register via claude mcp add (user scope)
+    local reg_ok=false
+    if [[ "$transport" == "http" && -n "$url" ]]; then
+      if claude mcp add --transport http --scope user "$server_name" "$url" 2>/dev/null; then
+        reg_ok=true
+      fi
+    elif [[ -n "$cmd" ]]; then
+      # shellcheck disable=SC2086
+      if claude mcp add --transport stdio --scope user "$server_name" -- $cmd $args 2>/dev/null; then
+        reg_ok=true
+      fi
+    fi
+
+    if $reg_ok; then
+      log_ok "MCP-Server '$server_name' registriert (user scope, $transport)"
+    else
+      log_err "MCP-Server '$server_name' konnte nicht registriert werden"
+    fi
+  done < <(jq -r 'keys[]' "$src" 2>/dev/null)
 }
 
 # --- Auto-Install fehlender Dependencies ---
