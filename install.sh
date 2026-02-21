@@ -263,12 +263,6 @@ sync_mcp_json() {
 
   [[ -f "$src" ]] || return 0
 
-  # Check if claude CLI is available (once for all servers)
-  if ! command -v claude >/dev/null 2>&1; then
-    log_skip "claude CLI nicht gefunden (MCP-Registrierung uebersprungen)"
-    return 0
-  fi
-
   # Iterate all server entries in .mcp.json
   local server_name
   while IFS= read -r server_name; do
@@ -296,6 +290,12 @@ sync_mcp_json() {
     if $DRY_RUN; then
       log_dry "Wuerde MCP-Server '$server_name' registrieren (user scope, $transport)"
       continue
+    fi
+
+    # Check if claude CLI is available
+    if ! command -v claude >/dev/null 2>&1; then
+      log_skip "claude CLI nicht gefunden (MCP-Registrierung uebersprungen)"
+      return 0
     fi
 
     # Check if already registered at user scope
