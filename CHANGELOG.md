@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - multi-backend, multi-test: sandbox `read` → `write` — Codex kann generierten Code direkt in den Projektordner schreiben statt nur als Text zurückzugeben
+- rules/git-workflow.md: Release-Checkliste ergaenzt (Version-Konsistenz, CHANGELOG finalisieren, Tests lokal gruen, Branch+PR Pflicht)
 
 ## [0.11.0] - 2026-02-22
 
