@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- multi-backend, multi-test: sandbox `read` → `write` — Codex kann generierten Code direkt in den Projektordner schreiben statt nur als Text zurückzugeben
+
 ## [0.11.0] - 2026-02-22
 
 ### Added

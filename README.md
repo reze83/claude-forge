@@ -198,9 +198,9 @@ Claude orchestriert, Codex implementiert — 9 Workflow-Commands:
 | `/multi-workflow` | write    | 6-Phasen-Workflow: Analyse → Planung → Codex → Claude → Integration → Review |
 | `/multi-plan`     | read     | Parallele Implementierungsplaene vergleichen                                 |
 | `/multi-execute`  | variabel | Direkte Codex-Delegation mit waehlbarem Sandbox-Modus                        |
-| `/multi-backend`  | read     | Backend/Algorithmen-Task an Codex                                            |
+| `/multi-backend`  | write    | Backend/Algorithmen-Task an Codex                                            |
 | `/multi-frontend` | read     | Claude implementiert Frontend, Codex reviewed                                |
-| `/multi-test`     | read     | Dual-Model Test-Generierung                                                  |
+| `/multi-test`     | write    | Dual-Model Test-Generierung                                                  |
 | `/multi-refactor` | write    | Claude plant, Codex transformiert pro Datei                                  |
 | `/multi-docs`     | read     | Codex dokumentiert, Claude prueft Genauigkeit                                |
 | `/multi-debug`    | read     | Unabhaengige Dual-Bug-Analyse                                                |
