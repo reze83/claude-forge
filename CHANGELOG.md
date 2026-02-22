@@ -13,6 +13,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - README.md: GitHub CLI setup instructions for sudo-less environments (WSL2)
 - user-config/download-gh.js: helper script to download gh binary via Node.js (no curl/wget/sudo needed)
 - rules/token-optimization.md: search tool selection guide (context7, exa web/code search, WebSearch, WebFetch)
+- install.sh: Phase 9 — optional auto-install for Smithery CLI (@smithery/cli) and GitHub CLI (gh)
+- test-hooks.sh: 16 new bypass tests for security fixes
+
+### Fixed
+
+- protect-files.sh: path traversal (`/../`), double slash (`//`), single dot (`/./`) bypasses hook-tampering protection — fixed via `realpath -m` normalization
+- url-allowlist.sh: `file://` scheme not blocked — now blocked with non-HTTP scheme check
+- url-allowlist.sh: IPv4-mapped IPv6 (`::ffff:127.0.0.1`) and unique local IPv6 (`fd00::`, `fc00::`) not in deny list
+- url-allowlist.sh: FQDN trailing dot (`metadata.google.internal.`) bypassed hostname matching
+- bash-firewall.sh: `rm -fr /` (flag order), `rm -rf -- /` (double-dash), `rm -rf --no-preserve-root /` not blocked
+- user-config/download-gh.js: no checksum verification — now verifies SHA256 from GitHub release checksums.txt and limits redirects to 5
 
 ## [0.10.0] - 2026-02-21
 
