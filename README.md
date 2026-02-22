@@ -245,6 +245,19 @@ bash validate.sh        # Konfig-Validierung + Secret-Scan
 | **QA-Tools**  | shellcheck, bats, markdownlint-cli2, gitleaks, actionlint |
 | **Optional**  | Codex CLI (`--with-codex`), Smithery CLI                  |
 
+### Smithery CLI einrichten
+
+```bash
+# 1. Global installieren
+npm install -g @smithery/cli
+
+# 2. Authentifizieren (oeffnet Browser)
+smithery login
+
+# 3. Verifizieren
+smithery mcp list
+```
+
 ---
 
 <details>
