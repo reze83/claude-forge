@@ -65,7 +65,7 @@ modify_input() {
   exit 0
 }
 
-# --- JSON context builder (Setup/SessionStart) ---
+# --- JSON context builder (SessionStart) ---
 # Builds additionalContext JSON from key-value pairs
 # Usage: context "key1" "val1" "key2" "val2"
 context() {

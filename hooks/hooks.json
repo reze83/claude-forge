@@ -136,19 +136,6 @@
         ]
       }
     ],
-    "Setup": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/setup.sh",
-            "timeout": 30,
-            "statusMessage": "Checking setup requirements..."
-          }
-        ]
-      }
-    ],
     "UserPromptSubmit": [
       {
         "hooks": [
@@ -162,6 +149,17 @@
       }
     ],
     "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/setup.sh",
+            "timeout": 30,
+            "statusMessage": "Checking setup requirements..."
+          }
+        ]
+      },
       {
         "matcher": "",
         "hooks": [

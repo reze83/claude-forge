@@ -7,8 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- hooks.json: removed non-existent `Setup` hook event — migrated setup.sh to `SessionStart` with `startup` matcher so dependency checks actually run
+- permission-request.sh: replaced non-existent `permission_type` field with `tool_input` (matches official PermissionRequest schema)
+- settings.json.example: corrected `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` to `CLAUDE_CODE_AUTOCOMPACT_PCT_OVERRIDE` (auto-compaction override was silently ignored)
+- settings.json.example: removed undocumented `skipDangerousModePermissionPrompt` setting
+- config-change.sh: switched from exit 2 to JSON `decision: "block"` format for consistent error messaging
+
 ### Changed
 
+- session-start.sh: persist forge env vars via `CLAUDE_ENV_FILE` for Bash command access throughout the session
+- validate.sh: added hook event whitelist validation against official Claude Code API (17 events)
 - multi-backend, multi-test: sandbox `read` → `write` — Codex kann generierten Code direkt in den Projektordner schreiben statt nur als Text zurückzugeben
 - rules/git-workflow.md: Release-Checkliste ergaenzt (Version-Konsistenz, CHANGELOG finalisieren, Tests lokal gruen, Branch+PR Pflicht)
 

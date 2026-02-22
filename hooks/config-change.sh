@@ -20,13 +20,16 @@ main() {
 
   log_event "$LOG_FILE" "$message"
 
+  # policy_settings cannot be blocked per Claude Code docs
   if [[ "$config_source" == "policy_settings" ]]; then
     exit 0
   fi
 
   if [[ "${CLAUDE_FORGE_CONFIG_LOCK:-0}" == "1" ]]; then
-    printf 'Config-Aenderung blockiert (CLAUDE_FORGE_CONFIG_LOCK=1): source=%s session=%s\n' "$config_source" "$session_id" >&2
-    exit 2
+    local reason
+    reason="$(printf 'Config change blocked (CLAUDE_FORGE_CONFIG_LOCK=1): source=%s' "$config_source")"
+    printf '{"decision":"block","reason":%s}' "$(printf '%s' "$reason" | jq -Rs .)"
+    exit 0
   fi
 
   exit 0

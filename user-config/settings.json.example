@@ -4,7 +4,7 @@
   "env": {
     "BASH_DEFAULT_TIMEOUT_MS": "120000",
     "BASH_MAX_TIMEOUT_MS": "600000",
-    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "75",
+    "CLAUDE_CODE_AUTOCOMPACT_PCT_OVERRIDE": "75",
     "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "0",
     "ENABLE_TOOL_SEARCH": "auto:3"
   },
@@ -151,6 +151,17 @@
       }
     ],
     "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $HOME/.claude/hooks/setup.sh",
+            "timeout": 30,
+            "statusMessage": "Checking setup requirements..."
+          }
+        ]
+      },
       {
         "matcher": "",
         "hooks": [
@@ -306,6 +317,5 @@
         ]
       }
     ]
-  },
-  "skipDangerousModePermissionPrompt": true
+  }
 }

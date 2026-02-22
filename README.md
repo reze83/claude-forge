@@ -182,7 +182,7 @@ Testen ohne zu blocken: `CLAUDE_FORGE_DRY_RUN=1` (gilt fuer bash-firewall, prote
 <tr><td><code>permission-request</code></td><td>PermissionRequest</td><td>Permission-Anfragen loggen + opt-in Gate</td></tr>
 <tr><td><code>notification</code></td><td>Notification</td><td>Notifications an Desktop weiterleiten</td></tr>
 <tr><td><code>session-logger</code></td><td>SessionEnd</td><td>Session-Ende Notification + Log-Rotation</td></tr>
-<tr><td><code>setup</code></td><td>Setup</td><td>Dependency-Check + Symlink-Health (Plugin-Modus)</td></tr>
+<tr><td><code>setup</code></td><td>SessionStart (startup)</td><td>Dependency-Check + Symlink-Health</td></tr>
 </table>
 
 Alle Hooks nutzen `hooks/lib.sh` mit `block()`, `warn()`, `context()` und 11 shared Secret-Patterns.
