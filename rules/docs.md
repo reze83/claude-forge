@@ -20,7 +20,7 @@ NICHT aktualisieren bei:
 ## Was aktualisieren
 
 - `CHANGELOG.md` → Eintrag unter `[Unreleased]`
-- `README.md` → Features, Beispiele, Badges (Test-Count)
+- `README.md` → Features, Beispiele, Status-Badges (Version, Test-Count, CI)
 - `ARCHITECTURE.md` → Struktur, Diagramme, Entscheidungen
 - `CONTRIBUTING.md` → Konventionen, Test-Befehle, Checklisten
 - `docs/` → weiterfuehrende Dokumentation

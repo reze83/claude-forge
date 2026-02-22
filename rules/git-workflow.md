@@ -35,7 +35,7 @@ Push auf main, `--force`, `reset --hard` und `--amend` auf gepushte Commits sind
 Vor jedem Release-Commit (auf eigenem `chore/vX.Y.Z`-Branch) sicherstellen:
 
 1. **Version-Dateien konsistent** — alle Stellen die eine Version enthalten muessen uebereinstimmen:
-   - `VERSION`, `package.json`, `Cargo.toml`, `pyproject.toml`, `plugin.json`, README-Badge
+   - `VERSION`, `package.json`, `Cargo.toml`, `pyproject.toml`, README-Badge sowie alle projektspezifischen Manifest-Dateien
 2. **CHANGELOG finalisieren** — `[Unreleased]` umbenennen zu `[X.Y.Z] - YYYY-MM-DD`, leeres `[Unreleased]` oben lassen
 3. **Tests + Validierung lokal gruen** — `validate.sh` (falls vorhanden), alle Test-Suites
 4. **Release-Commit auf Branch + PR** — nie direkt auf `main`; CI muss durchlaufen bevor Merge
