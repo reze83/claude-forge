@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- settings.json.example: removed `CLAUDE_CODE_AUTOCOMPACT_PCT_OVERRIDE` — binary reads `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` via `process.env`; the `env` section in settings.json only applies to subprocesses (Bash tool etc.), not to the Claude Code process itself. Set `export CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=75` in `~/.bashrc` instead.
+
 ## [0.12.0] - 2026-02-22
 
 ### Added
