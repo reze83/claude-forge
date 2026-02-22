@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- hooks/worktree-create.sh: WorktreeCreate hook — creates git worktrees for `--worktree` and `isolation: "worktree"` with custom VCS support via `CLAUDE_FORGE_VCS_WORKTREE_CMD`
+- hooks/worktree-remove.sh: WorktreeRemove hook — best-effort worktree cleanup with custom VCS support via `CLAUDE_FORGE_VCS_WORKTREE_REMOVE_CMD`
+- hooks.json + settings.json.example: WorktreeCreate/WorktreeRemove event registration
+- test-hooks.sh: 14 new worktree hook tests (error cases, git worktree ops, custom VCS commands)
+
 ### Changed
 
 - multi-backend, multi-test: sandbox `read` → `write` — Codex kann generierten Code direkt in den Projektordner schreiben statt nur als Text zurückzugeben

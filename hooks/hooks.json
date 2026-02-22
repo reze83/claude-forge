@@ -262,6 +262,30 @@
         ]
       }
     ],
+    "WorktreeCreate": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/worktree-create.sh",
+            "timeout": 30,
+            "statusMessage": "Creating worktree..."
+          }
+        ]
+      }
+    ],
+    "WorktreeRemove": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/worktree-remove.sh",
+            "timeout": 15,
+            "statusMessage": "Removing worktree..."
+          }
+        ]
+      }
+    ],
     "SessionEnd": [
       {
         "matcher": "",

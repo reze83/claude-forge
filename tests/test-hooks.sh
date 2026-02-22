@@ -1266,6 +1266,189 @@ assert_exit "CC: Exit 0 on empty input" 0 "$CC" '{}'
 
 echo ""
 
+# --- worktree-create.sh ---
+echo "-- worktree-create.sh --"
+WTC="$HOOKS_DIR/worktree-create.sh"
+
+assert_output() {
+  local desc="$1"
+  local expected_output="$2"
+  local script="$3"
+  local input="$4"
+
+  local output actual_exit=0
+  output="$(echo "$input" | bash "$script" 2>/dev/null)" || actual_exit=$?
+
+  if [[ "$actual_exit" -eq 0 && "$output" == *"$expected_output"* ]]; then
+    printf '  %b[PASS]%b %s\n' "$GREEN" "$NC" "$desc"
+    PASS=$((PASS + 1))
+  else
+    printf '  %b[FAIL]%b %s (expected output contains: %s, exit: %s, got: %s)\n' \
+      "$RED" "$NC" "$desc" "$expected_output" "$actual_exit" "$output"
+    FAIL=$((FAIL + 1))
+  fi
+}
+
+setup_worktree_test_repo() {
+  local repo
+  repo="$(mktemp -d /tmp/claude-forge-worktree-test.XXXXXX)"
+  git -C "$repo" init -q
+  git -C "$repo" config user.email "test@example.com"
+  git -C "$repo" config user.name "test"
+  printf 'initial\n' >"$repo/README.md"
+  git -C "$repo" add README.md
+  git -C "$repo" commit -q -m "init"
+  printf '%s\n' "$repo"
+}
+
+cleanup_worktree_test_repo() {
+  local repo="${1:-}"
+  if [[ -n "$repo" ]]; then
+    rm -rf "$repo"
+  fi
+}
+
+# Worktree hooks write to $HOME/.claude/hooks-debug.log — use temp HOME
+_WT_ORIG_HOME="${HOME:-}"
+_WT_HOME="$(mktemp -d /tmp/claude-forge-hooks-home.XXXXXX)"
+mkdir -p "$_WT_HOME/.claude"
+export HOME="$_WT_HOME"
+
+# Error cases
+assert_exit "WTC: Exit 1 when name is missing" 1 "$WTC" \
+  '{"cwd":"/tmp","session_id":"s1","hook_event_name":"WorktreeCreate"}'
+assert_exit "WTC: Exit 1 when cwd is missing" 1 "$WTC" \
+  '{"name":"test-wt","session_id":"s1","hook_event_name":"WorktreeCreate"}'
+assert_exit "WTC: Exit 1 when name is empty" 1 "$WTC" \
+  '{"name":"","cwd":"/tmp","session_id":"s1","hook_event_name":"WorktreeCreate"}'
+
+# Valid git worktree creation
+_WTC_REPO="$(setup_worktree_test_repo)"
+_WTC_INPUT="$(printf '{"name":"wt-test-exit","cwd":"%s","session_id":"s1","hook_event_name":"WorktreeCreate"}' "$_WTC_REPO")"
+assert_exit "WTC: Exit 0 for valid git worktree" 0 "$WTC" "$_WTC_INPUT"
+
+_WTC_INPUT2="$(printf '{"name":"wt-test-path","cwd":"%s","session_id":"s1","hook_event_name":"WorktreeCreate"}' "$_WTC_REPO")"
+assert_output "WTC: Prints absolute worktree path" "$_WTC_REPO/.claude/worktrees/wt-test-path" "$WTC" "$_WTC_INPUT2"
+cleanup_worktree_test_repo "$_WTC_REPO"
+unset _WTC_REPO _WTC_INPUT _WTC_INPUT2
+
+# Custom VCS command
+_WTC_REPO="$(setup_worktree_test_repo)"
+_WTC_CUSTOM_CMD="$_WTC_REPO/mock-create.sh"
+_WTC_CUSTOM_LOG="$_WTC_REPO/mock-create.log"
+cat >"$_WTC_CUSTOM_CMD" <<'EOS'
+#!/usr/bin/env bash
+set -euo pipefail
+name="${1:-}"
+printf '%s\n' "$name" >>"${WT_CREATE_CUSTOM_LOG:?}"
+printf 'custom-worktrees/%s\n' "$name"
+EOS
+chmod +x "$_WTC_CUSTOM_CMD"
+
+export CLAUDE_FORGE_VCS_WORKTREE_CMD="$_WTC_CUSTOM_CMD"
+export WT_CREATE_CUSTOM_LOG="$_WTC_CUSTOM_LOG"
+
+_WTC_INPUT3="$(printf '{"name":"wt-custom","cwd":"%s","session_id":"s1","hook_event_name":"WorktreeCreate"}' "$_WTC_REPO")"
+assert_exit "WTC: Exit 0 with custom VCS command" 0 "$WTC" "$_WTC_INPUT3"
+
+_WTC_INPUT4="$(printf '{"name":"wt-custom-path","cwd":"%s","session_id":"s1","hook_event_name":"WorktreeCreate"}' "$_WTC_REPO")"
+assert_output "WTC: Custom command returns path" "$_WTC_REPO/custom-worktrees/wt-custom-path" "$WTC" "$_WTC_INPUT4"
+
+unset CLAUDE_FORGE_VCS_WORKTREE_CMD WT_CREATE_CUSTOM_LOG
+
+if [[ -f "$_WTC_CUSTOM_LOG" ]] && grep -q "wt-custom-path" "$_WTC_CUSTOM_LOG"; then
+  printf '  %b[PASS]%b WTC: Custom command was invoked\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b WTC: Custom command was not invoked\n' "$RED" "$NC"
+  FAIL=$((FAIL + 1))
+fi
+cleanup_worktree_test_repo "$_WTC_REPO"
+unset _WTC_REPO _WTC_CUSTOM_CMD _WTC_CUSTOM_LOG _WTC_INPUT3 _WTC_INPUT4
+
+echo ""
+
+# --- worktree-remove.sh ---
+echo "-- worktree-remove.sh --"
+WTR="$HOOKS_DIR/worktree-remove.sh"
+
+# Missing worktree_path — graceful skip
+assert_exit "WTR: Exit 0 when worktree_path is missing" 0 "$WTR" \
+  '{"cwd":"/tmp","session_id":"s1","hook_event_name":"WorktreeRemove"}'
+
+# Valid removal of existing worktree
+_WTR_REPO="$(setup_worktree_test_repo)"
+mkdir -p "$_WTR_REPO/.claude/worktrees"
+_WTR_PATH="$_WTR_REPO/.claude/worktrees/remove-me"
+
+if git -C "$_WTR_REPO" worktree add "$_WTR_PATH" -b "worktree/remove-me" >/dev/null 2>/dev/null; then
+  _WTR_INPUT="$(printf '{"worktree_path":"%s","cwd":"%s","session_id":"s1","hook_event_name":"WorktreeRemove"}' "$_WTR_PATH" "$_WTR_REPO")"
+  assert_exit "WTR: Exit 0 for valid worktree removal" 0 "$WTR" "$_WTR_INPUT"
+
+  if [[ ! -e "$_WTR_PATH" ]]; then
+    printf '  %b[PASS]%b WTR: Worktree directory was removed\n' "$GREEN" "$NC"
+    PASS=$((PASS + 1))
+  else
+    printf '  %b[FAIL]%b WTR: Worktree directory still exists\n' "$RED" "$NC"
+    FAIL=$((FAIL + 1))
+  fi
+  unset _WTR_INPUT
+else
+  printf '  %b[FAIL]%b WTR: Could not create test worktree for removal\n' "$RED" "$NC"
+  FAIL=$((FAIL + 1))
+fi
+cleanup_worktree_test_repo "$_WTR_REPO"
+unset _WTR_REPO _WTR_PATH
+
+# Non-existent worktree_path — graceful failure
+_WTR_REPO="$(setup_worktree_test_repo)"
+_WTR_INPUT2="$(printf '{"worktree_path":"%s/.claude/worktrees/nonexistent","cwd":"%s","session_id":"s1","hook_event_name":"WorktreeRemove"}' "$_WTR_REPO" "$_WTR_REPO")"
+assert_exit "WTR: Exit 0 for non-existent worktree" 0 "$WTR" "$_WTR_INPUT2"
+cleanup_worktree_test_repo "$_WTR_REPO"
+unset _WTR_REPO _WTR_INPUT2
+
+# Custom VCS remove command
+_WTR_REPO="$(setup_worktree_test_repo)"
+_WTR_CUSTOM_CMD="$_WTR_REPO/mock-remove.sh"
+_WTR_CUSTOM_LOG="$_WTR_REPO/mock-remove.log"
+cat >"$_WTR_CUSTOM_CMD" <<'EOS'
+#!/usr/bin/env bash
+set -euo pipefail
+printf '%s\n' "${1:-}" >>"${WT_REMOVE_CUSTOM_LOG:?}"
+exit 0
+EOS
+chmod +x "$_WTR_CUSTOM_CMD"
+
+export CLAUDE_FORGE_VCS_WORKTREE_REMOVE_CMD="$_WTR_CUSTOM_CMD"
+export WT_REMOVE_CUSTOM_LOG="$_WTR_CUSTOM_LOG"
+
+_WTR_CUSTOM_PATH="$_WTR_REPO/.claude/worktrees/custom-rm"
+_WTR_INPUT3="$(printf '{"worktree_path":"%s","cwd":"%s","session_id":"s1","hook_event_name":"WorktreeRemove"}' "$_WTR_CUSTOM_PATH" "$_WTR_REPO")"
+assert_exit "WTR: Exit 0 with custom VCS remove command" 0 "$WTR" "$_WTR_INPUT3"
+
+unset CLAUDE_FORGE_VCS_WORKTREE_REMOVE_CMD WT_REMOVE_CUSTOM_LOG
+
+if [[ -f "$_WTR_CUSTOM_LOG" ]] && grep -Fq "$_WTR_CUSTOM_PATH" "$_WTR_CUSTOM_LOG"; then
+  printf '  %b[PASS]%b WTR: Custom remove command was invoked\n' "$GREEN" "$NC"
+  PASS=$((PASS + 1))
+else
+  printf '  %b[FAIL]%b WTR: Custom remove command was not invoked\n' "$RED" "$NC"
+  FAIL=$((FAIL + 1))
+fi
+cleanup_worktree_test_repo "$_WTR_REPO"
+unset _WTR_REPO _WTR_CUSTOM_CMD _WTR_CUSTOM_LOG _WTR_CUSTOM_PATH _WTR_INPUT3
+
+# Restore original HOME
+if [[ -n "$_WT_ORIG_HOME" ]]; then
+  export HOME="$_WT_ORIG_HOME"
+else
+  unset HOME
+fi
+rm -rf "$_WT_HOME"
+unset _WT_ORIG_HOME _WT_HOME
+
+echo ""
+
 # --- Ergebnis ---
 echo "================================="
 printf 'Tests: %d | %b%d passed%b | %b%d failed%b\n' $((PASS + FAIL)) "$GREEN" "$PASS" "$NC" "$RED" "$FAIL" "$NC"
