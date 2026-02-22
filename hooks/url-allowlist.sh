@@ -14,6 +14,12 @@ TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // ""' 2>/dev/null) || TOOL_NAME="
 URL=$(echo "$INPUT" | jq -r '.tool_input.url // ""' 2>/dev/null) || URL=""
 [[ -z "$URL" ]] && exit 0
 
+# Block non-HTTP schemes (file://, ftp://, gopher://, etc.)
+SCHEME=$(printf '%s' "$URL" | sed -E 's,^([a-zA-Z][a-zA-Z0-9+.-]*)://.*,\1,' | tr '[:upper:]' '[:lower:]')
+if [[ "$SCHEME" != "http" && "$SCHEME" != "https" ]]; then
+  block_or_warn "Non-HTTP scheme not allowed: $URL (scheme: $SCHEME)"
+fi
+
 debug "url-allowlist: url=$URL"
 
 # Extract host from URL (portable, no Bash 4+ features)
@@ -38,6 +44,9 @@ get_host() {
 
 HOST=$(get_host "$URL")
 [[ -z "$HOST" ]] && exit 0
+
+# Strip trailing dot from FQDN (e.g. localhost. → localhost, metadata.google.internal. → metadata.google.internal)
+HOST=$(printf '%s' "$HOST" | sed -E 's/\.$//')
 
 HOST_LOWER=$(printf '%s' "$HOST" | tr '[:upper:]' '[:lower:]')
 
@@ -67,6 +76,9 @@ PRIVATE_PATTERNS=(
   '^\[?::1\]?$'
   '^\[?::\]?$'
   '^\[?fe80:.*\]?$'
+  '^\[?fd[0-9a-f]{2}:.*\]?$'
+  '^\[?fc[0-9a-f]{2}:.*\]?$'
+  '^\[?::ffff:.*\]?$'
   '^169\.254\.169\.254$'
   '.*\.local$'
   '.*\.internal$'

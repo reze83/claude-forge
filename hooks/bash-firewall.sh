@@ -55,10 +55,10 @@ debug "bash-firewall: original='$CMD' normalized='$CMD_NORM'"
 
 # --- Deny patterns (ERE, portable — no PCRE) ---
 DENY_PATTERNS=(
-  'rm\s+-rf\s+/'
-  'rm\s+-rf\s+(~|\$HOME)'
-  'rm\s+-rf\s+(\.|\.\.\/)'
-  'rm\s+(-[a-z]*r[a-z]*\s+-[a-z]*f[a-z]*|-[a-z]*f[a-z]*\s+-[a-z]*r[a-z]*)\s+(/|\$HOME|~|\.\.?/)'
+  'rm[[:space:]]+(-[[:alpha:]]*r[[:alpha:]]*f[[:alpha:]]*|-[[:alpha:]]*f[[:alpha:]]*r[[:alpha:]]*)([[:space:]]+(--|-[[:alpha:]]+|--[[:alnum:]-]+))*[[:space:]]+/'
+  'rm[[:space:]]+(-[[:alpha:]]*r[[:alpha:]]*f[[:alpha:]]*|-[[:alpha:]]*f[[:alpha:]]*r[[:alpha:]]*)([[:space:]]+(--|-[[:alpha:]]+|--[[:alnum:]-]+))*[[:space:]]+(~|\$HOME)'
+  'rm[[:space:]]+(-[[:alpha:]]*r[[:alpha:]]*f[[:alpha:]]*|-[[:alpha:]]*f[[:alpha:]]*r[[:alpha:]]*)([[:space:]]+(--|-[[:alpha:]]+|--[[:alnum:]-]+))*[[:space:]]+(\.|\.\.\/)'
+  'rm[[:space:]]+(-[[:alpha:]]*r[[:alpha:]]*[[:space:]]+-[[:alpha:]]*f[[:alpha:]]*|-[[:alpha:]]*f[[:alpha:]]*[[:space:]]+-[[:alpha:]]*r[[:alpha:]]*)([[:space:]]+(--|-[[:alpha:]]+|--[[:alnum:]-]+))*[[:space:]]+(/|\$HOME|~|\.\.?/)'
   'git\s+push\s+.*(-f\b|--force\b|--force-with-lease)'
   'git\s+push\s+\S+\s+\S+:(main|master)'
   '(command|env)\s+(rm|eval|bash|sh)\s'

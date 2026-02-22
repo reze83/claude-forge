@@ -14,6 +14,15 @@ TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // ""' 2>/dev/null) || TOOL_NAME="
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // empty' 2>/dev/null) || FILE_PATH=""
 [[ -z "$FILE_PATH" ]] && exit 0
 
+# Normalize path: resolve //, /./, /../ to prevent bypass
+# Uses realpath -m (logical, no filesystem check) with fallback for Bash 3.2
+if command -v realpath >/dev/null 2>&1; then
+  FILE_PATH="$(realpath -m "$FILE_PATH" 2>/dev/null || printf '%s' "$FILE_PATH")"
+else
+  # Manual normalization: collapse //, remove /./, resolve /../
+  FILE_PATH="$(printf '%s' "$FILE_PATH" | sed -E 's#/+#/#g; s#/\.\/#/#g; s#/[^/]+/\.\./#/#g; s#/\./?$##')"
+fi
+
 debug "protect-files: tool=$TOOL_NAME path=$FILE_PATH"
 
 # Case-insensitive comparison (Bash 3.2+ compatible)
