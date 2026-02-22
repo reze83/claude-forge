@@ -108,7 +108,7 @@ wiederhergestellt. validate.sh Fehler loesen keinen Rollback aus.
 
 ## Hook-Architektur
 
-### 22 Hooks, 16 Event-Typen
+### 24 Hooks, 18 Event-Typen
 
 | Hook                  | Event              | Matcher                       | Modus            | Zweck                                                                                                                                                        |
 | --------------------- | ------------------ | ----------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -119,7 +119,7 @@ wiederhergestellt. validate.sh Fehler loesen keinen Rollback aus.
 | url-allowlist.sh      | PreToolUse         | WebFetch                      | Symlink + Plugin | Private/interne URLs blocken (localhost, RFC1918, Metadata, .local/.internal/.corp)                                                                          |
 | auto-format.sh        | PostToolUse        | Edit\|Write                   | Symlink + Plugin | Auto-Formatting (Polyglot, async)                                                                                                                            |
 | secret-scan.sh        | PostToolUse        | Edit\|Write                   | Symlink + Plugin | Secret-Erkennung in geschriebenen Dateien (warn)                                                                                                             |
-| setup.sh              | Setup ¹            | \*                            | Plugin only      | Dependency-Check (git, jq, node >=20, python3 >=3.10), Symlink-Health, additionalContext                                                                     |
+| setup.sh              | SessionStart       | startup                       | Symlink + Plugin | Dependency-Check (git, jq, node >=20, python3 >=3.10), Symlink-Health, additionalContext                                                                     |
 | smithery-context.sh   | UserPromptSubmit   | \*                            | Symlink + Plugin | Verbundene Smithery MCP Server + Sequential Thinking MCP-Verfuegbarkeit als additionalContext injizieren (kein Netzwerk, graceful no-op)                     |
 | session-start.sh      | SessionStart       | \*                            | Symlink + Plugin | Session-Init: Version als additionalContext, Logging                                                                                                         |
 | subagent-start.sh     | SubagentStart      | \*                            | Symlink + Plugin | Subagent-Start Logging (agent_type, agent_id)                                                                                                                |
@@ -133,9 +133,9 @@ wiederhergestellt. validate.sh Fehler loesen keinen Rollback aus.
 | notification.sh       | Notification       | _(kein matcher)_              | Symlink + Plugin | Claude Code Notifications an Desktop weiterleiten (async)                                                                                                    |
 | input-sanitizer.sh    | PreToolUse         | Write\|Edit\|Bash             | Symlink + Plugin | Input-Sanitisierung via updatedInput: ANSI-Stripping, CRLF→LF, BOM-Entfernung, Pfad-Normalisierung                                                           |
 | config-change.sh      | ConfigChange       | _(kein matcher)_              | Symlink + Plugin | Config-Aenderungen loggen + opt-in Blockierung (CLAUDE_FORGE_CONFIG_LOCK=1)                                                                                  |
+| worktree-create.sh    | WorktreeCreate     | _(kein matcher)_              | Symlink + Plugin | Git Worktree erstellen; Custom VCS via CLAUDE_FORGE_VCS_WORKTREE_CMD                                                                                         |
+| worktree-remove.sh    | WorktreeRemove     | _(kein matcher)_              | Symlink + Plugin | Worktree Cleanup (best-effort, exit 0); Custom VCS via CLAUDE_FORGE_VCS_WORKTREE_REMOVE_CMD                                                                  |
 | session-logger.sh     | SessionEnd         | \*                            | Symlink + Plugin | Session-Ende Log + Desktop-Notification                                                                                                                      |
-
-¹ `Setup` ist **kein offizielles Claude Code Hook-Event** laut Hooks-Referenz und bleibt nur in `hooks.json` (Plugin-Modus).
 
 ### Shared Library: hooks/lib.sh
 

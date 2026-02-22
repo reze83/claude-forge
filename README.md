@@ -48,7 +48,7 @@ claude-forge schuetzt Claude Code vor destruktiven Befehlen, Secret-Leaks und un
 
 ### Was es mitbringt
 
-- **20 Hooks** — Security, Productivity, Logging
+- **22 Hooks** — Security, Productivity, Logging, Worktree
 - **9 Rules** — Git, Security, Code-Standards, Performance, API-Design, ...
 - **5 Agents** — Research, Test-Runner, Security-Auditor, Dep-Auditor, Profiler
 - **9 Skills** — Code-Review, Explain, Deploy, Project-Init, Test-Gen, Refactor, Performance-Ref, Multi-Model-Ref, Smithery-Ref
@@ -181,8 +181,10 @@ Testen ohne zu blocken: `CLAUDE_FORGE_DRY_RUN=1` (gilt fuer bash-firewall, prote
 <tr><td><code>pre-write-backup</code></td><td>PreToolUse</td><td>.bak-Backup vor Write/Edit (opt-in)</td></tr>
 <tr><td><code>permission-request</code></td><td>PermissionRequest</td><td>Permission-Anfragen loggen + opt-in Gate</td></tr>
 <tr><td><code>notification</code></td><td>Notification</td><td>Notifications an Desktop weiterleiten</td></tr>
+<tr><td><code>worktree-create</code></td><td>WorktreeCreate</td><td>Git Worktree erstellen + Custom VCS Support</td></tr>
+<tr><td><code>worktree-remove</code></td><td>WorktreeRemove</td><td>Worktree Cleanup + Custom VCS Support</td></tr>
 <tr><td><code>session-logger</code></td><td>SessionEnd</td><td>Session-Ende Notification + Log-Rotation</td></tr>
-<tr><td><code>setup</code></td><td>Setup</td><td>Dependency-Check + Symlink-Health (Plugin-Modus)</td></tr>
+<tr><td><code>setup</code></td><td>SessionStart (startup)</td><td>Dependency-Check + Symlink-Health</td></tr>
 </table>
 
 Alle Hooks nutzen `hooks/lib.sh` mit `block()`, `warn()`, `context()` und 11 shared Secret-Patterns.
@@ -330,7 +332,7 @@ claude-forge/
 │   ├── settings.json.example       Hauptkonfiguration (kopiert bei Install)
 │   ├── CLAUDE.md.example           Globale Instruktionen (kopiert bei Install)
 │   └── local-patterns.sh.example   Eigene Bash-Firewall Deny-Patterns
-├── hooks/                          → ~/.claude/hooks/ (18 Scripts + lib.sh)
+├── hooks/                          → ~/.claude/hooks/ (20 Scripts + lib.sh)
 │   ├── lib.sh                      Shared library (block/warn/context/debug/patterns)
 │   ├── bash-firewall.sh            Destruktive Befehle + Injection blocken
 │   ├── protect-files.sh            Sensible Dateien schuetzen
@@ -348,6 +350,8 @@ claude-forge/
 │   ├── teammate-gate.sh            Uncommitted-Changes Gate
 │   ├── url-allowlist.sh            Private/interne URLs blocken
 │   ├── pre-write-backup.sh         .bak-Backup (opt-in)
+│   ├── worktree-create.sh          Worktree erstellen (VCS-agnostisch)
+│   ├── worktree-remove.sh          Worktree Cleanup (VCS-agnostisch)
 │   └── session-logger.sh           Session-Ende Log-Rotation
 ├── rules/                          → ~/.claude/rules/ (9 Regeln)
 ├── agents/                         → ~/.claude/agents/ (5 Agenten)
