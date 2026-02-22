@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-02-22
+
 ### Added
 
 - hooks/worktree-create.sh: WorktreeCreate hook — creates git worktrees for `--worktree` and `isolation: "worktree"` with custom VCS support via `CLAUDE_FORGE_VCS_WORKTREE_CMD`
@@ -28,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - validate.sh: added hook event whitelist validation against official Claude Code API (17 events)
 - multi-backend, multi-test: sandbox `read` → `write` — Codex kann generierten Code direkt in den Projektordner schreiben statt nur als Text zurückzugeben
 - rules/git-workflow.md: Release-Checkliste ergaenzt (Version-Konsistenz, CHANGELOG finalisieren, Tests lokal gruen, Branch+PR Pflicht)
+- rules/git-workflow.md, rules/docs.md, rules/security.md: project-specific references replaced with generic descriptions (portability improvement)
 
 ## [0.11.0] - 2026-02-22
 
