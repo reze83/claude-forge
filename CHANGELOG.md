@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- README.md: Smithery CLI setup instructions (install, login, verify)
+- README.md: GitHub CLI setup instructions for sudo-less environments (WSL2)
+- user-config/download-gh.js: helper script to download gh binary via Node.js (no curl/wget/sudo needed)
+- rules/token-optimization.md: search tool selection guide (context7, exa web/code search, WebSearch, WebFetch)
+
 ## [0.10.0] - 2026-02-21
 
 ### Added
