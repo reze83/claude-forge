@@ -75,6 +75,17 @@ assert_exit "Blocks bash -c" 0 "$FW" '{"tool_input":{"command":"bash -c \"rm -rf
 assert_exit "Blocks sh -c" 0 "$FW" '{"tool_input":{"command":"sh -c \"echo pwned\""}}'
 assert_exit "Allows bash script.sh" 0 "$FW" '{"tool_input":{"command":"bash script.sh"}}'
 
+# --- bash-firewall.sh: Flag-order and intermediate-flag bypass fixes ---
+echo "-- bash-firewall.sh: Flag-order bypass fixes --"
+assert_exit "Blocks rm -fr /" 0 "$FW" '{"tool_input":{"command":"rm -fr /"}}'
+assert_exit "Blocks rm -rf -- /" 0 "$FW" '{"tool_input":{"command":"rm -rf -- /"}}'
+assert_exit "Blocks rm -rf --no-preserve-root /" 0 "$FW" '{"tool_input":{"command":"rm -rf --no-preserve-root /"}}'
+assert_exit "Blocks rm -Rf /" 0 "$FW" '{"tool_input":{"command":"rm -Rf /"}}'
+assert_exit "Blocks rm -fR /" 0 "$FW" '{"tool_input":{"command":"rm -fR /"}}'
+assert_exit "Allows rm single file" 0 "$FW" '{"tool_input":{"command":"rm file.txt"}}'
+
+echo ""
+
 # Bypass variants (from Codex + review findings)
 assert_exit "Blocks rm -r -f /" 0 "$FW" '{"tool_input":{"command":"rm -r -f /"}}'
 assert_exit "Blocks /bin/rm -rf /" 0 "$FW" '{"tool_input":{"command":"/bin/rm -rf /"}}'
@@ -324,6 +335,16 @@ echo ""
 echo "-- protect-files.sh: Non-ASCII paths --"
 assert_exit "Blocks .env with umlaut path" 0 "$PF" '{"tool_input":{"file_path":"/home/user/Pr\u00f6jekt/.env"}}'
 assert_exit "Allows safe umlaut path" 0 "$PF" '{"tool_input":{"file_path":"/home/user/Pr\u00f6jekt/index.ts"}}'
+
+echo ""
+
+# --- protect-files.sh: Path normalization bypass fixes ---
+echo "-- protect-files.sh: Path normalization (security bypass fixes) --"
+assert_exit "Blocks double slash hooks.json" 0 "$PF" '{"tool_name":"Write","tool_input":{"file_path":"/home/c/.claude//hooks.json"}}'
+assert_exit "Blocks path traversal hooks.json" 0 "$PF" '{"tool_name":"Write","tool_input":{"file_path":"/home/c/.claude/x/../hooks.json"}}'
+assert_exit "Blocks single dot hooks.json" 0 "$PF" '{"tool_name":"Write","tool_input":{"file_path":"/home/c/.claude/./hooks.json"}}'
+assert_exit "Blocks double slash .ssh" 0 "$PF" '{"tool_name":"Read","tool_input":{"file_path":"/home/c//.ssh/id_rsa"}}'
+assert_exit "Blocks path traversal .env" 0 "$PF" '{"tool_name":"Read","tool_input":{"file_path":"/home/c/project/../.env"}}'
 
 echo ""
 
@@ -1070,6 +1091,16 @@ assert_exit "Blocks http://[::]/" 0 "$UA" '{"tool_name":"WebFetch","tool_input":
 
 # IPv6 link-local fe80::
 assert_exit "Blocks http://[fe80::1]/" 0 "$UA" '{"tool_name":"WebFetch","tool_input":{"url":"http://[fe80::1]/admin"}}'
+
+# --- url-allowlist.sh: Security bypass fixes ---
+echo ""
+echo "-- url-allowlist.sh: Security bypass fixes --"
+assert_exit "Blocks file:///etc/passwd" 0 "$UA" '{"tool_name":"WebFetch","tool_input":{"url":"file:///etc/passwd"}}'
+assert_exit "Blocks IPv4-mapped IPv6 ::ffff:127.0.0.1" 0 "$UA" '{"tool_name":"WebFetch","tool_input":{"url":"http://[::ffff:127.0.0.1]/"}}'
+assert_exit "Blocks unique local IPv6 fd00::1" 0 "$UA" '{"tool_name":"WebFetch","tool_input":{"url":"http://[fd00::1]/"}}'
+assert_exit "Blocks unique local IPv6 fc00::1" 0 "$UA" '{"tool_name":"WebFetch","tool_input":{"url":"http://[fc00::1]/"}}'
+assert_exit "Blocks trailing dot FQDN" 0 "$UA" '{"tool_name":"WebFetch","tool_input":{"url":"http://metadata.google.internal./computeMetadata/"}}'
+assert_exit "Allows normal HTTPS after fixes" 0 "$UA" '{"tool_name":"WebFetch","tool_input":{"url":"https://api.github.com/repos"}}'
 
 echo ""
 
