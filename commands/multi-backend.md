@@ -1,5 +1,5 @@
 ---
-description: "Sende Backend/Algorithmen-Task an Codex CLI im read-only Modus"
+description: "Sende Backend/Algorithmen-Task an Codex CLI mit write-Sandbox"
 argument-hint: <backend-aufgabe>
 model: sonnet
 allowed-tools:
@@ -22,7 +22,7 @@ Diesen Schritt IMMER ausfuehren — die Aufgabe geht an Codex, nicht an Claude:
 
 ```bash
 bash $HOME/.claude/multi-model/codex-wrapper.sh \
-  --sandbox read \
+  --sandbox write \
   --prompt "Projekt-Kontext: <kontext>. Aufgabe: $ARGUMENTS"
 ```
 

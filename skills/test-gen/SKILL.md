@@ -60,7 +60,7 @@ Bei Zustimmung:
 
 ```bash
 bash $HOME/.claude/multi-model/codex-wrapper.sh \
-  --sandbox read \
+  --sandbox write \
   --context-file <quelldatei> \
   --prompt "Generiere zusaetzliche Tests aus einer anderen Perspektive. Framework: <framework>."
 ```

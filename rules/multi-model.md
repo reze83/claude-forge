@@ -55,9 +55,9 @@ Automatisch nach groesseren Aenderungen ausfuehren — kein User-Prompt noetig:
 | `/multi-workflow` | Voller 6-Phasen-Workflow             | write    |
 | `/multi-plan`     | Parallele Plaene vergleichen         | read     |
 | `/multi-execute`  | Direkte Delegation (Modus waehlbar)  | variabel |
-| `/multi-backend`  | Backend/Algo-Task                    | read     |
+| `/multi-backend`  | Backend/Algo-Task                    | write    |
 | `/multi-frontend` | Claude implementiert, Codex reviewed | read     |
-| `/multi-test`     | Dual-Model Test-Generierung          | read     |
+| `/multi-test`     | Dual-Model Test-Generierung          | write    |
 | `/multi-refactor` | Claude plant, Codex transformiert    | write    |
 | `/multi-docs`     | Codex dokumentiert, Claude prueft    | read     |
 | `/multi-debug`    | Unabhaengige Dual-Analyse            | read     |

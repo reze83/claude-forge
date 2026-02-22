@@ -38,7 +38,7 @@ Lasse Codex die Tests generieren. Diesen Schritt IMMER ausfuehren:
 
 ```bash
 bash $HOME/.claude/multi-model/codex-wrapper.sh \
-  --sandbox read \
+  --sandbox write \
   --context-file <quelldatei> \
   --prompt "Generiere Tests fuer die uebergebene Datei. Framework: <framework>. Konventionen: <konventionen>. Teste: <testfaelle>"
 ```
