@@ -8,6 +8,17 @@
 - Triviale Tasks (Formatierung, Lookups): `model: "haiku"` — minimal cost
 - Einfache Lookups (Grep/Glob/Read): kein Subagent noetig — direkt ausfuehren
 
+## Such-Tool-Wahl
+
+| Tool                     | Wann nutzen                                               |
+| ------------------------ | --------------------------------------------------------- |
+| Glob / Grep / Read       | Lokale Codebase — immer bevorzugen, kein Netzwerk         |
+| `context7`               | Docs zu bekannten Libraries (versioniert, API-Referenz)   |
+| `exa` (web_search)       | Aktuelle Web-Infos, News, unbekannte Packages, Changelogs |
+| `exa` (get_code_context) | Code-Beispiele, Stack Overflow, GitHub-Snippets zu APIs   |
+| WebSearch                | Fallback wenn exa nicht verfuegbar                        |
+| WebFetch                 | Einzelne bekannte URL abrufen — kein generelles Suchen    |
+
 ## MCP-Server
 
 - Nicht benoetigte MCP-Server deaktivieren: `disabledMcpServers` in `.claude/settings.json`
