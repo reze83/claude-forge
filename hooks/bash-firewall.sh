@@ -54,10 +54,19 @@ CMD_NORM="$(normalize_cmd "$CMD")"
 debug "bash-firewall: original='$CMD' normalized='$CMD_NORM'"
 
 # --- Deny patterns (ERE, portable — no PCRE) ---
+# rm uses 4 patterns to cover all flag-order and target combinations:
+#   [[:alpha:]]* instead of [a-z] — POSIX character class, portable on macOS Bash 3.2+
+#   Optional intermediate flags group ([[:space:]]+(--|-flag|--long-flag))* handles
+#   `rm -rf -- /`, `rm -rf --no-preserve-root /`, and similar variants.
+#   Patterns 1-3: combined flags (-rf or -fr). Pattern 4: separated flags (-r -f or -f -r).
 DENY_PATTERNS=(
+  # combined flags, absolute path target (/)
   'rm[[:space:]]+(-[[:alpha:]]*r[[:alpha:]]*f[[:alpha:]]*|-[[:alpha:]]*f[[:alpha:]]*r[[:alpha:]]*)([[:space:]]+(--|-[[:alpha:]]+|--[[:alnum:]-]+))*[[:space:]]+/'
+  # combined flags, home directory target (~ or $HOME)
   'rm[[:space:]]+(-[[:alpha:]]*r[[:alpha:]]*f[[:alpha:]]*|-[[:alpha:]]*f[[:alpha:]]*r[[:alpha:]]*)([[:space:]]+(--|-[[:alpha:]]+|--[[:alnum:]-]+))*[[:space:]]+(~|\$HOME)'
+  # combined flags, relative target (. or ../)
   'rm[[:space:]]+(-[[:alpha:]]*r[[:alpha:]]*f[[:alpha:]]*|-[[:alpha:]]*f[[:alpha:]]*r[[:alpha:]]*)([[:space:]]+(--|-[[:alpha:]]+|--[[:alnum:]-]+))*[[:space:]]+(\.|\.\.\/)'
+  # separated flags (-r -f or -f -r) on critical paths — catches `rm -r -f /`
   'rm[[:space:]]+(-[[:alpha:]]*r[[:alpha:]]*[[:space:]]+-[[:alpha:]]*f[[:alpha:]]*|-[[:alpha:]]*f[[:alpha:]]*[[:space:]]+-[[:alpha:]]*r[[:alpha:]]*)([[:space:]]+(--|-[[:alpha:]]+|--[[:alnum:]-]+))*[[:space:]]+(/|\$HOME|~|\.\.?/)'
   'git\s+push\s+.*(-f\b|--force\b|--force-with-lease)'
   'git\s+push\s+\S+\s+\S+:(main|master)'
@@ -132,6 +141,13 @@ for i in "${!DENY_PATTERNS[@]}"; do
   fi
 done
 
+# Two-pass check: raw CMD first, then normalized CMD_NORM.
+# Raw pass catches patterns visible in the original input (e.g. backtick substitutions,
+# process substitutions) that normalize_cmd does not fully strip.
+# Normalized pass catches patterns that only emerge after prefix removal
+# (e.g. `command rm -rf /` → CMD_NORM=`rm -rf /`).
+# Both passes are required: normalization can reveal new matches while also
+# eliminating some surface-level patterns from the raw form.
 if echo "$CMD" | grep -Eiq "$deny_alt"; then
   for i in "${!DENY_PATTERNS[@]}"; do
     if echo "$CMD" | grep -Eiq "${DENY_PATTERNS[$i]}"; then

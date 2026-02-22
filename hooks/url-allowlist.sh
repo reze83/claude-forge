@@ -76,9 +76,9 @@ PRIVATE_PATTERNS=(
   '^\[?::1\]?$'
   '^\[?::\]?$'
   '^\[?fe80:.*\]?$'
-  '^\[?fd[0-9a-f]{2}:.*\]?$'
-  '^\[?fc[0-9a-f]{2}:.*\]?$'
-  '^\[?::ffff:.*\]?$'
+  '^\[?fd[0-9a-f]{2}:.*\]?$' # Unique local IPv6 fd00::/8 (RFC 4193)
+  '^\[?fc[0-9a-f]{2}:.*\]?$' # Unique local IPv6 fc00::/8 (RFC 4193)
+  '^\[?::ffff:.*\]?$'        # IPv4-mapped IPv6 (e.g. ::ffff:127.0.0.1 → loopback)
   '^169\.254\.169\.254$'
   '.*\.local$'
   '.*\.internal$'
