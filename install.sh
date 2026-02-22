@@ -509,6 +509,10 @@ auto_install_optional() {
     _install_github_binary "gitleaks" "gitleaks/gitleaks" && return 0
   elif [[ "$pkg" == "actionlint" ]]; then
     _install_github_binary "actionlint" "rhysd/actionlint" && return 0
+  elif [[ "$pkg" == "@smithery/cli" ]]; then
+    _install_node_tool "smithery" "@smithery/cli" && return 0
+  elif [[ "$pkg" == "gh" ]]; then
+    _install_github_binary "gh" "cli/cli" && return 0
   elif [[ "$pkg" == "bats-core" ]]; then
     _install_bats_core && return 0
   fi
@@ -665,6 +669,12 @@ if $WITH_CODEX; then
   fi
 fi
 
+# --- Phase 9: Optionale CLIs ---
+echo ""
+echo "-- Phase 9: Optionale CLIs --"
+auto_install_optional smithery @smithery/cli || true
+auto_install_optional gh gh || true
+
 # --- Repo-Marker ---
 if ! $DRY_RUN; then
   printf '%s\n' "$REPO_DIR" >"$CLAUDE_DIR/.forge-repo"
@@ -713,6 +723,20 @@ if ! command -v codex >/dev/null 2>&1; then
   echo ""
   echo -e "${YELLOW}[INFO]${NC} Codex CLI ist nicht installiert. /multi-* Commands benoetigen Codex."
   echo -e "       Optional installieren: ${GREEN}bash install.sh --with-codex${NC}"
+fi
+
+# --- Hinweis: Smithery CLI ---
+if ! command -v smithery >/dev/null 2>&1; then
+  echo ""
+  echo -e "${YELLOW}[INFO]${NC} smithery mcp search benoetigt Smithery CLI."
+  echo -e "       Optional: ${GREEN}npm install -g @smithery/cli && smithery login${NC}"
+fi
+
+# --- Hinweis: GitHub CLI ---
+if ! command -v gh >/dev/null 2>&1; then
+  echo ""
+  echo -e "${YELLOW}[INFO]${NC} GitHub CLI ist nicht installiert."
+  echo -e "       Optional: ${GREEN}install.sh installiert gh automatisch beim naechsten Lauf${NC}"
 fi
 
 echo ""
