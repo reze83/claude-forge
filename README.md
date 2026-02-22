@@ -243,7 +243,38 @@ bash validate.sh        # Konfig-Validierung + Secret-Scan
 | **Pflicht**   | git, jq, node >= 20, python3 >= 3.10                      |
 | **Formatter** | shfmt, ruff, prettier (automatisch installiert)           |
 | **QA-Tools**  | shellcheck, bats, markdownlint-cli2, gitleaks, actionlint |
-| **Optional**  | Codex CLI (`--with-codex`), Smithery CLI                  |
+| **Optional**  | Codex CLI (`--with-codex`), Smithery CLI, GitHub CLI      |
+
+### Smithery CLI einrichten
+
+```bash
+# 1. Global installieren
+npm install -g @smithery/cli
+
+# 2. Authentifizieren (oeffnet Browser)
+smithery login
+
+# 3. Verifizieren
+smithery mcp list
+```
+
+### GitHub CLI (gh) einrichten
+
+Kein sudo verfuegbar (z.B. WSL2)? Installation via Node.js-Hilfsskript:
+
+```bash
+# 1. Binary herunterladen
+node user-config/download-gh.js
+tar -xzf /tmp/gh.tar.gz -C /tmp
+cp /tmp/gh_*_linux_amd64/bin/gh ~/.local/bin/gh
+chmod +x ~/.local/bin/gh
+
+# 2. Authentifizieren (oeffnet Browser)
+gh auth login
+
+# 3. Verifizieren
+gh --version
+```
 
 ---
 
