@@ -15,6 +15,15 @@ const CHECKSUMS_URL = `https://github.com/cli/cli/releases/download/v${VERSION}/
 const DEST = "/tmp/gh.tar.gz";
 const MAX_REDIRECTS = 5;
 
+/**
+ * Downloads a binary file to disk, following HTTP 301/302 redirects.
+ * Exits the process on HTTP error or if MAX_REDIRECTS is exceeded.
+ *
+ * @param {string}   url       - HTTPS URL to download.
+ * @param {string}   dest      - Local path to write the file to.
+ * @param {Function} cb        - Invoked with no arguments when the file is fully written.
+ * @param {number}  [redirects=0] - Internal redirect counter; do not pass explicitly.
+ */
 function download(url, dest, cb, redirects) {
   if (redirects === undefined) redirects = 0;
   if (redirects > MAX_REDIRECTS) {
@@ -39,6 +48,15 @@ function download(url, dest, cb, redirects) {
     });
 }
 
+/**
+ * Fetches a text resource into memory, following HTTP 301/302 redirects.
+ * Unlike download(), does not write to disk — suitable for small text responses
+ * such as the checksums.txt file (~2 KB).
+ *
+ * @param {string}   url       - HTTPS URL to fetch.
+ * @param {Function} cb        - Invoked with the full response body as a string.
+ * @param {number}  [redirects=0] - Internal redirect counter; do not pass explicitly.
+ */
 function fetchText(url, cb, redirects) {
   if (redirects === undefined) redirects = 0;
   if (redirects > MAX_REDIRECTS) {
@@ -61,6 +79,14 @@ function fetchText(url, cb, redirects) {
     });
 }
 
+/**
+ * Verifies the SHA256 checksum of a file using a streaming hash.
+ * Streaming avoids loading the full binary into memory (important for large tarballs).
+ * If the digest does not match, deletes the file and exits with code 1.
+ *
+ * @param {string} filePath     - Path to the downloaded file.
+ * @param {string} expectedHash - Expected SHA256 hex digest (lowercase, from checksums.txt).
+ */
 function verifySha256(filePath, expectedHash) {
   const hash = crypto.createHash("sha256");
   const stream = fs.createReadStream(filePath);
