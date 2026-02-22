@@ -4,11 +4,13 @@
 
 ## Hook-enforced (automatisch, nicht umgehbar)
 
+Diese Schutzebenen sind durch claude-forge Hooks aktiv — unabhaengig vom Projekt:
+
 - **Dateischutz (kritisch):** `.env`, `.ssh/`, `.aws/`, `.gnupg/`, `*.pem`, `*.key`, `*.p12`, `*.pfx` — Read/Write/Edit geblockt, auch in DRY_RUN. Allowlist: `.env.example`, `.env.sample`, `.env.template`
 - **Dateischutz (non-critical):** `secrets/`, `.git/`, `.npmrc`, `.netrc` — Read/Write/Edit geblockt, DRY_RUN konvertiert zu Warning
-- **Secret-Scan:** 11 Patterns (Anthropic, OpenAI, GitHub, AWS, JWT, PEM, Stripe, Slack, Azure) — Pre-Write blockt, Post-Write warnt. False Positive: `# pragma: allowlist secret` pro Zeile
-- **Bash-Firewall:** Destruktive Befehle (`rm -rf /`, `mkfs`, `dd`), Git-Schutz (push main, --force, reset --hard), Shell-Injection (`eval`, `bash -c`), Interpreter-Injection (`python[version] -c`, `node/nodejs -e`, `perl -e`, `ruby -e`), unsichere Permissions (`chmod 777`)
-- **Hook-Integritaet:** `.claude/hooks/`, `hooks.json`, `settings.json` — Write/Edit geblockt, auch in DRY_RUN
+- **Secret-Scan:** Patterns fuer gaengige API-Keys (Anthropic, OpenAI, GitHub, AWS, JWT, PEM, Stripe, Slack, Azure) — Pre-Write blockt, Post-Write warnt. False Positive: `# pragma: allowlist secret` pro Zeile
+- **Bash-Firewall:** Destruktive Befehle (`rm -rf /`, `mkfs`, `dd`), Git-Schutz (push main, --force, reset --hard), Shell-Injection (`eval`, `bash -c`), Interpreter-Injection (`python -c`, `node -e`, `perl -e`, `ruby -e`), unsichere Permissions (`chmod 777`)
+- **Hook-Integritaet:** Hook-Konfigurationsdateien — Write/Edit geblockt, auch in DRY_RUN
 - **URL-Allowlist:** WebFetch auf private/interne URLs geblockt (localhost, RFC1918, Metadata, .local/.internal)
 
 ## Supply-Chain
