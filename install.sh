@@ -732,6 +732,15 @@ if ! command -v smithery >/dev/null 2>&1; then
   echo -e "       Optional: ${GREEN}npm install -g @smithery/cli && smithery login${NC}"
 fi
 
+# --- Hinweis: Auto-compact threshold ---
+if ! grep -qE "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE" "$HOME/.bashrc" "$HOME/.zshrc" 2>/dev/null; then
+  echo ""
+  echo -e "${YELLOW}[INFO]${NC} Auto-compact threshold nicht konfiguriert."
+  echo -e "       Die Variable muss vor dem Start von Claude Code gesetzt sein."
+  echo -e "       Empfehlung: In ~/.bashrc oder ~/.zshrc einfuegen:"
+  echo -e "       ${GREEN}export CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=75${NC}"
+fi
+
 # --- Hinweis: GitHub CLI ---
 if ! command -v gh >/dev/null 2>&1; then
   echo ""
