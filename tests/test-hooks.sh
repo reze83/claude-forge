@@ -560,7 +560,7 @@ echo "-- permission-request.sh --"
 PR="$HOOKS_DIR/permission-request.sh"
 
 assert_exit "Exit 0 with valid permission request" 0 "$PR" \
-  '{"session_id":"s1","tool_name":"Bash","permission_type":"network"}'
+  '{"session_id":"s1","tool_name":"Bash","tool_input":{"command":"rm -rf node_modules"}}'
 
 assert_exit "Exit 0 with empty input" 0 "$PR" '{}'
 
@@ -568,11 +568,11 @@ assert_exit "Exit 0 with empty input" 0 "$PR" '{}'
 (
   export CLAUDE_FORGE_PERMISSION_GATE=1
   assert_exit "Exit 2 when permission gate enabled" 2 "$PR" \
-    '{"session_id":"s1","tool_name":"Bash","permission_type":"shell_execution"}'
+    '{"session_id":"s1","tool_name":"Bash","tool_input":{"command":"npm test"}}'
 )
 
 # Verify stderr contains reason message when gate is enabled
-_PR_ERR="$(echo '{"session_id":"s1","tool_name":"Read","permission_type":"file_access"}' |
+_PR_ERR="$(echo '{"session_id":"s1","tool_name":"Read","tool_input":{"file_path":"/tmp/x"}}' |
   CLAUDE_FORGE_PERMISSION_GATE=1 bash "$PR" 2>&1 >/dev/null || true)"
 if printf '%s' "$_PR_ERR" | grep -q "PERMISSION_GATE"; then
   printf '  %b[PASS]%b permission-request: stderr contains gate reason\n' "$GREEN" "$NC"
@@ -1225,38 +1225,39 @@ else
 fi
 rm -rf "$_CC_TMPDIR"
 
-# Opt-in lock: non-policy blocked
+# Opt-in lock: non-policy blocked (JSON decision, exit 0)
 _CC_EXIT=0
-printf '%s' '{"source":"user_settings","session_id":"s1"}' |
-  CLAUDE_FORGE_CONFIG_LOCK=1 bash "$CC" >/dev/null 2>/dev/null || _CC_EXIT=$?
-if [[ "$_CC_EXIT" -eq 2 ]]; then
-  printf '  %b[PASS]%b CC: CONFIG_LOCK=1 blocks user_settings (exit 2)\n' "$GREEN" "$NC"
+_CC_OUT="$(printf '%s' '{"source":"user_settings","session_id":"s1"}' |
+  CLAUDE_FORGE_CONFIG_LOCK=1 bash "$CC" 2>/dev/null)" || _CC_EXIT=$?
+if [[ "$_CC_EXIT" -eq 0 ]] && printf '%s' "$_CC_OUT" | jq -e '.decision == "block"' >/dev/null 2>&1; then
+  printf '  %b[PASS]%b CC: CONFIG_LOCK=1 blocks user_settings (JSON decision:block)\n' "$GREEN" "$NC"
   PASS=$((PASS + 1))
 else
-  printf '  %b[FAIL]%b CC: CONFIG_LOCK=1 expected exit 2, got %d\n' "$RED" "$NC" "$_CC_EXIT"
+  printf '  %b[FAIL]%b CC: CONFIG_LOCK=1 expected JSON decision:block, got exit=%d out=%s\n' "$RED" "$NC" "$_CC_EXIT" "$_CC_OUT"
   FAIL=$((FAIL + 1))
 fi
 
 # Opt-in lock: policy_settings exempt
 _CC_EXIT=0
-printf '%s' '{"source":"policy_settings","session_id":"s1"}' |
-  CLAUDE_FORGE_CONFIG_LOCK=1 bash "$CC" >/dev/null 2>/dev/null || _CC_EXIT=$?
-if [[ "$_CC_EXIT" -eq 0 ]]; then
-  printf '  %b[PASS]%b CC: CONFIG_LOCK=1 policy_settings exempt (exit 0)\n' "$GREEN" "$NC"
+_CC_OUT="$(printf '%s' '{"source":"policy_settings","session_id":"s1"}' |
+  CLAUDE_FORGE_CONFIG_LOCK=1 bash "$CC" 2>/dev/null)" || _CC_EXIT=$?
+# policy_settings exits 0 with no output — check output is empty (avoids jq 1.6 empty-input exit 0 quirk)
+if [[ "$_CC_EXIT" -eq 0 && -z "$_CC_OUT" ]]; then
+  printf '  %b[PASS]%b CC: CONFIG_LOCK=1 policy_settings exempt (exit 0, no block)\n' "$GREEN" "$NC"
   PASS=$((PASS + 1))
 else
-  printf '  %b[FAIL]%b CC: policy_settings should be exempt, got exit %d\n' "$RED" "$NC" "$_CC_EXIT"
+  printf '  %b[FAIL]%b CC: policy_settings should be exempt, got exit %d out=%s\n' "$RED" "$NC" "$_CC_EXIT" "$_CC_OUT"
   FAIL=$((FAIL + 1))
 fi
 
-# Stderr contains reason when blocked
-_CC_ERR="$(printf '%s' '{"source":"local_settings","session_id":"s1"}' |
-  CLAUDE_FORGE_CONFIG_LOCK=1 bash "$CC" 2>&1 >/dev/null || true)"
-if printf '%s' "$_CC_ERR" | grep -q "CONFIG_LOCK"; then
-  printf '  %b[PASS]%b CC: stderr contains CONFIG_LOCK reason\n' "$GREEN" "$NC"
+# JSON output contains reason when blocked
+_CC_OUT="$(printf '%s' '{"source":"local_settings","session_id":"s1"}' |
+  CLAUDE_FORGE_CONFIG_LOCK=1 bash "$CC" 2>/dev/null || true)"
+if printf '%s' "$_CC_OUT" | jq -e '.reason' >/dev/null 2>&1 && printf '%s' "$_CC_OUT" | grep -q "CONFIG_LOCK"; then
+  printf '  %b[PASS]%b CC: JSON output contains CONFIG_LOCK reason\n' "$GREEN" "$NC"
   PASS=$((PASS + 1))
 else
-  printf '  %b[FAIL]%b CC: expected CONFIG_LOCK in stderr\n' "$RED" "$NC"
+  printf '  %b[FAIL]%b CC: expected CONFIG_LOCK in JSON reason\n' "$RED" "$NC"
   FAIL=$((FAIL + 1))
 fi
 
