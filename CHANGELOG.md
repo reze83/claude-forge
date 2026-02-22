@@ -9,9 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- settings.json.example: removed `CLAUDE_CODE_AUTOCOMPACT_PCT_OVERRIDE` — binary reads `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` via `process.env`; the `env` section in settings.json only applies to subprocesses (Bash tool etc.), not to the Claude Code process itself. Set `export CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=75` in `~/.bashrc` instead.
-- install.sh: added hint when `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` is missing from shell profile
-- hooks/setup.sh: added `autocompactHint` to session context when `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` is not set in the environment
+- settings.json.example: removed `CLAUDE_CODE_AUTOCOMPACT_PCT_OVERRIDE` — binary reads `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` via `process.env`; the `env` section in settings.json only applies to subprocesses (Bash tool etc.), not to the Claude Code process itself
+- install.sh: interactive prompt to write `export CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=75` to `~/.bashrc` when not already configured; auto-writes in non-interactive mode
 
 ## [0.12.0] - 2026-02-22
 

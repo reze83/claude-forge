@@ -82,12 +82,6 @@ main() {
     fi
   done
 
-  # --- Auto-compact check ---
-  local autocompact_hint=""
-  if [[ -z "${CLAUDE_AUTOCOMPACT_PCT_OVERRIDE:-}" ]]; then
-    autocompact_hint="CLAUDE_AUTOCOMPACT_PCT_OVERRIDE not set — add 'export CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=75' to ~/.bashrc"
-  fi
-
   # --- Output ---
   local context_json
   context_json="$(
@@ -96,8 +90,7 @@ main() {
       "dependencies" "$dep_status" \
       "symlinkHealth" "$symlink_status" \
       "depMissing" "$dep_missing" \
-      "symlinkBroken" "$symlink_broken" \
-      "autocompactHint" "$autocompact_hint"
+      "symlinkBroken" "$symlink_broken"
   )"
   printf '{"additionalContext":%s}\n' "$context_json"
 

@@ -732,13 +732,27 @@ if ! command -v smithery >/dev/null 2>&1; then
   echo -e "       Optional: ${GREEN}npm install -g @smithery/cli && smithery login${NC}"
 fi
 
-# --- Hinweis: Auto-compact threshold ---
+# --- Auto-compact threshold ---
 if ! grep -qE "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE" "$HOME/.bashrc" "$HOME/.zshrc" 2>/dev/null; then
   echo ""
   echo -e "${YELLOW}[INFO]${NC} Auto-compact threshold nicht konfiguriert."
-  echo -e "       Die Variable muss vor dem Start von Claude Code gesetzt sein."
-  echo -e "       Empfehlung: In ~/.bashrc oder ~/.zshrc einfuegen:"
-  echo -e "       ${GREEN}export CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=75${NC}"
+  echo -e "       Claude Code compact'et standardmaessig bei 95% Kontextauslastung."
+  echo -e "       Empfohlen: 75% fuer frueheres, weniger invasives Compacting."
+  if [[ "$DRY_RUN" == true ]]; then
+    echo -e "       ${YELLOW}[DRY_RUN]${NC} Wuerde fragen: export CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=75 >> ~/.bashrc"
+  elif [[ -t 0 ]]; then
+    printf "       Jetzt in ~/.bashrc eintragen? [Y/n] "
+    read -r answer </dev/tty
+    if [[ -z "$answer" || "$answer" =~ ^[Yy]$ ]]; then
+      printf '\n# Claude Code — auto-compact threshold\nexport CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=75\n' >>"$HOME/.bashrc"
+      echo -e "       ${GREEN}[OK]${NC} Eingetragen. Wirksam ab der naechsten Shell-Session."
+    else
+      echo -e "       Manuell eintragen: ${GREEN}export CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=75${NC} in ~/.bashrc"
+    fi
+  else
+    printf '\n# Claude Code — auto-compact threshold\nexport CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=75\n' >>"$HOME/.bashrc"
+    echo -e "       ${GREEN}[OK]${NC} Nicht-interaktiv: automatisch in ~/.bashrc eingetragen."
+  fi
 fi
 
 # --- Hinweis: GitHub CLI ---
