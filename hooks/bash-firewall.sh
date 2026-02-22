@@ -60,8 +60,10 @@ debug "bash-firewall: original='$CMD' normalized='$CMD_NORM'"
 #   `rm -rf -- /`, `rm -rf --no-preserve-root /`, and similar variants.
 #   Patterns 1-3: combined flags (-rf or -fr). Pattern 4: separated flags (-r -f or -f -r).
 DENY_PATTERNS=(
-  # combined flags, absolute path target (/)
-  'rm[[:space:]]+(-[[:alpha:]]*r[[:alpha:]]*f[[:alpha:]]*|-[[:alpha:]]*f[[:alpha:]]*r[[:alpha:]]*)([[:space:]]+(--|-[[:alpha:]]+|--[[:alnum:]-]+))*[[:space:]]+/'
+  # combined flags, root filesystem only (/) — specific project paths allowed
+  'rm[[:space:]]+(-[[:alpha:]]*r[[:alpha:]]*f[[:alpha:]]*|-[[:alpha:]]*f[[:alpha:]]*r[[:alpha:]]*)([[:space:]]+(--|-[[:alpha:]]+|--[[:alnum:]-]+))*[[:space:]]+/([[:space:]]|$)'
+  # combined flags, system critical directories (depth 1)
+  'rm[[:space:]]+(-[[:alpha:]]*r[[:alpha:]]*f[[:alpha:]]*|-[[:alpha:]]*f[[:alpha:]]*r[[:alpha:]]*)([[:space:]]+(--|-[[:alpha:]]+|--[[:alnum:]-]+))*[[:space:]]+/(etc|usr|var|bin|sbin|lib|lib64|boot|sys|proc|dev|opt|srv|run|snap|root)([[:space:]]|$|/[^/[:space:]]*([[:space:]]|$))'
   # combined flags, home directory target (~ or $HOME)
   'rm[[:space:]]+(-[[:alpha:]]*r[[:alpha:]]*f[[:alpha:]]*|-[[:alpha:]]*f[[:alpha:]]*r[[:alpha:]]*)([[:space:]]+(--|-[[:alpha:]]+|--[[:alnum:]-]+))*[[:space:]]+(~|\$HOME)'
   # combined flags, relative target (. or ../)
@@ -97,7 +99,8 @@ DENY_PATTERNS=(
 )
 
 DENY_REASONS=(
-  "rm -rf / not allowed. Use rm on specific files instead."
+  "rm -rf / (root) not allowed. Use rm on specific project directories instead."
+  "rm -rf on system directory not allowed. Use rm on specific project directories instead."
   "rm -rf ~ not allowed. Use rm on specific files instead."
   "rm -rf ./ or ../ not allowed. Use rm on specific files instead."
   "rm with separated -r/-f flags on critical paths not allowed. Use rm on specific files."
