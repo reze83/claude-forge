@@ -1241,11 +1241,12 @@ fi
 _CC_EXIT=0
 _CC_OUT="$(printf '%s' '{"source":"policy_settings","session_id":"s1"}' |
   CLAUDE_FORGE_CONFIG_LOCK=1 bash "$CC" 2>/dev/null)" || _CC_EXIT=$?
-if [[ "$_CC_EXIT" -eq 0 ]] && ! printf '%s' "$_CC_OUT" | jq -e '.decision == "block"' >/dev/null 2>&1; then
+# policy_settings exits 0 with no output — check output is empty (avoids jq 1.6 empty-input exit 0 quirk)
+if [[ "$_CC_EXIT" -eq 0 && -z "$_CC_OUT" ]]; then
   printf '  %b[PASS]%b CC: CONFIG_LOCK=1 policy_settings exempt (exit 0, no block)\n' "$GREEN" "$NC"
   PASS=$((PASS + 1))
 else
-  printf '  %b[FAIL]%b CC: policy_settings should be exempt, got exit %d\n' "$RED" "$NC" "$_CC_EXIT"
+  printf '  %b[FAIL]%b CC: policy_settings should be exempt, got exit %d out=%s\n' "$RED" "$NC" "$_CC_EXIT" "$_CC_OUT"
   FAIL=$((FAIL + 1))
 fi
 
