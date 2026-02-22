@@ -27,6 +27,12 @@ main() {
     active_hooks="$(jq -r '.hooks | keys | join(", ")' "$hooks_file" 2>/dev/null || printf 'unknown')"
   fi
 
+  # Persist forge-specific env vars for the session via CLAUDE_ENV_FILE
+  if [[ -n "${CLAUDE_ENV_FILE:-}" ]]; then
+    printf 'export CLAUDE_FORGE_VERSION="%s"\n' "$version" >>"$CLAUDE_ENV_FILE"
+    printf 'export CLAUDE_FORGE_ACTIVE_HOOKS="%s"\n' "$active_hooks" >>"$CLAUDE_ENV_FILE"
+  fi
+
   context_json="$(jq -cn --arg version "$version" --arg active_hooks "$active_hooks" '{forgeVersion:$version,activeHooks:$active_hooks}' 2>/dev/null || printf '{"forgeVersion":"unknown","activeHooks":"unknown"}')"
   printf '{"additionalContext":%s}\n' "$context_json"
 

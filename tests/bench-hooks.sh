@@ -64,7 +64,7 @@ bench auto-format.sh '{"tool_name":"Write","tool_input":{"file_path":"/tmp/test.
 bench url-allowlist.sh '{"tool_name":"WebFetch","tool_input":{"url":"https://github.com"}}'
 bench smithery-context.sh '{"tool_name":"UserPromptSubmit","tool_input":{"prompt":"hello"}}'
 bench session-start.sh '{"tool_name":"SessionStart","tool_input":{}}'
-bench setup.sh '{"tool_name":"Setup","tool_input":{}}'
+bench setup.sh '{"session_id":"bench","source":"startup","model":"claude-sonnet-4-6","hook_event_name":"SessionStart"}'
 bench post-failure.sh '{"tool_name":"PostToolUseFailure","tool_input":{"error":"some error"}}'
 bench pre-compact.sh '{"tool_name":"PreCompact","tool_input":{"trigger":"manual"}}'
 bench secret-scan.sh '{"tool_name":"Write","tool_input":{"file_path":"/tmp/test.ts"}}'
