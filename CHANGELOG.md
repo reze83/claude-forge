@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-02-22
+
 ### Added
 
 - README.md: Smithery CLI setup instructions (install, login, verify)
@@ -14,16 +16,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - user-config/download-gh.js: helper script to download gh binary via Node.js (no curl/wget/sudo needed)
 - rules/token-optimization.md: search tool selection guide (context7, exa web/code search, WebSearch, WebFetch)
 - install.sh: Phase 9 — optional auto-install for Smithery CLI (@smithery/cli) and GitHub CLI (gh)
-- test-hooks.sh: 16 new bypass tests for security fixes
+- test-hooks.sh: 17 new bypass regression tests (252 → 269 hook tests, 336 → 353 total)
 
 ### Fixed
 
-- protect-files.sh: path traversal (`/../`), double slash (`//`), single dot (`/./`) bypasses hook-tampering protection — fixed via `realpath -m` normalization
-- url-allowlist.sh: `file://` scheme not blocked — now blocked with non-HTTP scheme check
-- url-allowlist.sh: IPv4-mapped IPv6 (`::ffff:127.0.0.1`) and unique local IPv6 (`fd00::`, `fc00::`) not in deny list
-- url-allowlist.sh: FQDN trailing dot (`metadata.google.internal.`) bypassed hostname matching
-- bash-firewall.sh: `rm -fr /` (flag order), `rm -rf -- /` (double-dash), `rm -rf --no-preserve-root /` not blocked
-- user-config/download-gh.js: no checksum verification — now verifies SHA256 from GitHub release checksums.txt and limits redirects to 5
+- protect-files.sh: path traversal (`/../`), double slash (`//`), single dot (`/./`) bypasses hook-tampering protection — fixed via `realpath -m` normalization (CF-001, CF-002, CF-003)
+- url-allowlist.sh: `file://` scheme not blocked — now blocked with non-HTTP scheme check (CF-004)
+- url-allowlist.sh: IPv4-mapped IPv6 (`::ffff:127.0.0.1`) and unique local IPv6 (`fd00::`, `fc00::`) not in deny list (CF-005, CF-006)
+- url-allowlist.sh: FQDN trailing dot (`metadata.google.internal.`) bypassed hostname matching (CF-007)
+- bash-firewall.sh: `rm -fr /` (flag order), `rm -rf -- /` (double-dash), `rm -rf --no-preserve-root /` not blocked (CF-008, CF-009, CF-010)
+- user-config/download-gh.js: no checksum verification — now verifies SHA256 from GitHub release checksums.txt and limits redirects to 5 (CF-011)
+
+### Documentation
+
+- bash-firewall.sh: inline comments for rm pattern design (POSIX `[[:alpha:]]`, 4 flag-order variants, two-pass grep strategy)
+- url-allowlist.sh: RFC 4193 references for new IPv6 PRIVATE_PATTERNS
+- download-gh.js: JSDoc for `download()`, `fetchText()`, `verifySha256()`
 
 ## [0.10.0] - 2026-02-21
 
